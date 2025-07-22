@@ -80,14 +80,14 @@
             <tr>
               <td colspan="6" class="no-data-found p-2 m-0 text-center">No data found</td>
             </tr>
-            <tr class="d-none">
+            <!-- <tr>
               <td>1.</td>
               <td>Lorem cell</td>
               <td>20/01/2025</td>
               <td>Steven Ifeanyi</td>
               <td>16</td>
               <td><button type="button" class="view-details-btn px-3 py-1">View details</button></td>
-            </tr>
+            </tr> -->
           </table>
         </div>
       </div>
