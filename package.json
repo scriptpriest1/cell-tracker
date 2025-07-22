@@ -1,0 +1,21 @@
+{
+  "name": "cell-tracker",
+  "version": "1.0.0",
+  "main": "script.js",
+  "dependencies": {
+    "htmx.org": "^1.9.12"
+  },
+  "devDependencies": {
+    "@prettier/plugin-php": "^0.22.4",
+    "sass": "^1.83.4"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "sass --watch src/scss/:dist/css/"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "description": ""
+}

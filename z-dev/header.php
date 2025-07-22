@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Cell Tracker</title>
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Onest:wght@100..900&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap CDN Link -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <!-- CSS Link -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="container-fluid w-100 h-100 m-0 p-0">
+
+  <header class="px-4 py-3 d-flex align-items-center justify-content-center w-100">
+    <div class="w-100 site-name-bar">
+      <h1 class="fs-5 fw-bold w-100 text-center m-0 p-0">Cell Tracker</h1>
+    </div>
+  </header>

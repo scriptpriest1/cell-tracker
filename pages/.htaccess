@@ -1,0 +1,5 @@
+<FilesMatch "\.php$">
+    <If "%{HTTP:X-Requested-With} != 'XMLHttpRequest'">
+        Require all denied
+    </If>
+</FilesMatch>

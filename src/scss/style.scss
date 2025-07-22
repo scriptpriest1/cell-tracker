@@ -1,0 +1,869 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+/*=========================================
+               Variables
+=========================================*/
+
+//Gray Colors
+$box-border-color: #e6e6e6;
+$lightgray: #afafaf80;
+$lightergray: #d3d3d349;
+$gray-body-bg: #fdfdfd;
+$gray-hover: #cccccc80;
+$overlay-bg: #ffffffaa;
+
+//Blue Colors
+$lightblue: #7b8ebd50;
+$lighterblue: #7b8ebd20;
+$darkblue: #444f69;
+$darkerblue: #373f55;
+$blue-border: #7b8ebd;
+
+//Buttons
+$btn-padding: 8px 20px;
+$big-btn-padding: 14px 22px;
+$btn-border-radius: 5px;
+
+//Others
+$header-padding: 10px 30px;
+$header-height: 60px;
+
+$h1: 33px;
+$h2: 28px;
+$h3: 24px;
+$h4: 18px;
+$h5: 16px;
+$h6: 12px;
+
+$gray-text: #979797;
+
+$red-border: red;
+$red-bg: #ff6363;
+
+/*=========================================
+       Body and Entire Page Styling
+=========================================*/
+
+body {
+  width: 100%;
+  background-color: $gray-body-bg;
+  padding: 0;
+  margin: 0;
+}
+
+// Browser's Javascript Disabled Warning
+.no-js-warning {
+  background-color: #ffcccb;
+  color: #000;
+  padding: 15px;
+  text-align: center;
+  border: 1px solid red;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  transition: 0.4s;
+  scrollbar-width: none;
+  scrollbar-color: transparent;
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  ::-moz-scrollbar {
+    display: none;
+  }
+  ::-ms-scrollbar {
+    display: none;
+  }
+}
+
+#site-container {
+  display: none;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  padding: 0;
+  margin: 0;
+}
+
+/*=========================================
+             General Styling
+=========================================*/
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: bold;
+}
+
+p {
+  font-size: 15px;
+}
+
+#success-msg,
+#err-msg {
+  display: none;
+  opacity: 0;
+  position: fixed;
+  top: 70px;
+  left: -20px;
+  width: fit-content;
+  text-align: center;
+  padding: 10px 20px;
+  background: $red-bg;
+  color: white;
+  border-radius: $btn-border-radius;
+}
+
+#success-msg {
+  background: lightgreen;
+  color: black;
+}
+
+/*=========================================
+             Header Styling
+=========================================*/
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $header-padding;
+  border-bottom: 1px solid $box-border-color;
+
+  h1 {
+    font-size: $h3;
+    font-weight: bold;
+  }
+
+  .nav-bar {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .add-cell-link {
+    padding: $btn-padding;
+    background-color: $darkblue;
+    color: white;
+    border-radius: $btn-border-radius;
+
+    &:hover {
+      background-color: $darkerblue;
+    }
+  }
+}
+
+/*=========================================
+           Logout Modal Styling
+=========================================*/
+.modal-box {
+  display: none;
+  opacity: 0;
+  z-index: 100;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background-color: $overlay-bg;
+
+  .modal {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 20px;
+    background-color: $darkerblue;
+    width: 330px;
+    overflow: hidden;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+
+    .message {
+      padding: 25px 30px;
+
+      p {
+        color: white;
+        text-align: center;
+      }
+    }
+
+    .conf-box {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      border-top: 1px solid $lightgray;
+
+      .opr {
+        flex: 50%;
+        padding: 13px;
+        color: white;
+
+        &:hover {
+          background-color: $lighterblue;
+        }
+
+        &#logout-modal-logout-btn {
+          border-left: 2px solid $lightblue;
+          color: $red-bg;
+        }
+      }
+    }
+  }
+}
+
+/*=========================================
+             Masthead Styling
+=========================================*/
+.masthead {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: $header-height;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 40px;
+  border-bottom: 1px solid $box-border-color;
+  border-top-left-radius: 5px;
+
+  a.home-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .home-icon {
+      padding: 7px 10px;
+      background-color: $lighterblue;
+      border-radius: $btn-border-radius;
+    }
+
+    #cell-name {
+      margin-top: 2px;
+      font-size: $h4;
+      font-weight: normal;
+    }
+  }
+
+  .nav-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .btn {
+      padding: 7px 10px;
+      border: none;
+      border-radius: $btn-border-radius;
+      background-color: #cccccc20;
+      cursor: pointer;
+
+      &:hover {
+        background-color: $lighterblue;
+      }
+    }
+  }
+}
+
+/*=========================================
+            Dashboard Styling
+=========================================*/
+.dashboard {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 4fr);
+
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: $darkblue;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+
+    .top-section {
+      height: 100%;
+    }
+
+    .app-name-container {
+      padding: 10px 10px 0;
+      height: $header-height;
+      border-bottom: 1px solid $lightgray;
+
+      .app-name {
+        font-size: $h3;
+        color: #f2f2f2;
+        padding: 0 20px;
+      }
+    }
+
+    nav ul {
+      padding: 10px 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+
+      li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 15px 20px;
+        border-radius: 5px 0 0 5px;
+        margin: 0 0 5px 0;
+        color: white;
+        width: calc(100% - 10px);
+        float: right;
+
+        &:hover {
+          background-color: $lightblue;
+        }
+
+        &.active {
+          background-color: $darkerblue;
+          position: relative;
+          overflow: hidden;
+
+          ::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 0;
+            transform: translate(50%, -50%) rotate(45deg);
+            width: 12px; /* Width of the arrow body */
+            height: 12px; /* Height of the arrow body */
+            background-color: $gray-body-bg; /* Arrow color */
+          }
+        }
+      }
+    }
+
+    .footer {
+      padding: 10px;
+      border-top: 1px solid $lightgray;
+      bottom: 0;
+      width: 100%;
+
+      #logout-btn {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 15px 20px;
+        border-radius: 5px;
+        margin: 0 0 0 0;
+        color: white;
+        width: 100%;
+
+        &:hover {
+          background-color: $lightblue;
+          //border-color: $darkerblue;
+        }
+      }
+    }
+  }
+
+  // General [Pages] Styling
+  #page-body {
+    height: 100%;
+    overflow: hidden;
+
+    #page-container {
+      padding: 0 40px 20px;
+      width: 100%;
+      height: 100%;
+      overflow-x: hidden;
+      overflow-y: auto;
+      position: relative;
+
+      .content {
+        padding-bottom: 150px;
+      }
+
+      .block {
+        .heading {
+          font-size: $h2;
+          font-weight: normal;
+          margin: 20px 0;
+        }
+
+        // Dashboard Page Styling
+        // Stats Block
+        #stats-brief-section {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          width: 100%;
+          flex-wrap: wrap;
+
+          .stats-brief {
+            padding: 10px 20px;
+            min-width: 220px;
+            width: fit-content;
+            border-radius: $btn-border-radius;
+            border: 1px solid $box-border-color;
+            background-color: white;
+            cursor: pointer;
+
+            &:hover {
+              border-color: $blue-border;
+            }
+
+            .number {
+              font-size: $h1;
+              color: black;
+            }
+            .caption {
+              color: $gray-text;
+              font-size: 15px;
+            }
+          }
+        }
+
+        // Members List Page Styling
+        #table-section {
+          margin-bottom: 200px;
+
+          .control-panel {
+            padding: 10px 0;
+            position: sticky;
+            top: 0;
+            background-color: $gray-body-bg;
+            z-index: 10;
+
+            #edit-table-btn {
+              padding: 7px 10px;
+              border: none;
+              border-radius: $btn-border-radius;
+              background-color: #cccccc20;
+              cursor: pointer;
+
+              &:hover {
+                background-color: $lighterblue;
+              }
+
+              span:nth-child(2) {
+                display: none;
+              }
+            }
+          }
+
+          #cell-members-table-container {
+            display: flex;
+            width: 100%;
+            max-height: 400px;
+            overflow: auto;
+            border-radius: $btn-border-radius;
+            border: 1px solid $box-border-color;
+
+            #cell-members-table {
+              flex: 1 0 auto;
+              border-collapse: collapse;
+              border-radius: $btn-border-radius;
+
+              th,
+              td {
+                padding: 10px 30px;
+                font-weight: normal;
+                height: 40px;
+                max-width: 300px;
+                border: 1px solid $box-border-color;
+                text-align: left;
+                overflow-x: hidden;
+                text-overflow: clip;
+                white-space: nowrap;
+
+                &:focus {
+                  outline-color: $blue-border;
+                }
+              }
+
+              th {
+                font-weight: 500;
+                position: sticky;
+                top: 0;
+                background: $gray-body-bg;
+              }
+
+              thead {
+                border-bottom: 3px solid $box-border-color;
+                background: $gray-body-bg;
+              }
+
+              tbody {
+                tr {
+                  &:nth-child(odd) {
+                    background-color: $lighterblue;
+                  }
+                }
+              }
+            }
+          }
+
+          #add-member-btn {
+            padding: 12px 16px;
+            background-color: $darkblue;
+            color: white;
+            border-radius: $btn-border-radius;
+            float: right;
+            margin-top: 20px;
+            position: sticky;
+            bottom: 0;
+
+            &:hover {
+              background-color: $darkerblue;
+            }
+          }
+          // Close Table Section
+        }
+
+        //Reports Page Styling
+        #report-modal-box {
+          display: none;
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: $overlay-bg;
+
+          #report-modal {
+            width: 100%;
+            height: 100%;
+            position: relative;
+
+            #report-form-container {
+              position: absolute;
+              margin: 0;
+              top: calc(50% - 235px);
+              left: calc(50% - 250px);
+              width: 500px;
+              height: fit-content;
+              padding: 30px 30px;
+              border-radius: 10px;
+              border: 1px solid $box-border-color;
+              border-bottom-width: 5px;
+              background-color: white;
+            }
+
+            #report-form {
+              height: 350px;
+              overflow-y: auto;
+
+              .field-group {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                margin: 10px 0;
+
+                &:nth-child(1) {
+                  margin: 0;
+                }
+
+                // Custom Dropdown (Multi-select Single-select)
+                .custom-dropdown,
+                .custom-single-dropdown {
+                  position: relative;
+                  display: inline-block;
+                  width: 100%;
+
+                  .dropdown-title {
+                    border: 1px solid $box-border-color;
+                    cursor: pointer;
+                    border-radius: $btn-border-radius;
+                    padding: 8px;
+                    font-weight: 300;
+                  }
+
+                  .dropdown-menu {
+                    display: none;
+                    position: absolute;
+                    top: calc(100% + 4px);
+                    left: 0;
+                    width: 100%;
+                    background-color: #fff;
+                    border: 1px solid #ddd;
+                    border-radius: $btn-border-radius;
+                    z-index: 10;
+                    max-height: 200px;
+                    overflow-y: auto;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+                    // Multi-select dropdown styles
+                    label {
+                      display: flex;
+                      align-items: center;
+                      padding: 6px 8px;
+                      cursor: pointer;
+                      font-weight: 300;
+
+                      &:hover {
+                        background-color: $gray-hover;
+                      }
+                      
+                      input[type='checkbox'] {
+                        margin-right: 8px;
+                        font-weight: 300;
+                      }
+                    }
+
+                    // Single-select dropdown styles
+                    .option {
+                      padding: 8px;
+                      cursor: pointer;
+                      font-weight: 300;
+
+                      &:hover {
+                        background-color: $gray-hover;
+                      }
+
+                      &[data-value='Custom']:hover {
+                        background-color: transparent;
+                      }
+                    }
+
+                    .custom-input {
+                      width: calc(100% - 16px);
+                      padding:  8px;
+                      border: 1px solid $box-border-color;
+                      border-radius: $btn-border-radius;
+                      margin: 0 8px 8px;
+                      font-weight: 300;
+
+                      &:focus {
+                        outline: none;
+                        border-color: $blue-border;
+                      }
+                    }
+                  }
+                }
+
+                .hidden {
+                  display: none !important;
+                }
+
+                #offr-input {
+                  padding: 8px;
+                  border: 1px solid $box-border-color;
+                  border-radius: $btn-border-radius;
+                  font-weight: 300;
+
+                  &:focus {
+                    outline: none;
+                    border-color: $blue-border;
+                  }
+                }
+              }
+
+              .footer {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 20px;
+
+                #report-form-publ-btn {
+                  padding: $btn-padding;
+                  border-radius: $btn-border-radius;
+                  color: white;
+                  background: linear-gradient(45deg, #2eac57, #34c759);
+
+                  &:hover {
+                    background: linear-gradient(45deg, #238a4e, #2eac57);
+                  }
+                }
+
+                #report-form-close-btn {
+                  padding: $btn-padding;
+                  border-radius: $btn-border-radius;
+                  border: none;
+                  background-color: $gray-hover;
+                }
+              }
+            }
+          }
+        }
+
+        #reports-section {
+          #cat-nav-bar {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background-color: $lightergray;
+            border-radius: 7px;
+            padding: 5px;
+            width: fit-content;
+            margin: auto;
+
+            .cat-btn {
+              padding: 8px 50px;
+              border-radius: 5px;
+
+              &:hover {
+                background-color: $gray-hover;
+              }
+
+              &.active {
+                background: $blue-border;
+                color: white;
+
+                &:hover {
+                  background-color: $blue-border;
+                }
+              }
+            }
+          }
+
+          #report-cards-container {
+            margin-top: 30px;
+
+            .card-group {
+              .date-block {
+                padding: 10px 0;
+
+                .date {
+                  font-size: $h4;
+                }
+              }
+
+              .card {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 10px;
+                width: 100%;
+                border-radius: $btn-border-radius;
+                background-color: white;
+                border: 1px solid $box-border-color;
+                border-bottom-width: 3px;
+                padding: 5px;
+                margin-bottom: 10px;
+
+                .card-item {
+                  width: 100%;
+                  padding: 10px 20px;
+                  border-radius: $btn-border-radius;
+                  margin: 0;
+                }
+
+                .publ-btn {
+                  display: flex;
+                  align-items: center;
+                  gap: 5px;
+                  margin: 0;
+                  padding: $btn-padding;
+                  border-radius: $btn-border-radius;
+                  color: #2eac57;
+                  transition: 0.4s;
+
+                  &:hover {
+                    color:  #238a4e;
+                  }
+                }
+
+                &:hover {
+                  border-color: $blue-border;
+                }
+              }
+            }
+          }
+          // Close Reports Section
+        }
+      }
+    }
+  }
+}
+
+/*=========================================
+      Login and Add-Cell Page Styling
+=========================================*/
+.form-container {
+  width: 500px;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+
+  .heading {
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+}
+
+#add-cell-form,
+#login-form {
+  background-color: #fff;
+  border: 1px solid $box-border-color;
+  border-bottom-width: 5px;
+  border-radius: 10px;
+  padding: 30px;
+  transition: height 0.3s ease;
+
+  .field-group {
+    margin-bottom: 10px;
+
+    input {
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 5px 10px;
+
+      &:focus {
+        outline: none;
+        border: 1px solid $darkblue;
+      }
+
+      .invalid {
+        border-color: $red-border;
+
+        &:hover {
+          border-color: $red-border;
+        }
+      }
+    }
+    .input-error-msg {
+      transition: height 0.3s ease;
+    }
+  }
+
+  .footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+
+  .submit-btn {
+    background-color: $darkblue;
+    color: white;
+    padding: $btn-padding;
+    border: none;
+    border-radius: $btn-border-radius;
+
+    &:hover {
+      background-color: $darkerblue;
+    }
+
+    .disabled {
+      opacity: 0.5;
+
+      &:hover {
+        background-color: $darkblue;
+      }
+    }
+  }
+}
+
+#add-cell-form a {
+  text-decoration: underline;
+}
+
+/*=========================================
+      Footer Styling
+=========================================*/
+#page-footer {
+  background-color: $gray-body-bg;
+  bottom: 0;
+}
