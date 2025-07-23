@@ -112,6 +112,27 @@ button {
   background-color: var(--bg);
 }
 
+/* Feedback pop-ups */
+#success-msg,
+#err-msg {
+  display: none;
+  opacity: 0;
+  position: fixed;
+  top: 70px;
+  left: -20px;
+  width: fit-content;
+  text-align: center;
+  padding: 10px 20px;
+  background: var(--error);
+  color: var(--text-tertiary);
+  border-radius: 5px;
+}
+
+#success-msg {
+  background: var(--success);
+  color: var(--text-primary);
+}
+
 /* =========================================
 
   Modals Styling 

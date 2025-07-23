@@ -1,12 +1,14 @@
 <?php
-  include_once "header.php";
+include_once "header.php";
+
+if ($isLoggedIn) {
+  header('Location: ./dashboard');
+}
 ?>
 
 <div class="auth-panel login-panel m-0 position-fixed">
 
     <form
-
-      action="./dashboard/index.php"
 
       class="auth-form login-form m-0"
 
@@ -32,7 +34,7 @@
 
           <label for="">Enter your email address:</label>
 
-          <input type="text" class="form-control" />
+          <input type="text" class="form-control" name="user-login" />
 
         </div>
 
@@ -40,7 +42,7 @@
 
           <label for="">Enter your password:</label>
 
-          <input type="password" class="form-control" />
+          <input type="password" class="form-control" name="password" />
 
         </div>
 

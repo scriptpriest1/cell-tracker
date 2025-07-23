@@ -2,7 +2,7 @@
 
   <header class="screen-header m-0 px-3 py-2 d-flex align-items-center justify-content-between gap-3 position-sticky top-0">
     <div class="masthead d-flex align-items-center gap-2">
-      <h4 class="account m-0 p-0 fs-5">CE Orogwe Church</h4>
+      <h4 class="account m-0 p-0 fs-5"><?php echo $user_data['church_name']; ?></h4>
 
       <span class="divider">/</span>
 

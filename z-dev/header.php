@@ -1,3 +1,14 @@
+<?php
+session_start();
+include './php/connect_db.php';
+
+$isLoggedIn = false;
+
+if (isset($_SESSION['id'])) {
+  $isLoggedIn = true;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,8 +32,16 @@
 <body>
 <div class="container-fluid w-100 h-100 m-0 p-0">
 
-  <header class="px-4 py-3 d-flex align-items-center justify-content-center w-100">
-    <div class="w-100 site-name-bar">
-      <h1 class="fs-5 fw-bold w-100 text-center m-0 p-0">Cell Tracker</h1>
-    </div>
-  </header>
+  <?php if ($isLoggedIn === false) {
+    echo '
+      <header class="px-4 py-3 d-flex align-items-center justify-content-center w-100">
+        <div class="w-100 site-name-bar">
+          <h1 class="fs-5 fw-bold w-100 text-center m-0 p-0">Cell Tracker</h1>
+        </div>
+      </header>
+    ';
+  } ?> 
+
+  <!-- Feedback Pop-ups -->
+  <span id="success-msg" class="feedback"></span>
+  <span id="err-msg" class="feedback"></span>
