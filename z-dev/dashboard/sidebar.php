@@ -3,7 +3,19 @@
   <header class="sidebar-header m-0 px-3 py-2 d-flex align-items-center justify-content-between gap-3">
     <div class="masthead d-flex align-items-center gap-3">
 
-      <h4 class="user-role m-0 p-0 fs-5">Church admin</h4>
+      <h4 class="user-role m-0 p-0 fs-5">
+        <?php
+        if ($_SESSION['admin_type'] === 'group') {
+          echo 'Group admin';
+        }
+        if ($_SESSION['admin_type'] === 'church') {
+          echo 'Church admin';
+        }
+        if ($_SESSION['admin_type'] === 'cell') {
+          echo 'Cell admin';
+        }
+        ?>
+      </h4>
 
       <button class="switch-account-btn px-3 py-1">Switch account</button>
 

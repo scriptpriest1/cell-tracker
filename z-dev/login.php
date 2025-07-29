@@ -4,6 +4,7 @@ include_once "header.php";
 if ($isLoggedIn) {
   header('Location: ./dashboard');
 }
+
 ?>
 
 <div class="auth-panel login-panel m-0 position-fixed">

@@ -1,7 +1,7 @@
 <?php
 
-include '../header.php';
-include '../php/functions.php';
+include_once '../header.php';
+include_once '../php/functions.php';
 
 $user_data = check_login($conn);
 ?>

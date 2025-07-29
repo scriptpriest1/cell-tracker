@@ -116,10 +116,10 @@ button {
 #success-msg,
 #err-msg {
   display: none;
-  opacity: 0;
+  opacity: 1;
   position: fixed;
   top: 70px;
-  left: -20px;
+  left: 20px;
   width: fit-content;
   text-align: center;
   padding: 10px 20px;
@@ -354,7 +354,7 @@ button {
   border-bottom: 1px solid var(--border);
 }
 
-.screen header .masthead .account {
+.screen header .account-name-bar .account {
   margin: 0;
   overflow-x: hidden;
   flex: 40%;
@@ -362,8 +362,8 @@ button {
   white-space: nowrap;
 }
 
-.screen header .masthead .divider,
-.screen header .masthead .page-title {
+.screen header .account-name-bar .divider,
+.screen header .account-name-bar .page-title {
   color: var(--text-secondary);
   margin: 0;
 }
@@ -404,6 +404,10 @@ button {
 }
 
 /* Cells page */
+
+.no-table-data .info {
+  color: var(--text-secondary);
+}
 
 .cell-table-section .search-bar {
    width: 350px;
@@ -446,10 +450,6 @@ button {
   border-collapse: collapse;
   border-radius: 10px;
   overflow: hidden;
-}
-
-.cells-table-container table td.no-data-found {
-  color: var(--text-secondary);
 }
 
 .cells-table-container table th,

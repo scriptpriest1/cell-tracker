@@ -1,10 +1,18 @@
 <?php
+// init.php
+
+// Start session
 session_start();
-include './php/connect_db.php';
+
+// Define BASE_URL
+define('BASE_URL', 'http://cell-tracker.localhost/z-dev/');
+
+// Include database connection
+require_once __DIR__ . '/php/connect_db.php';
 
 $isLoggedIn = false;
 
-if (isset($_SESSION['id'])) {
+if (isset($_SESSION['user_id'])) {
   $isLoggedIn = true;
 }
 ?>
@@ -14,7 +22,7 @@ if (isset($_SESSION['id'])) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Cell Tracker</title>
+  <title>Cell Tracker</title>
   <!-- Google Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,7 +35,7 @@ if (isset($_SESSION['id'])) {
   />
 
   <!-- CSS Link -->
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="<?php echo BASE_URL; ?>style.css" />
 </head>
 <body>
 <div class="container-fluid w-100 h-100 m-0 p-0">

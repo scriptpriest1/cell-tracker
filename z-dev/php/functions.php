@@ -11,8 +11,8 @@ function clean_input($data)
 // Check if user is logged in
 function check_login($conn)
 {
-  if (isset($_SESSION['id'])) {
-    $id = clean_input($_SESSION['id']);
+  if (isset($_SESSION['user_id'])) {
+    $id = clean_input($_SESSION['user_id']);
     
     $stmt = $conn->prepare('SELECT * FROM users WHERE id = ? LIMIT 1');
     $stmt->execute([$id]);
@@ -25,7 +25,7 @@ function check_login($conn)
   }
 
   // Redirect to Login Page if user is not logged in
-  header('Location: ../login.php');
+  header('Location: ' . BASE_URL . 'login.php');
   exit;
 }
 ?>

@@ -1,3 +1,4 @@
+- Create the login functionality for cell, church and group admins. Also for super admins.
 - Create the table functionality for cells page.
 - Create the functionalty for adding new cells.
 
@@ -12,3 +13,36 @@ Delegate an admin to the cell (can happen later after the cell has been created;
 For Reports Page:
 - Page displays most recent reports from cells under the church
 - A dropdown to sort reports based on the selected cell
+
+##########################################################################################################
+Okay, so my new approach for the login functionality is like this: 
+- There are currently 4 types of admins that can access the platform: the cell admin, church admin, group admin and superadmin(which is only me the creator). Cells are under churches and churches are under groups. The super admin is and will always be above them all. THat's how the hierachy goes. 
+
+- A user (except the superuser which is me) can be a cell admin as well as a church admin and a group admin. When a user logs in, the program would check for the highest 'admin type' that the user is and log them into that account. When logged in, the user can now switch to their various accounts--cell, church or group as the case may be--via a 'switch account' button which I've already created in the dashboard. This approach applies to every user except me the superadmin. I will have my own special login page where I would access the platform from. I may even have my own separate dashboard. We will get into my login approach later. For now, we will just build for the cell, church and group admins. 
+
+- I need to know how the structure of my database tables and their relationships will be. These are the tables(with their columns in bracket) I currently have:
+> cells (id, church_name, date_created).
+> churches (id, church_name, date_created).
+> groups (id, group_name, date_created).
+> users (id, role, admin_type, first_name, last_name, user_login, password, cell_id, church_id, group_id, date_created). 
+> cell_members (id, title, first_name, last_name, phone_number, email, dob, occupation, residencial_address, foundation_sch_status, dept_in_cell, dept_in_church, date_joined_ministry, date_added[i.e timestamp]). 
+> cell_reports (id, attendance, attendees, cell_meeting_week, date_reported).
+
+- Also, in as much as we're building the login logic for cell, church and group admin, I am focusing now on the church and cell structure because I want to launch and test it which churches first. I will build the group dashboard later but just keep the approach for the group login in place. 
+
+I will now send you my current ajax.php program which contains my login function. Wait till I send it before generating another code to integrate the new approach I have given you.
+
+
+##########################################################################################################
+
+I'm trying to create more constraints on the relation view for the users table so that it can be linked to the cells' and groups' id also. It is throwing back this error:
+
+SQL query:
+
+ALTER TABLE `users` ADD  FOREIGN KEY (`cell_id`) REFERENCES `cells`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+MySQL said: Documentation
+
+#1452 - Cannot add or update a child row: a foreign key constraint fails (`cell_tracker`.`#sql-b6c_16b`, CONSTRAINT `#sql-b6c_16b_ibfk_2` FOREIGN KEY (`cell_id`) REFERENCES `cells` (`id`) ON DELETE CASCADE ON UPDATE CASCADE)
+
+ 
+### Fix the success and error message display

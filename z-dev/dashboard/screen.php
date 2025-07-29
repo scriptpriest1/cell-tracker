@@ -1,8 +1,20 @@
 <section class="screen w-100 h-100 m-0 p-0 m-0">
 
   <header class="screen-header m-0 px-3 py-2 d-flex align-items-center justify-content-between gap-3 position-sticky top-0">
-    <div class="masthead d-flex align-items-center gap-2">
-      <h4 class="account m-0 p-0 fs-5"><?php echo $user_data['church_name']; ?></h4>
+    <div class="account-name-bar d-flex align-items-center gap-2">
+      <h4 class="account-name m-0 p-0 fs-5">
+        <?php
+        if ($_SESSION['admin_type'] === 'group') {
+          echo 'CE ' . $_SESSION['entity_name'] . ' Group';
+        } 
+        if ($_SESSION['admin_type'] === 'church') {
+          echo 'CE ' . $_SESSION['entity_name'] . ' Church';
+        }
+        if ($_SESSION['admin_type'] === 'cell') {
+          echo $_SESSION['entity_name'] . ' Cell';
+        }
+        ?>
+      </h4>
 
       <span class="divider">/</span>
 
@@ -77,9 +89,7 @@
               <th>Cell members</th>
               <th>Action</th>
             </thead>
-            <tr>
-              <td colspan="6" class="no-data-found p-2 m-0 text-center">No data found</td>
-            </tr>
+      
             <!-- <tr>
               <td>1.</td>
               <td>Lorem cell</td>
@@ -90,6 +100,10 @@
             </tr> -->
           </table>
         </div>
+      </div>
+
+      <div class="no-table-data">
+        <p class="info p-2 m-0 text-center">No data found!</0>
       </div>
     </div>
 
