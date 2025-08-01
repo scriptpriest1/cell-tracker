@@ -19,6 +19,7 @@ $(document).ready(function () {
     }
     return this;
   }
+  window.toggleActionModal = toggleActionModal;
 
   // Toggle Sidebar
 

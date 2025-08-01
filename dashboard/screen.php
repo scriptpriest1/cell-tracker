@@ -65,7 +65,7 @@
 
       <div class="cell-table-section">
         <div class="control-panel d-flex align-items-center gap-3 justify-content-between mb-2">
-          <h6 class="m-0">Total no. of Cells: <span>2</span></h6>
+          <h6 class="m-0">Total no. of Cells: &nbsp;<span id="cell-count"></span></h6>
 
           <button id="add-cell-btn" class="add-cell-btn px-3">Add a Cell
           </button>
@@ -80,25 +80,6 @@
         </div>
 
         <div class="cells-table-container w-100 p-0 m-0">
-          <!-- <table class="w-100">
-            <thead>
-              <th>SN</th>
-              <th>Cell name</th>
-              <th>Date created</th>
-              <th>Cell leader</th>
-              <th>Cell members</th>
-              <th>Action</th>
-            </thead>
-      
-            <tr>
-              <td>1.</td>
-              <td>Lorem cell</td>
-              <td>20/01/2025</td>
-              <td>Steven Ifeanyi</td>
-              <td>16</td>
-              <td><button type="button" class="view-details-btn px-3 py-1">View details</button></td>
-            </tr>
-          </table> -->
           <table class="w-100" id="cells-table">
             <thead>
               <tr>

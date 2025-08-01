@@ -11,6 +11,10 @@ $(document).ready(() => {
     return $.trim($input.val()) !== "";
   }
 
+  function isNotFilled($input) {
+    return $.trim($input.val()) === "";
+  }
+
   /*********************************************
                 Login Functionality
   *********************************************/
@@ -62,7 +66,7 @@ $(document).ready(() => {
               Add A Cell Functionality
   *********************************************/
 
-  function validateAddCellForm() {
+  function validateCellAdminAssignment() {
     const $role = $("#add-cell-form #admin-role");
     const role = $role.val();
     if (role === "") return;
@@ -83,11 +87,32 @@ $(document).ready(() => {
     );
   }
 
+  function inValidateCellAdminAssignment() {
+    const $role = $("#add-cell-form #admin-role");
+    const role = $role.val();
+    if (role != "") return;
+
+    const $firstName = $("#add-cell-form #admin-first-name"),
+      $lastName = $("#add-cell-form #admin-last-name"),
+      $email = $("#add-cell-form #admin-email"),
+      $pw = $("#add-cell-form #admin-password"),
+      $confPw = $("#add-cell-form #admin-password-confirm");
+
+    return (
+      isNotFilled($firstName) &&
+      isNotFilled($lastName) &&
+      isNotFilled($email) &&
+      isNotFilled($pw) &&
+      isNotFilled($confPw)
+    );
+  }
+
   $("#add-cell-form .form-control, #add-cell-form .form-select").on(
     "input change",
     function () {
       const valid =
-        isFilled($("#add-cell-form #cell-name")) && validateAddCellForm();
+        (isFilled($("#add-cell-form #cell-name")) && validateCellAdminAssignment()) ||
+        (isFilled($("#add-cell-form #cell-name")) && inValidateCellAdminAssignment());
       $("#add-cell-form .submit-btn").prop("disabled", !valid);
     }
   );
@@ -110,7 +135,6 @@ $(document).ready(() => {
           fetchAllCells();
           $("#add-cell-form").trigger("reset");
           $btn.prop("disabled", false).text("Add Cell");
-          toggleActionModal();
         } else {
           alert("Error: " + res);
         }
@@ -136,6 +160,8 @@ $(document).ready(() => {
       success: function (cells) {
         const tbody = $("#cells-table tbody");
         tbody.empty();
+
+        $("#cell-count").text(cells.length);
 
         if (cells.length === 0) {
           $("#table-info-block .info").text("No data found!");

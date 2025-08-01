@@ -410,6 +410,12 @@ button {
 
 /* Cells page */
 
+.cell-table-section .control-panel #cell-count {
+   padding: 1px 7px;
+   border-radius: 5px;
+   background-color: var(--border);
+}
+
 #table-info-block .info {
   color: var(--text-secondary);
 }
