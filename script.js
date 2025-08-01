@@ -17,6 +17,7 @@ $(document).ready(function () {
         .animate({ opacity: 1 }, 200);
       actionPanel.animate({ top: '50%' }, 200);
     }
+    return this;
   }
 
   // Toggle Sidebar

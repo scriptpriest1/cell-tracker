@@ -19,16 +19,16 @@
         <div class="body px-4 pt-2">
           <div class="form-group">
             <label for="cell-name">Name of Cell:</label>
-            <input type="text" name="cell_name" id="cell-name" class="form-control" required>
+            <input type="text" name="cell_name" id="cell-name" class="form-control" placeholder="e.g Haven (don't add &quot;Cell&quot; to the name)" required>
           </div>
 
-          <div class="admin-assignment-section mt-3">
-            <h6 class="title mb-2 fw-normal">Assign a Cell leader/admin to this Cell (can be done later)</h6>
+          <div class="admin-assignment-section mt-4">
+            <h6 class="title mt-1 mb-2 text-center py-2 fw-normal">Assign a Cell leader/admin to this Cell (can be done later)</h6>
 
             <div class="form-group">
               <label for="admin-role">Admin's role:</label>
               <select name="admin_role" id="admin-role" class="form-control form-select">
-                <option value="">No selected role</option>
+                <option value="">Select</option>
                 <option value="leader">Cell Leader</option>
                 <option value="executive">Cell Executive</option>
               </select>

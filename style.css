@@ -410,7 +410,7 @@ button {
 
 /* Cells page */
 
-.no-table-data .info {
+#table-info-block .info {
   color: var(--text-secondary);
 }
 
@@ -483,8 +483,14 @@ button {
   margin-bottom: 10px;
 }
 
+/* .add-cell-form .admin-assignment-section {
+  border-top: 1px solid var(--border);
+} */
+
 .add-cell-form .admin-assignment-section .title {
-  color: var(--text-secondary);
+  background-color: var(--bg);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
 .add-cell-form footer {

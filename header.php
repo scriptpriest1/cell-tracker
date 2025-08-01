@@ -42,7 +42,7 @@ if (isset($_SESSION['user_id'])) {
 
   <?php if ($isLoggedIn === false) {
     echo '
-      <header class="px-4 py-3 d-flex align-items-center justify-content-center w-100">
+      <header id="site-header" class="px-4 py-3 d-flex align-items-center justify-content-center w-100">
         <div class="w-100 site-name-bar">
           <h1 class="fs-5 fw-bold w-100 text-center m-0 p-0">Cell Tracker</h1>
         </div>

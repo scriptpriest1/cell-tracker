@@ -80,7 +80,7 @@
         </div>
 
         <div class="cells-table-container w-100 p-0 m-0">
-          <table class="w-100">
+          <!-- <table class="w-100">
             <thead>
               <th>SN</th>
               <th>Cell name</th>
@@ -90,20 +90,34 @@
               <th>Action</th>
             </thead>
       
-            <!-- <tr>
+            <tr>
               <td>1.</td>
               <td>Lorem cell</td>
               <td>20/01/2025</td>
               <td>Steven Ifeanyi</td>
               <td>16</td>
               <td><button type="button" class="view-details-btn px-3 py-1">View details</button></td>
-            </tr> -->
+            </tr>
+          </table> -->
+          <table class="w-100" id="cells-table">
+            <thead>
+              <tr>
+                <th>SN</th>
+                <th>Cell name</th>
+                <th>Date created</th>
+                <th>Cell leader</th>
+                <th>Cell members</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
           </table>
+
         </div>
       </div>
 
-      <div class="no-table-data">
-        <p class="info p-2 m-0 text-center">No data found!</0>
+      <div id="table-info-block">
+        <p class="info p-2 m-0 text-center"></p>
       </div>
     </div>
 

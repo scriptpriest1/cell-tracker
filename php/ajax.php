@@ -17,7 +17,7 @@ if ($action === 'check_user_login') {
 }
 
 /*=======================================
-    Add a Cell Functionality
+         Add a Cell Functionality
 =======================================*/
 if ($action === 'add_a_cell') {
   session_start();
@@ -168,9 +168,6 @@ if ($action === 'login') {
   exit;
 }
 
-
-
-
 /*=======================================
           Logout Functionality
 =======================================*/
@@ -179,5 +176,39 @@ if ($action === 'logout') {
   session_unset();
   session_destroy();
   echo 'loggedOut';
+  exit;
+}
+
+/*=======================================
+        Fetch Cells Functionality
+=======================================*/
+if ($_POST['action'] === 'fetch_all_cells') {
+  session_start();
+  $churchId = $_SESSION['entity_id'];
+
+  $stmt = $conn->prepare("
+    SELECT 
+      cells.id, 
+      cells.cell_name, 
+      DATE_FORMAT(cells.date_created, '%d/%m/%Y') AS date_created,
+      CONCAT(users.first_name, ' ', users.last_name) AS cell_leader_name,
+      (
+        SELECT COUNT(*) 
+        FROM cell_members 
+        WHERE cell_members.cell_id = cells.id
+      ) AS cell_members_count
+    FROM cells
+    LEFT JOIN users 
+      ON users.cell_id = cells.id 
+      AND users.cell_role = 'leader'
+    WHERE cells.church_id = :church_id
+  ");
+  
+  $stmt->bindValue(':church_id', $churchId, PDO::PARAM_INT);
+  $stmt->execute();
+
+  $cells = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+  echo json_encode($cells);
   exit;
 }
