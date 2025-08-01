@@ -489,10 +489,6 @@ button {
   margin-bottom: 10px;
 }
 
-/* .add-cell-form .admin-assignment-section {
-  border-top: 1px solid var(--border);
-} */
-
 .add-cell-form .admin-assignment-section .title {
   background-color: var(--bg);
   border-top: 1px solid var(--border);

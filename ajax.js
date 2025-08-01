@@ -90,7 +90,7 @@ $(document).ready(() => {
   function inValidateCellAdminAssignment() {
     const $role = $("#add-cell-form #admin-role");
     const role = $role.val();
-    if (role != "") return;
+    if (role !== "") return;
 
     const $firstName = $("#add-cell-form #admin-first-name"),
       $lastName = $("#add-cell-form #admin-last-name"),
@@ -107,17 +107,22 @@ $(document).ready(() => {
     );
   }
 
-  $("#add-cell-form .form-control, #add-cell-form .form-select").on(
+  $(document).on(
     "input change",
+    "#add-cell-form .form-control, #add-cell-form .form-select",
     function () {
-      const valid =
-        (isFilled($("#add-cell-form #cell-name")) && validateCellAdminAssignment()) ||
-        (isFilled($("#add-cell-form #cell-name")) && inValidateCellAdminAssignment());
+      const validityOne =
+          isFilled($("#add-cell-form #cell-name")) &&
+          validateCellAdminAssignment(),
+        validityTwo =
+          isFilled($("#add-cell-form #cell-name")) &&
+          inValidateCellAdminAssignment(),
+        valid = validityOne || validityTwo;
       $("#add-cell-form .submit-btn").prop("disabled", !valid);
     }
   );
 
-  $("#add-cell-form").on("submit", function (e) {
+  $(document).on("submit", "#add-cell-form", function (e) {
     e.preventDefault();
 
     const $btn = $("#add-cell-form .submit-btn")
@@ -150,7 +155,7 @@ $(document).ready(() => {
                  - Function
   *********************************************/
   function fetchAllCells() {
-    if ($("#site-header").is(':visible')) return;
+    if ($("#site-header").is(":visible")) return;
 
     $.ajax({
       url: "../php/ajax.php",
@@ -176,14 +181,14 @@ $(document).ready(() => {
             <td>${cell.date_created}</td>
             <td>${cell.cell_leader_name || "—"}</td>
             <td>${cell.cell_members_count}</td>
-            <td><button type="button" class="view-details-btn px-3 py-1">View details</button></td>
+            <td><button type="button" class="load-action-modal-dyn-content view-details-btn px-3 py-1" data-content-type="view-cell-details">View</button></td>
           </tr>`;
           tbody.append(row);
         });
 
         updateCellsTableSN(); // Call to number rows
       },
-      error: function () {
+      error: () => {
         alert("Error fetching cells.");
       },
     });
@@ -200,6 +205,26 @@ $(document).ready(() => {
         .text(`${index + 1}.`);
     });
   }
+
+  /*********************************************
+      Load content dynamically into html
+                  - Function
+  *********************************************/
+
+  // Action Modal
+
+  $(document).on("click", ".load-action-modal-dyn-content", function () {
+    let contentType = $(this).data("content-type");
+
+    $.ajax({
+      url: "../php/load_dynamic_content.php",
+      method: "POST",
+      data: { "content-type": contentType },
+      success: (res) => {
+        $("#action-modal .content-container").html(res);
+      },
+    });
+  });
 
   // Close Ready Function
 });

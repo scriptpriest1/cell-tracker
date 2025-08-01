@@ -67,7 +67,7 @@
         <div class="control-panel d-flex align-items-center gap-3 justify-content-between mb-2">
           <h6 class="m-0">Total no. of Cells: &nbsp;<span id="cell-count"></span></h6>
 
-          <button id="add-cell-btn" class="add-cell-btn px-3">Add a Cell
+          <button id="add-cell-btn" class="load-action-modal-dyn-content add-cell-btn px-3" data-content-type="add-a-cell-form">Add a Cell
           </button>
         </div>
 
