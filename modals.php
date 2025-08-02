@@ -2,7 +2,7 @@
   <div class="modal-overlay w-100 h-100 m-0 p-0 position-relative">
     <div class="action-panel position-absolute">
 
-      <header class="d-flex align-items-center gap-2 justify-content-between px-4 py-3 position-sticky top-0">
+      <header class="header d-flex align-items-center gap-2 justify-content-between px-4 py-3 position-absolute top-0 w-100">
         <div class="title-bar">
           <h5 class="title m-0 p-0">Title</h5>
         </div>
@@ -15,7 +15,9 @@
         </div>
       </header>
 
-      <div class="content-container"></div>
+      <div class="content-container mt-1 pt-5"></div>
+
+      <footer class="footer d-none px-4 py-3 position-absolute bottom-0 w-100"></footer>
     </div>
   </div>
 </div>

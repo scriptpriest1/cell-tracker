@@ -162,8 +162,9 @@ button {
   box-shadow: var(--box-shadow);
 }
 
-.action-modal .action-panel header {
+.action-modal .action-panel .header, .action-modal .action-panel .footer {
   background-color: inherit;
+  z-index: 2;
 }
 
 @media screen and (max-width: 767px) {
@@ -505,4 +506,8 @@ button {
 }
 .action-modal-form .submit-btn:hover {
   background-color: var(--hover-on-primary);
+}
+
+#cell-admin-list-container {
+
 }

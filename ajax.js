@@ -218,9 +218,13 @@ $(document).ready(() => {
             <td>${cell.date_created}</td>
             <td>${cell.cell_leader_name || "—"}</td>
             <td>${cell.cell_members_count}</td>
-            <td><button type="button" class="load-action-modal-dyn-content action-btn px-3 py-1" data-content-type="view-cell-details">View</button> <button type="button" class="load-action-modal-dyn-content action-btn px-3 py-1" data-content-type="assign-cell-admin" data-cell-name="${
+            <td><button type="button" class="load-action-modal-dyn-content action-btn px-3 py-1" data-content-type="view-cell-details" data-cell-name="${
               cell.cell_name + " Cell"
-            }" data-cell-id="${cell.id}">Assign admin</button></td>
+            }" data-cell-id="${
+            cell.id
+          }">View</button> <button type="button" class="load-action-modal-dyn-content action-btn px-3 py-1" data-content-type="assign-cell-admin" data-cell-name="${
+            cell.cell_name + " Cell"
+          }" data-cell-id="${cell.id}">Assign admin</button></td>
           </tr>`;
           tbody.append(row);
         });
@@ -264,10 +268,15 @@ $(document).ready(() => {
         if (contentType === "add-a-cell-form") {
           $("#action-modal header .title").text("Add a Cell");
           $("#action-modal .content-container").html(res);
-        } else if (contentType === "assign-cell-admin") {
+        } else if (
+          contentType === "view-cell-details" ||
+          contentType === "assign-cell-admin"
+        ) {
           $("#action-modal header .title").text($thisElement.data("cell-name"));
           $("#action-modal .content-container").html(res);
-          $("#action-modal .content-container #cell-id").val($thisElement.data('cell-id'));
+          $("#action-modal .content-container #cell-id").val(
+            $thisElement.data("cell-id")
+          );
         } else return;
         toggleActionModal();
       },

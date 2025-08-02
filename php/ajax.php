@@ -216,52 +216,94 @@ if ($action === 'fetch_all_cells') {
       Assign Cell Admin Functionality
 =======================================*/
 if ($action === 'assign_cell_admin') {
-
-  $cell_id = $_POST['cell_id'] ?? null;
-  $assign_type = $_POST['choose_admin'] ?? '';
-  $role = $_POST['role'] ?? '';
+  $cell_id     = $_POST['cell_id']        ?? null;
+  $assign_type = $_POST['choose_admin']   ?? '';
+  $role        = $_POST['role']           ?? '';
 
   if (!$cell_id || !$assign_type || !$role) {
     echo "Missing required fields";
     exit;
   }
 
-  // Check if a cell leader already exists
-  $stmt = $conn->prepare('SELECT COUNT(*) FROM users WHERE cell_role = ? AND cell_id = ?');
-  $stmt->execute(['leader', $cell_id]);
-  if ($stmt->fetchColumn() > 0) {
-    echo 'A Cell Leader has already been assigned! Unassign first to assign new Cell Leader.';
-    exit;
+  // Only one leader per cell
+  if ($role === 'leader') {
+    $stmt = $conn->prepare(
+      'SELECT COUNT(*) FROM users WHERE cell_role = ? AND cell_id = ?'
+    );
+    $stmt->execute(['leader', $cell_id]);
+    if ($stmt->fetchColumn() > 0) {
+      echo 'A Cell Leader has already been assigned! Unassign first to assign a new Cell Leader.';
+      exit;
+    }
   }
 
   if ($assign_type === 'self') {
-    // Assign current user (church admin) to this cell
+    // Fetch current assignment
+    $stmt = $conn->prepare(
+      'SELECT cell_id FROM users WHERE user_login = ?'
+    );
+    $stmt->execute([$_SESSION['user_login']]);
+    $current_cell = $stmt->fetchColumn();
 
-    $stmt = $conn->prepare("UPDATE users SET cell_id = ?, cell_role = ? WHERE user_login = ?");
+    if ($current_cell == $cell_id) {
+      echo 'User already assigned';
+      exit;
+    }
+    if ($current_cell && $current_cell != $cell_id) {
+      echo 'Already assigned to another cell. Unassign first before assigning to this cell.';
+      exit;
+    }
+
+    // Assign self
+    $stmt = $conn->prepare(
+      'UPDATE users SET cell_id = ?, cell_role = ? WHERE user_login = ?'
+    );
     $stmt->execute([$cell_id, $role, $_SESSION['user_login']]);
-
     echo "success";
     exit;
   }
 
   if ($assign_type === 'else') {
-    $first_name = $_POST['first_name'] ?? '';
-    $last_name = $_POST['last_name'] ?? '';
-    $email = $_POST['email'] ?? '';
-    $password = $_POST['password'] ?? '';
-    $password_confirm = $_POST['password_confirm'] ?? '';
+    $first_name       = $_POST['first_name']        ?? '';
+    $last_name        = $_POST['last_name']         ?? '';
+    $email            = $_POST['email']             ?? '';
+    $password         = $_POST['password']          ?? '';
+    $password_confirm = $_POST['password_confirm']  ?? '';
 
-    if (!$first_name || !$last_name || !$email || !$password || $password !== $password_confirm) {
+    if (
+      !$first_name || !$last_name ||
+      !$email      || !$password ||
+      $password !== $password_confirm
+    ) {
       echo "Invalid input";
       exit;
     }
 
-    // Hash password
-    $hashed_pw = password_hash($password, PASSWORD_DEFAULT);
+    // Prevent duplicate email
+    $stmt = $conn->prepare(
+      'SELECT COUNT(*) FROM users WHERE user_login = ?'
+    );
+    $stmt->execute([$email]);
+    if ($stmt->fetchColumn() > 0) {
+      echo 'User already exists';
+      exit;
+    }
 
-    // Insert new admin into `users` table
-    $insert_user = $conn->prepare("INSERT INTO users (first_name, last_name, user_login, password, cell_id, cell_role) VALUES (?, ?, ?, ?, ?, ?)");
-    $insert_user->execute([$first_name, $last_name, $email, $hashed_pw, $cell_id, $role]);
+    // Insert new admin
+    $hashed_pw = password_hash($password, PASSWORD_DEFAULT);
+    $stmt = $conn->prepare(
+      'INSERT INTO users
+         (first_name, last_name, user_login, password, cell_id, cell_role)
+       VALUES (?, ?, ?, ?, ?, ?)'
+    );
+    $stmt->execute([
+      $first_name,
+      $last_name,
+      $email,
+      $hashed_pw,
+      $cell_id,
+      $role
+    ]);
 
     echo "success";
     exit;
@@ -270,3 +312,4 @@ if ($action === 'assign_cell_admin') {
   echo "Invalid assignment type";
   exit;
 }
+
