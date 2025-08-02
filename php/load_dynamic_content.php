@@ -4,7 +4,7 @@ if (isset($_POST['content-type'])) {
 
   if ($content_type === 'add-a-cell-form') {
     echo <<<HTML
-      <form id="add-cell-form" class="add-cell-form position-relative">
+      <form id="add-cell-form" class="action-modal-form position-relative">
         <div class="body px-4 pt-2">
           <div class="form-group">
             <label for="cell-name">Name of Cell:</label>
@@ -52,6 +52,97 @@ if (isset($_POST['content-type'])) {
 
         <footer class="position-absolute bottom-0 py-3 px-4 w-100">
           <button type="submit" class="submit-btn w-100" disabled>Add Cell</button>
+        </footer>
+      </form>
+    HTML;
+  }
+
+  if ($content_type === 'assign-cell-admin') {
+    echo <<<HTML
+      <form id="assign-cell-admin-form" class="action-modal-form position-relative">
+        <input type="hidden" name="cell_id" value="" id="cell-id">
+        <div class="body px-4 pt-2">
+          <div class="form-group">
+            <label for="choose-admin">Choose who to assign:</label>
+            <select
+              name="choose_admin"
+              id="choose-admin"
+              class="form-control form-select"
+            >
+              <option value="">Select</option>
+              <option value="self">Assign youself</option>
+              <option value="else">Assign someone else</option>
+            </select>
+          </div>
+
+          <div class="form-group role-container d-none">
+            <label for="role">Role:</label>
+            <select
+              name="role"
+              id="role"
+              class="form-control form-select"
+            >
+              <option value="">Select</option>
+              <option value="leader">Cell Leader</option>
+              <option value="executive">Cell Executive</option>
+            </select>
+          </div>
+
+          <div class="hidden-section mt-3 d-none">
+            <div class="form-group">
+              <label for="first-name">First name:</label>
+              <input
+                type="text"
+                name="first_name"
+                id="first-name"
+                class="form-control"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="last-name">Last name:</label>
+              <input
+                type="text"
+                name="last_name"
+                id="last-name"
+                class="form-control"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email:</label>
+              <input
+                type="email"
+                name="email"
+                id="email"
+                class="form-control"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="password">Create login password:</label>
+              <input
+                type="password"
+                name="password"
+                id="password"
+                class="form-control"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="password-confirm">Confirm password:</label>
+              <input
+                type="password"
+                name="password_confirm"
+                id="password-confirm"
+                class="form-control"
+              />
+            </div>
+          </div>
+        </div>
+
+        <footer class="position-absolute bottom-0 py-3 px-4 w-100">
+          <button type="submit" class="submit-btn w-100" disabled>Assign</button>
         </footer>
       </form>
     HTML;

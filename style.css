@@ -470,39 +470,39 @@ button {
   border: 1px solid var(--border) !important;
 }
 
-.cells-table-container table tr .view-details-btn {
+.cells-table-container table tr .action-btn {
   color: var(--text-primary);
   border: 1px solid var(--border);
   border-radius: 10px;
 }
-.cells-table-container table tr .view-details-btn:hover {
+.cells-table-container table tr .action-btn:hover {
   background-color: var(--hover-on-bg);
 }
 
-.add-cell-form .body {
+.action-modal-form .body {
   overflow-y: auto;
   max-height: 350px;
   padding-bottom: 70px;
 }
 
-.add-cell-form .form-group {
+.action-modal-form .form-group {
   margin-bottom: 10px;
 }
 
-.add-cell-form .admin-assignment-section .title {
+.action-modal-form .admin-assignment-section .title {
   background-color: var(--bg);
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
 }
 
-.add-cell-form footer {
+.action-modal-form footer {
   background-color: var(--tertiary-alt);
 }
 
-.add-cell-form .submit-btn {
+.action-modal-form .submit-btn {
   background-color: var(--primary);
   color: var(--text-tertiary);
 }
-.add-cell-form .submit-btn:hover {
+.action-modal-form .submit-btn:hover {
   background-color: var(--hover-on-primary);
 }

@@ -4,7 +4,7 @@
 
       <header class="d-flex align-items-center gap-2 justify-content-between px-4 py-3 position-sticky top-0">
         <div class="title-bar">
-          <h5 class="title m-0 p-0">Add a Cell</h5>
+          <h5 class="title m-0 p-0">Title</h5>
         </div>
         <div class="action-bar">
           <button type="button" class="close-btn p-0 m-0">

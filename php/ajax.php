@@ -1,26 +1,26 @@
 <?php
+session_start();
 include 'connect_db.php';   // sets up $conn as a PDO instance
 include 'functions.php';
 
-$action = isset($_GET['action']) ? $_GET['action'] : '';
+$action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
 
 /*=======================================
     Check if user_login already exists
 =======================================*/
-if ($action === 'check_user_login') {
-  $user_login = clean_input($_POST['user-login']);
+// if ($action === 'check_user_login') {
+//   $user_login = clean_input($_POST['user-login']);
 
-  $stmt = $conn->prepare('SELECT COUNT(*) FROM users WHERE user_login = ?');
-  $stmt->execute([$user_login]);
-  echo $stmt->fetchColumn() ? 'notAvailable' : 'available';
-  exit;
-}
+//   $stmt = $conn->prepare('SELECT COUNT(*) FROM users WHERE user_login = ?');
+//   $stmt->execute([$user_login]);
+//   echo $stmt->fetchColumn() ? 'notAvailable' : 'available';
+//   exit;
+// }
 
 /*=======================================
          Add a Cell Functionality
 =======================================*/
 if ($action === 'add_a_cell') {
-  session_start();
   if (!isset($_SESSION['entity_id']) || $_SESSION['admin_type'] !== 'church') {
     echo 'unauthorized';
     exit;
@@ -109,6 +109,7 @@ if ($action === 'login') {
   $stmt = $conn->prepare("
     SELECT DISTINCT
       users.id AS user_id,
+      users.user_login,
       users.password,
       users.cell_id,
       users.church_id,
@@ -158,8 +159,8 @@ if ($action === 'login') {
   }
 
   // Set session variables
-  session_start();
   $_SESSION['user_id']     = $user['user_id'];
+  $_SESSION['user_login']  = $user['user_login'];
   $_SESSION['admin_type']  = $adminType;
   $_SESSION['entity_id']   = $entityId;
   $_SESSION['entity_name'] = $entityName;
@@ -172,7 +173,6 @@ if ($action === 'login') {
           Logout Functionality
 =======================================*/
 if ($action === 'logout') {
-  session_start();
   session_unset();
   session_destroy();
   echo 'loggedOut';
@@ -182,8 +182,7 @@ if ($action === 'logout') {
 /*=======================================
         Fetch Cells Functionality
 =======================================*/
-if ($_POST['action'] === 'fetch_all_cells') {
-  session_start();
+if ($action === 'fetch_all_cells') {
   $churchId = $_SESSION['entity_id'];
 
   $stmt = $conn->prepare("
@@ -210,5 +209,64 @@ if ($_POST['action'] === 'fetch_all_cells') {
   $cells = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
   echo json_encode($cells);
+  exit;
+}
+
+/*=======================================
+      Assign Cell Admin Functionality
+=======================================*/
+if ($action === 'assign_cell_admin') {
+
+  $cell_id = $_POST['cell_id'] ?? null;
+  $assign_type = $_POST['choose_admin'] ?? '';
+  $role = $_POST['role'] ?? '';
+
+  if (!$cell_id || !$assign_type || !$role) {
+    echo "Missing required fields";
+    exit;
+  }
+
+  // Check if a cell leader already exists
+  $stmt = $conn->prepare('SELECT COUNT(*) FROM users WHERE cell_role = ? AND cell_id = ?');
+  $stmt->execute(['leader', $cell_id]);
+  if ($stmt->fetchColumn() > 0) {
+    echo 'A Cell Leader has already been assigned! Unassign first to assign new Cell Leader.';
+    exit;
+  }
+
+  if ($assign_type === 'self') {
+    // Assign current user (church admin) to this cell
+
+    $stmt = $conn->prepare("UPDATE users SET cell_id = ?, cell_role = ? WHERE user_login = ?");
+    $stmt->execute([$cell_id, $role, $_SESSION['user_login']]);
+
+    echo "success";
+    exit;
+  }
+
+  if ($assign_type === 'else') {
+    $first_name = $_POST['first_name'] ?? '';
+    $last_name = $_POST['last_name'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $password = $_POST['password'] ?? '';
+    $password_confirm = $_POST['password_confirm'] ?? '';
+
+    if (!$first_name || !$last_name || !$email || !$password || $password !== $password_confirm) {
+      echo "Invalid input";
+      exit;
+    }
+
+    // Hash password
+    $hashed_pw = password_hash($password, PASSWORD_DEFAULT);
+
+    // Insert new admin into `users` table
+    $insert_user = $conn->prepare("INSERT INTO users (first_name, last_name, user_login, password, cell_id, cell_role) VALUES (?, ?, ?, ?, ?, ?)");
+    $insert_user->execute([$first_name, $last_name, $email, $hashed_pw, $cell_id, $role]);
+
+    echo "success";
+    exit;
+  }
+
+  echo "Invalid assignment type";
   exit;
 }

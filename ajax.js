@@ -10,6 +10,7 @@ $(document).ready(() => {
   function isFilled($input) {
     return $.trim($input.val()) !== "";
   }
+  window.isFilled = isFilled;
 
   function isNotFilled($input) {
     return $.trim($input.val()) === "";
@@ -128,7 +129,7 @@ $(document).ready(() => {
     const $btn = $("#add-cell-form .submit-btn")
       .prop("disabled", true)
       .text("Adding…");
-    const data = $(this).serialize(); // Automatically serializes all input values with name attributes
+    const data = $(this).serialize();
 
     $.ajax({
       url: "../php/ajax.php?action=add_a_cell",
@@ -146,6 +147,42 @@ $(document).ready(() => {
       },
       error: () => {
         alert("Server error");
+      },
+    });
+  });
+
+  /*********************************************
+    Assign Cell Admin when Cell already exists
+                 - Function
+  *********************************************/
+  $(document).on("submit", "#assign-cell-admin-form", function (e) {
+    e.preventDefault();
+
+    const $form = $(this);
+    const $btn = $form
+      .find(".submit-btn")
+      .text("Assigning...")
+      .prop("disabled", true);
+    const data = $form.serialize();
+
+    $.ajax({
+      url: "../php/ajax.php?action=assign_cell_admin",
+      method: "POST",
+      data,
+      success: (res) => {
+        if (res === "success") {
+          alert("Admin successfully assigned!");
+          // Optional: reload cells or close modal
+          fetchAllCells();
+          $btn.text("Assign").prop("disabled", false);
+        } else {
+          alert("Error: " + res);
+          $btn.text("Assign").prop("disabled", false);
+        }
+      },
+      error: () => {
+        alert("Server error");
+        $btn.text("Assign").prop("disabled", false);
       },
     });
   });
@@ -181,7 +218,9 @@ $(document).ready(() => {
             <td>${cell.date_created}</td>
             <td>${cell.cell_leader_name || "—"}</td>
             <td>${cell.cell_members_count}</td>
-            <td><button type="button" class="load-action-modal-dyn-content view-details-btn px-3 py-1" data-content-type="view-cell-details">View</button></td>
+            <td><button type="button" class="load-action-modal-dyn-content action-btn px-3 py-1" data-content-type="view-cell-details">View</button> <button type="button" class="load-action-modal-dyn-content action-btn px-3 py-1" data-content-type="assign-cell-admin" data-cell-name="${
+              cell.cell_name + " Cell"
+            }" data-cell-id="${cell.id}">Assign admin</button></td>
           </tr>`;
           tbody.append(row);
         });
@@ -214,6 +253,7 @@ $(document).ready(() => {
   // Action Modal
 
   $(document).on("click", ".load-action-modal-dyn-content", function () {
+    const $thisElement = $(this);
     let contentType = $(this).data("content-type");
 
     $.ajax({
@@ -221,7 +261,15 @@ $(document).ready(() => {
       method: "POST",
       data: { "content-type": contentType },
       success: (res) => {
-        $("#action-modal .content-container").html(res);
+        if (contentType === "add-a-cell-form") {
+          $("#action-modal header .title").text("Add a Cell");
+          $("#action-modal .content-container").html(res);
+        } else if (contentType === "assign-cell-admin") {
+          $("#action-modal header .title").text($thisElement.data("cell-name"));
+          $("#action-modal .content-container").html(res);
+          $("#action-modal .content-container #cell-id").val($thisElement.data('cell-id'));
+        } else return;
+        toggleActionModal();
       },
     });
   });
