@@ -67,89 +67,99 @@ $(document).ready(() => {
               Add A Cell Functionality
   *********************************************/
 
-  function validateCellAdminAssignment() {
-    const $role = $("#add-cell-form #admin-role");
-    const role = $role.val();
-    if (role === "") return;
+function validateCellAdminAssignment() {
+  const $role = $("#add-cell-form #admin-role");
+  const role = $role.val();
+  if (role === "") return;
 
-    const $firstName = $("#add-cell-form #admin-first-name"),
-      $lastName = $("#add-cell-form #admin-last-name"),
-      $email = $("#add-cell-form #admin-email"),
-      $pw = $("#add-cell-form #admin-password"),
-      $confPw = $("#add-cell-form #admin-password-confirm");
+  const $firstName = $("#add-cell-form #admin-first-name"),
+    $lastName = $("#add-cell-form #admin-last-name"),
+    $email = $("#add-cell-form #admin-email"),
+    $pw = $("#add-cell-form #admin-password"),
+    $confPw = $("#add-cell-form #admin-password-confirm");
 
-    return (
-      isFilled($firstName) &&
-      isFilled($lastName) &&
-      isFilled($email) &&
-      isFilled($pw) &&
-      isFilled($confPw) &&
-      $pw.val() === $confPw.val()
-    );
-  }
-
-  function inValidateCellAdminAssignment() {
-    const $role = $("#add-cell-form #admin-role");
-    const role = $role.val();
-    if (role !== "") return;
-
-    const $firstName = $("#add-cell-form #admin-first-name"),
-      $lastName = $("#add-cell-form #admin-last-name"),
-      $email = $("#add-cell-form #admin-email"),
-      $pw = $("#add-cell-form #admin-password"),
-      $confPw = $("#add-cell-form #admin-password-confirm");
-
-    return (
-      isNotFilled($firstName) &&
-      isNotFilled($lastName) &&
-      isNotFilled($email) &&
-      isNotFilled($pw) &&
-      isNotFilled($confPw)
-    );
-  }
-
-  $(document).on(
-    "input change",
-    "#add-cell-form .form-control, #add-cell-form .form-select",
-    function () {
-      const validityOne =
-          isFilled($("#add-cell-form #cell-name")) &&
-          validateCellAdminAssignment(),
-        validityTwo =
-          isFilled($("#add-cell-form #cell-name")) &&
-          inValidateCellAdminAssignment(),
-        valid = validityOne || validityTwo;
-      $("#add-cell-form .submit-btn").prop("disabled", !valid);
-    }
+  return (
+    isFilled($firstName) &&
+    isFilled($lastName) &&
+    isFilled($email) &&
+    isFilled($pw) &&
+    isFilled($confPw) &&
+    $pw.val() === $confPw.val()
   );
+}
 
-  $(document).on("submit", "#add-cell-form", function (e) {
-    e.preventDefault();
+function inValidateCellAdminAssignment() {
+  const $role = $("#add-cell-form #admin-role");
+  const role = $role.val();
+  if (role !== "") return;
 
-    const $btn = $("#add-cell-form .submit-btn")
-      .prop("disabled", true)
-      .text("Adding…");
-    const data = $(this).serialize();
+  const $firstName = $("#add-cell-form #admin-first-name"),
+    $lastName = $("#add-cell-form #admin-last-name"),
+    $email = $("#add-cell-form #admin-email"),
+    $pw = $("#add-cell-form #admin-password"),
+    $confPw = $("#add-cell-form #admin-password-confirm");
 
-    $.ajax({
-      url: "../php/ajax.php?action=add_a_cell",
-      method: "POST",
-      data,
-      success: (res) => {
-        if (res === "success") {
-          alert("Cell added successfully!");
-          fetchAllCells();
-          $("#add-cell-form").trigger("reset");
-          $btn.prop("disabled", false).text("Add Cell");
-        } else {
-          alert("Error: " + res);
-        }
-      },
-      error: () => {
-        alert("Server error");
-      },
-    });
+  return (
+    isNotFilled($firstName) &&
+    isNotFilled($lastName) &&
+    isNotFilled($email) &&
+    isNotFilled($pw) &&
+    isNotFilled($confPw)
+  );
+}
+
+$(document).on(
+  "input change",
+  "#add-cell-form .form-control, #add-cell-form .form-select, #add-cell-form [name='assign_to']",
+  function () {
+    const isNameFilled = isFilled($("#add-cell-form #cell-name"));
+    const assignTo = $("#add-cell-form input[name='assign_to']:checked").val();
+
+    let valid = false;
+
+    if (assignTo === "self") {
+      valid = isNameFilled && isFilled($("#add-cell-form #admin-role"));
+    } else if (assignTo === "someone_else") {
+      valid = isNameFilled && validateCellAdminAssignment();
+    } else {
+      valid = isNameFilled; // no admin assignment
+    }
+
+    $("#add-cell-form .submit-btn").prop("disabled", !valid);
+  }
+);
+
+$(document).on("submit", "#add-cell-form", function (e) {
+  e.preventDefault();
+
+  const $btn = $("#add-cell-form .submit-btn")
+    .prop("disabled", true)
+    .text("Adding…");
+
+  const data = $(this).serialize();
+
+  $.ajax({
+    url: "../php/ajax.php?action=add_a_cell",
+    method: "POST",
+    data,
+    success: (res) => {
+      if (res === "success") {
+        alert("Cell added successfully!");
+        fetchAllCells();
+        $("#add-cell-form").trigger("reset");
+        $btn.prop("disabled", false).text("Add Cell");
+      } else {
+        alert("Error: " + res);
+        $btn.prop("disabled", false).text("Add Cell");
+      }
+    },
+    error: () => {
+      alert("Server error");
+      $btn.prop("disabled", false).text("Add Cell");
+    },
   });
+});
+
 
   /*********************************************
     Assign Cell Admin when Cell already exists

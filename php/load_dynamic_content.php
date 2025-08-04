@@ -18,6 +18,17 @@ if (isset($_POST['content-type'])) {
           <div class="admin-assignment-section mt-4">
             <h6 class="title mt-1 mb-2 text-center py-2 fw-normal">Assign a Cell leader/admin to this Cell (can be done later)</h6>
 
+            <div class="d-flex gap-3 justify-content-center mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="assign_to" value="self" id="assign-self">
+                <label class="form-check-label" for="assign-self">Assign Myself</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="assign_to" value="someone_else" id="assign-someone-else">
+                <label class="form-check-label" for="assign-someone-else">Assign Someone Else</label>
+              </div>
+            </div>
+
             <div class="form-group">
               <label for="admin-role">Admin's role:</label>
               <select name="admin_role" id="admin-role" class="form-control form-select">
@@ -27,27 +38,27 @@ if (isset($_POST['content-type'])) {
               </select>
             </div>
 
-            <div class="form-group">
+            <div class="form-group other-only">
               <label for="admin-first-name">Admin's first name:</label>
               <input type="text" name="admin_first_name" id="admin-first-name" class="form-control">
             </div>
 
-            <div class="form-group">
+            <div class="form-group other-only">
               <label for="admin-last-name">Admin's last name:</label>
               <input type="text" name="admin_last_name" id="admin-last-name" class="form-control">
             </div>
 
-            <div class="form-group">
+            <div class="form-group other-only">
               <label for="admin-email">Admin's email:</label>
               <input type="email" name="admin_email" id="admin-email" class="form-control">
             </div>
 
-            <div class="form-group">
+            <div class="form-group other-only">
               <label for="admin-password">Create Admin's login password:</label>
               <input type="password" name="admin_password" id="admin-password" class="form-control">
             </div>
 
-            <div class="form-group">
+            <div class="form-group other-only">
               <label for="admin-password-confirm">Confirm password:</label>
               <input type="password" name="admin_password_confirm" id="admin-password-confirm" class="form-control">
             </div>

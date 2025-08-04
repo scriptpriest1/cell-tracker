@@ -26,22 +26,49 @@ if ($action === 'add_a_cell') {
     exit;
   }
 
-  $cellName     = clean_input($_POST['cell_name'] ?? '');
-  $adminRole    = clean_input($_POST['admin_role'] ?? '');
-  $firstName    = clean_input($_POST['admin_first_name'] ?? '');
-  $lastName     = clean_input($_POST['admin_last_name'] ?? '');
-  $adminEmail   = clean_input($_POST['admin_email'] ?? '');
-  $password     = clean_input($_POST['admin_password'] ?? '');
-  $confPw       = clean_input($_POST['admin_password_confirm'] ?? '');
+  $churchId = $_SESSION['entity_id'];
+  $cellName = clean_input($_POST['cell_name'] ?? '');
+  $adminType = $_POST['admin_type'] ?? ''; // either 'self' or 'other'
 
   if (!$cellName) {
     echo 'missing_cell_name';
     exit;
   }
 
-  // Validate optional admin input: if any admin field is filled, all must be filled
-  $adminFieldsFilled = $adminRole || $firstName || $lastName || $adminEmail || $password || $confPw;
-  if ($adminFieldsFilled) {
+  // Insert the new cell first
+  $stmt = $conn->prepare('INSERT INTO cells (cell_name, church_id, date_created) VALUES (?, ?, NOW())');
+  if (!$stmt->execute([$cellName, $churchId])) {
+    echo 'cell_insert_failed';
+    exit;
+  }
+
+  $cellId = $conn->lastInsertId();
+
+  // === Assign Self as Admin ===
+  if ($adminType === 'self') {
+    $adminRole = clean_input($_POST['admin_role'] ?? '');
+    if (!$adminRole) {
+      echo 'missing_admin_role';
+      exit;
+    }
+
+    // Update current church admin’s cell_id and cell_role
+    $stmt = $conn->prepare('UPDATE users SET cell_id = ?, cell_role = ? WHERE id = ?');
+    $stmt->execute([$cellId, $adminRole, $_SESSION['user_id']]);
+
+    echo 'success';
+    exit;
+  }
+
+  // === Assign Someone Else as Admin ===
+  if ($adminType === 'other') {
+    $adminRole = clean_input($_POST['admin_role'] ?? '');
+    $firstName = clean_input($_POST['admin_first_name'] ?? '');
+    $lastName = clean_input($_POST['admin_last_name'] ?? '');
+    $adminEmail = clean_input($_POST['admin_email'] ?? '');
+    $password = clean_input($_POST['admin_password'] ?? '');
+    $confPw = clean_input($_POST['admin_password_confirm'] ?? '');
+
     if (!$adminRole || !$firstName || !$lastName || !$adminEmail || !$password || !$confPw) {
       echo 'incomplete_admin_fields';
       exit;
@@ -59,20 +86,8 @@ if ($action === 'add_a_cell') {
       echo 'admin_email_taken';
       exit;
     }
-  }
 
-  // Insert new cell
-  $stmt = $conn->prepare('INSERT INTO cells (cell_name, church_id, date_created) VALUES (?, ?, NOW())');
-  $churchId = $_SESSION['entity_id'];
-  if (!$stmt->execute([$cellName, $churchId])) {
-    echo 'cell_insert_failed';
-    exit;
-  }
-
-  $cellId = $conn->lastInsertId();
-
-  // If admin fields were filled, create the user
-  if ($adminFieldsFilled) {
+    // Insert new user as admin
     $stmt = $conn->prepare('
       INSERT INTO users (
         cell_role, first_name, last_name, user_login, password, cell_id, date_created
@@ -83,7 +98,7 @@ if ($action === 'add_a_cell') {
       $firstName,
       $lastName,
       $adminEmail,
-      $password,  // hash later if needed
+      $password, // You can hash this later
       $cellId
     ]);
 
@@ -91,11 +106,16 @@ if ($action === 'add_a_cell') {
       echo 'admin_insert_failed';
       exit;
     }
+
+    echo 'success';
+    exit;
   }
 
+  // === No admin assigned ===
   echo 'success';
   exit;
 }
+
 
 
 /*=======================================
