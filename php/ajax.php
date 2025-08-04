@@ -316,7 +316,7 @@ if ($action === 'assign_cell_admin') {
 /*=======================================
       Unassign Cell Admin Functionality
 =======================================*/
-if ($_POST['action'] === 'unassign_cell_admin') {
+if ($action === 'unassign_cell_admin') {
     $userId = $_POST['user_id'] ?? null;
     $cellId = $_POST['cell_id'] ?? null;
 

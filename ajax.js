@@ -175,6 +175,7 @@ $(document).ready(() => {
           // Optional: reload cells or close modal
           fetchAllCells();
           $btn.text("Assign").prop("disabled", false);
+          $form.trigger('reset');
         } else {
           alert("Error: " + res);
           $btn.text("Assign").prop("disabled", false);
@@ -257,9 +258,8 @@ $(document).ready(() => {
   // Action Modal
 
   $(document).on("click", ".load-action-modal-dyn-content", loadDynamicContentfunction); 
-  
-  window.loadDynamicContentfunction = function () {
-    const $thisElement = $(this);
+  function loadDynamicContentfunction(e) {
+    let $thisElement = $(this);
     let contentType = $thisElement.data("content-type");
     let cellId = $thisElement.data("cell-id");
 
@@ -282,18 +282,25 @@ $(document).ready(() => {
         } else if (contentType === "view-cell-details") {
           $("#action-modal header .title").text($thisElement.data("cell-name"));
           $("#action-modal .content-container").html(res);
+          if ($("#action-modal .cell-admins-list li").length === 0) {
+            $("#action-modal .cell-admins-list-container .admins-list-info").text("No admins found.");
+          }
           toggleActionModal();
         } else if (contentType === "fetch-cell-admins") {
           $("#action-modal .content-container").html(res);
+          if ($("#action-modal .cell-admins-list li").length === 0) {
+            $("#action-modal .cell-admins-list-container .admins-list-info").text("No admins found.");
+          }
         } else return;
       },
     });
   };
 
   // Unassign cell admin logic
-  $(document).on("click", ".unassign-btn", function () {
-    const userId = $(this).data("user-id");
-    const cellId = $(this).data("cell-id");
+  $(document).on("click", ".unassign-btn", function (e) {
+    const $thisElement = $(this);
+    const userId = $thisElement.data("user-id");
+    const cellId = $thisElement.data("cell-id");
 
     if (!userId || !cellId) {
       alert("Missing user or cell ID.");
@@ -312,8 +319,9 @@ $(document).ready(() => {
       },
       success: (res) => {
         if (res.status === "success") {
-          // Refresh the list
-          fetchCellAdmins(); // Make sure this function exists globally
+          loadDynamicContentfunction.call(this, e); 
+          fetchAllCells();
+          alert("Unassigned admin successfully.")
         } else {
           alert(res.message || "Failed to unassign admin.");
         }
@@ -323,4 +331,5 @@ $(document).ready(() => {
       },
     });
   });
+
 });

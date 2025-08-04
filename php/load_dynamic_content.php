@@ -156,7 +156,7 @@ if (isset($_POST['content-type'])) {
       Fetch Admins for a viewed Cell 
             - Functionality
 =======================================*/
-if ($content_type === 'view-cell-details') {
+if ($content_type === 'view-cell-details' || $content_type === 'fetch-cell-admins') {
   $cell_id = $_POST['cell-id'] ?? null;
 
   if (!$cell_id) {
@@ -231,7 +231,7 @@ if ($content_type === 'view-cell-details') {
             <p class="admin-name p-0 m-0"><?= $nameWithLabels ?></p>
             <p class="admin-email p-0 m-0"><?= $email ?></p>
           </div>
-          <button type="button" class="load-action-modal-dyn-content px-3 py-1 unassign-btn" data-user-id="<?= $id ?>" data-content-type="fetch-cell-admins" data-cell-id="<?= $cell_id ?>">Unassign</button>
+          <button type="button" class=" px-3 py-1 unassign-btn" data-user-id="<?= $id ?>" data-content-type="fetch-cell-admins" data-cell-id="<?= $cell_id ?>">Unassign</button>
         </div>
       </li>
     <?php endif; ?>
@@ -249,7 +249,7 @@ if ($content_type === 'view-cell-details') {
             <p class="admin-name p-0 m-0"><?= $nameWithLabels ?></p>
             <p class="admin-email p-0 m-0"><?= $email ?></p>
           </div>
-          <button type="button" class="load-action-modal-dyn-content px-3 py-1 unassign-btn delete" data-user-id="<?= $id ?>" data-content-type="fetch-cell-admins" data-cell-id="<?= $cell_id ?>">Remove</button>
+          <button type="button" class=" px-3 py-1 unassign-btn delete" data-user-id="<?= $id ?>" data-content-type="fetch-cell-admins" data-cell-id="<?= $cell_id ?>">Remove</button>
         </div>
       </li>
     <?php endif; ?>
@@ -265,7 +265,7 @@ if ($content_type === 'view-cell-details') {
             <p class="admin-name p-0 m-0"><?= $name ?></p>
             <p class="admin-email p-0 m-0"><?= $email ?></p>
           </div>
-          <button type="button" class="load-action-modal-dyn-content px-3 py-1 unassign-btn delete" data-user-id="<?= $id ?>" data-content-type="fetch-cell-admins" data-cell-id="<?= $cell_id ?>">Remove</button>
+          <button type="button" class=" px-3 py-1 unassign-btn delete" data-user-id="<?= $id ?>" data-content-type="fetch-cell-admins" data-cell-id="<?= $cell_id ?>">Remove</button>
         </div>
       </li>
     <?php endforeach; ?>
@@ -278,6 +278,7 @@ if ($content_type === 'view-cell-details') {
       <span class="p-0 pb-1 m-0 mb-2 fw-bold">Admins</span>
       <div class="cell-admins-list-container mt-2">
         {$html}
+        <p class="text-center admins-list-info m-0 p-0 fs-6"></p>
       </div>
     </div>
   HTML;

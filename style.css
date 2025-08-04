@@ -540,3 +540,7 @@ button {
   .unassign-btn.delete {
   background-color: var(--error);
 }
+
+#action-modal .cell-admins-list-container .admins-list-info {
+  color: var(--text-secondary);
+}
