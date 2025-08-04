@@ -218,11 +218,11 @@ $(document).ready(() => {
             <td>${cell.date_created}</td>
             <td>${cell.cell_leader_name || "—"}</td>
             <td>${cell.cell_members_count}</td>
-            <td><button type="button" class="load-action-modal-dyn-content action-btn px-3 py-1" data-content-type="view-cell-details" data-cell-name="${
+            <td><button type="button" class="load-action-modal-dyn-content view-cell-details-btn action-btn px-3 py-1" data-content-type="view-cell-details" data-cell-name="${
               cell.cell_name + " Cell"
             }" data-cell-id="${
             cell.id
-          }">View</button> <button type="button" class="load-action-modal-dyn-content action-btn px-3 py-1" data-content-type="assign-cell-admin" data-cell-name="${
+          }">View</button> <button type="button" class="load-action-modal-dyn-content assign-cell-admin action-btn px-3 py-1" data-content-type="assign-cell-admin" data-cell-name="${
             cell.cell_name + " Cell"
           }" data-cell-id="${cell.id}">Assign admin</button></td>
           </tr>`;
@@ -256,32 +256,71 @@ $(document).ready(() => {
 
   // Action Modal
 
-  $(document).on("click", ".load-action-modal-dyn-content", function () {
+  $(document).on("click", ".load-action-modal-dyn-content", loadDynamicContentfunction); 
+  
+  window.loadDynamicContentfunction = function () {
     const $thisElement = $(this);
-    let contentType = $(this).data("content-type");
+    let contentType = $thisElement.data("content-type");
+    let cellId = $thisElement.data("cell-id");
 
     $.ajax({
       url: "../php/load_dynamic_content.php",
       method: "POST",
-      data: { "content-type": contentType },
+      data: { "content-type": contentType, "cell-id": cellId },
       success: (res) => {
         if (contentType === "add-a-cell-form") {
           $("#action-modal header .title").text("Add a Cell");
           $("#action-modal .content-container").html(res);
-        } else if (
-          contentType === "view-cell-details" ||
-          contentType === "assign-cell-admin"
-        ) {
+          toggleActionModal();
+        } else if (contentType === "assign-cell-admin") {
           $("#action-modal header .title").text($thisElement.data("cell-name"));
           $("#action-modal .content-container").html(res);
           $("#action-modal .content-container #cell-id").val(
             $thisElement.data("cell-id")
           );
+          toggleActionModal();
+        } else if (contentType === "view-cell-details") {
+          $("#action-modal header .title").text($thisElement.data("cell-name"));
+          $("#action-modal .content-container").html(res);
+          toggleActionModal();
+        } else if (contentType === "fetch-cell-admins") {
+          $("#action-modal .content-container").html(res);
         } else return;
-        toggleActionModal();
+      },
+    });
+  };
+
+  // Unassign cell admin logic
+  $(document).on("click", ".unassign-btn", function () {
+    const userId = $(this).data("user-id");
+    const cellId = $(this).data("cell-id");
+
+    if (!userId || !cellId) {
+      alert("Missing user or cell ID.");
+      return;
+    }
+
+    if (!confirm("Are you sure you want to unassign this admin?")) return;
+
+    $.ajax({
+      url: "../php/ajax.php?action=unassign_cell_admin",
+      method: "POST",
+      dataType: "json",
+      data: {
+        user_id: userId,
+        cell_id: cellId,
+      },
+      success: (res) => {
+        if (res.status === "success") {
+          // Refresh the list
+          fetchCellAdmins(); // Make sure this function exists globally
+        } else {
+          alert(res.message || "Failed to unassign admin.");
+        }
+      },
+      error: () => {
+        alert("Server error.");
       },
     });
   });
-
-  // Close Ready Function
 });

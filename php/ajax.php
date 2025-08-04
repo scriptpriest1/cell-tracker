@@ -313,3 +313,43 @@ if ($action === 'assign_cell_admin') {
   exit;
 }
 
+/*=======================================
+      Unassign Cell Admin Functionality
+=======================================*/
+if ($_POST['action'] === 'unassign_cell_admin') {
+    $userId = $_POST['user_id'] ?? null;
+    $cellId = $_POST['cell_id'] ?? null;
+
+    if (!$userId || !$cellId) {
+        echo json_encode(['status' => 'error', 'message' => 'Missing required parameters.']);
+        exit;
+    }
+
+    $loggedInUserId = $_SESSION['user_id'] ?? null;
+
+    // Fetch the user being unassigned
+    $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
+    $stmt->execute([$userId]);
+    $targetUser = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$targetUser) {
+        echo json_encode(['status' => 'error', 'message' => 'User not found.']);
+        exit;
+    }
+
+    $isSelf = $userId == $loggedInUserId;
+    $hasHigherRole = !empty($targetUser['church_id']) || !empty($targetUser['group_id']);
+
+    if ($isSelf || $hasHigherRole) {
+        // Just unassign (don’t delete)
+        $stmt = $conn->prepare("UPDATE users SET cell_id = NULL, cell_role = '' WHERE id = ?");
+        $stmt->execute([$userId]);
+    } else {
+        // Delete the cell-only admin
+        $stmt = $conn->prepare("DELETE FROM users WHERE id = ? AND church_id IS NULL AND group_id IS NULL");
+        $stmt->execute([$userId]);
+    }
+
+    echo json_encode(['status' => 'success']);
+    exit;
+}

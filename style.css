@@ -55,7 +55,7 @@ body {
   transition: 0.4s;
   scrollbar-width: none;
   scrollbar-color: transparent;
-  font-family: 'Outfit', sans-serif;
+  font-family: "Outfit", sans-serif;
   font-optical-sizing: auto;
   font-style: normal;
   color: var(--text-primary);
@@ -162,7 +162,8 @@ button {
   box-shadow: var(--box-shadow);
 }
 
-.action-modal .action-panel .header, .action-modal .action-panel .footer {
+.action-modal .action-panel .header,
+.action-modal .action-panel .footer {
   background-color: inherit;
   z-index: 2;
 }
@@ -171,6 +172,12 @@ button {
   .action-modal .action-panel {
     width: 90%;
   }
+}
+
+.action-modal .action-modal-inner.scrollable {
+  overflow-y: auto;
+  max-height: 350px;
+  padding-bottom: 20px !important;
 }
 
 /* =========================================
@@ -412,9 +419,9 @@ button {
 /* Cells page */
 
 .cell-table-section .control-panel #cell-count {
-   padding: 1px 7px;
-   border-radius: 5px;
-   background-color: var(--border);
+  padding: 1px 7px;
+  border-radius: 5px;
+  background-color: var(--border);
 }
 
 #table-info-block .info {
@@ -422,11 +429,11 @@ button {
 }
 
 .cell-table-section .search-bar {
-   width: 350px;
+  width: 350px;
 }
 
 .cell-table-section .search-bar .search-icon {
-   fill: var(--text-secondary);
+  fill: var(--text-secondary);
 }
 
 @media screen and (max-width: 767px) {
@@ -447,7 +454,7 @@ button {
 }
 
 .cell-table-section .add-cell-btn svg {
-  fill: var(--primary)
+  fill: var(--primary);
 }
 
 .cells-table-container {
@@ -508,6 +515,28 @@ button {
   background-color: var(--hover-on-primary);
 }
 
-#cell-admin-list-container {
+#action-modal .cell-admins-list-container .cell-admins-list li {
+  margin-bottom: 7px;
+}
+#action-modal .cell-admins-list-container .cell-admins-list li:last-child {
+  margin-bottom: 0;
+}
 
+#action-modal .cell-admins-list-container .cell-admins-list li .admin-email {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: -3px !important;
+}
+
+#action-modal .cell-admins-list-container .cell-admins-list li .unassign-btn {
+  font-size: 14px;
+  background-color: var(--tertiary);
+  color: var(--text-tertiary);
+}
+#action-modal
+  .cell-admins-list-container
+  .cell-admins-list
+  li
+  .unassign-btn.delete {
+  background-color: var(--error);
 }
