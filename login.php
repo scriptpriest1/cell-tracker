@@ -1,77 +1,70 @@
 <?php
-
-include 'components/header.php';
+include_once "header.php";
 
 if ($isLoggedIn) {
-  header('Location: ./');
+  header('Location: ./dashboard');
 }
+
 ?>
 
-  <div class="form-container">   
-    <h2 class="heading">Log in</h2>
-    <form id="login-form">
+<div class="auth-panel login-panel m-0 position-fixed">
 
-      <div class="field-group">
-        <label>Username:</label>
-        <input type="text" name="user-name" id="login-user-name" class="entries"/>
-        <p class="input-error-msg" style="font-size: 14px;"></p>
-      </div>
+    <form
 
-      <div class="field-group">
-        <label>Password:</label>
-        <input type="password" name="password" id="login-password" class="entries"/>
-        <p class="input-error-msg" style="font-size: 14px;"></p>
-      </div>
+      class="auth-form login-form m-0"
 
-      <div class="footer">
-        <button type="submit" class="submit-btn">Log in</button>
-      </div>
-      
+      id="login-form"
+
+    >
+
+      <header>
+
+        <h4 class="form-heading text-center mb-4">
+
+          Log in to your account
+
+        </h4>
+
+      </header>
+
+
+
+      <section class="step">
+
+        <div class="form-group">
+
+          <label for="">Enter your email address:</label>
+
+          <input type="text" class="form-control" name="user-login" />
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="">Enter your password:</label>
+
+          <input type="password" class="form-control" name="password" />
+
+        </div>
+
+        <button type="submit" class="btn submit-btn">Log in</button>
+
+
+
+        <footer class="mt-2">
+
+          <a href="forgot-password.html" class="forgot-password"
+
+            >Forgot Password</a
+
+          >
+
+        </footer>
+
+      </section>
+
     </form>
+
   </div>
 
-
-  <!-- Scripts -->
-  <script src="js/functions.js"></script>
-  <script src="js/formValidation.js"></script>
-
-  <script>
-
-    $(document).ready( () => {
-
-      const successMsg = $('#success-msg');
-      const errMsg = $('#err-msg');
-
-      //Post Login Details to the Backend
-      $("#login-form").on('submit', (e) => {
-        e.preventDefault();
-
-        if (validateForm()) {
-
-          let formData = $("#login-form").serialize();
-
-          $.ajax({
-            url: 'php/ajax.php?action=login',
-            method: 'POST',
-            data: formData,
-            success: (res) => {
-              if (res === 'success') {
-                window.location.href = './';
-              } else if (res === 'wrongDetails') {;
-                displayFeedback(0);
-                errMsg.text('Wrong username or password');
-              }
-            },
-            error: () => {
-              displayFeedback(0);
-              errMsg.text('Error logging in');
-            }
-          }) 
-        }
-      })
-
-    })
-  
-  </script>
-</body>
-</html>
+  <?php include_once "footer.php"; ?>

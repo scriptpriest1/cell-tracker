@@ -4,11 +4,13 @@ $db_user = 'admin';
 $db_password = 'great.admin';
 $db_name = 'cell_tracker';
 
-// Create connection
-$conn = new mysqli($servername, $db_user, $db_password, $db_name);
-
-// Check connection
-if ($conn->connect_error) {
-  die('Connection failed: ' . $conn->connect_error);
+try {
+  $conn = new PDO("mysql:host=$servername;dbname=$db_name;charset=utf8", $db_user, $db_password);
+  // Set PDO error mode to exception
+  $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+  // Optional: Set default fetch mode to associative arrays
+  $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+  die('Connection failed: ' . $e->getMessage());
 }
 ?>
