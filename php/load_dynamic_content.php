@@ -155,137 +155,135 @@ if (isset($_POST['content-type'])) {
   /*=======================================
       Fetch Admins for a viewed Cell 
             - Functionality
-=======================================*/
-if ($content_type === 'view-cell-details' || $content_type === 'fetch-cell-admins') {
-  $cell_id = $_POST['cell-id'] ?? null;
+  =======================================*/
+  if ($content_type === 'view-cell-details' || $content_type === 'fetch-cell-admins') {
+    $cell_id = $_POST['cell-id'] ?? null;
 
-  if (!$cell_id) {
-    echo "Missing cell ID";
-    exit;
-  }
+    if (!$cell_id) {
+      echo "Missing cell ID";
+      exit;
+    }
 
-  $user_login = $_SESSION['user_login'];
-  $admins = [];
+    $user_login = $_SESSION['user_login'];
+    $admins = [];
 
-  // Fetch all users assigned to this cell
-  $stmt = $conn->prepare("SELECT id, first_name, last_name, user_login, cell_role, church_id FROM users WHERE cell_id = ?");
-  $stmt->execute([$cell_id]);
-  $all_users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // Fetch all users assigned to this cell
+    $stmt = $conn->prepare("SELECT id, first_name, last_name, user_login, cell_role, church_id FROM users WHERE cell_id = ?");
+    $stmt->execute([$cell_id]);
+    $all_users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-  $loggedInUser = null;
-  $cellLeader = null;
-  $others = [];
+    $loggedInUser = null;
+    $cellLeader = null;
+    $others = [];
 
-  foreach ($all_users as $user) {
-    $name = htmlspecialchars($user['first_name'] . ' ' . $user['last_name']);
-    $email = htmlspecialchars($user['user_login']);
-    $userId = $user['id'];
-    $labels = [];
+    foreach ($all_users as $user) {
+      $name = htmlspecialchars($user['first_name'] . ' ' . $user['last_name']);
+      $email = htmlspecialchars($user['user_login']);
+      $userId = $user['id'];
+      $labels = [];
 
-    if ($email === $user_login) {
-      $labels[] = 'You';
+      if ($email === $user_login) {
+        $labels[] = 'You';
+        if ($user['cell_role'] === 'leader') {
+          $labels[] = 'Cell Leader';
+        }
+        $loggedInUser = [
+          'id' => $userId,
+          'name' => $name,
+          'email' => $email,
+          'labels' => $labels,
+        ];
+        continue;
+      }
+
       if ($user['cell_role'] === 'leader') {
         $labels[] = 'Cell Leader';
+        $cellLeader = [
+          'id' => $userId,
+          'name' => $name,
+          'email' => $email,
+          'labels' => $labels,
+        ];
+        continue;
       }
-      $loggedInUser = [
+
+      $others[] = [
         'id' => $userId,
         'name' => $name,
         'email' => $email,
-        'labels' => $labels,
+        'labels' => [],
       ];
-      continue;
     }
 
-    if ($user['cell_role'] === 'leader') {
-      $labels[] = 'Cell Leader';
-      $cellLeader = [
-        'id' => $userId,
-        'name' => $name,
-        'email' => $email,
-        'labels' => $labels,
-      ];
-      continue;
-    }
+    ob_start();
+    ?>
+    <ol class="cell-admins-list p-0 m-0 ps-4">
+      <?php
+      if ($loggedInUser):
+        $labelText = !empty($loggedInUser['labels']) ? ' (' . implode(') (', $loggedInUser['labels']) . ')' : '';
+        $nameWithLabels = $loggedInUser['name'] . $labelText;
+        $email = $loggedInUser['email'];
+        $id = $loggedInUser['id'];
+      ?>
+        <li>
+          <div class="d-flex justify-content-between gap-3 align-items-start">
+            <div class="identity">
+              <p class="admin-name p-0 m-0"><?= $nameWithLabels ?></p>
+              <p class="admin-email p-0 m-0"><?= $email ?></p>
+            </div>
+            <button type="button" class=" px-3 py-1 unassign-btn" data-user-id="<?= $id ?>" data-content-type="fetch-cell-admins" data-cell-id="<?= $cell_id ?>">Unassign</button>
+          </div>
+        </li>
+      <?php endif; ?>
 
-    $others[] = [
-      'id' => $userId,
-      'name' => $name,
-      'email' => $email,
-      'labels' => [],
-    ];
-  }
+      <?php
+      if ($cellLeader && (!$loggedInUser || $cellLeader['email'] !== $loggedInUser['email'])):
+        $labelText = !empty($cellLeader['labels']) ? ' (' . implode(') (', $cellLeader['labels']) . ')' : '';
+        $nameWithLabels = $cellLeader['name'] . $labelText;
+        $email = $cellLeader['email'];
+        $id = $cellLeader['id'];
+      ?>
+        <li>
+          <div class="d-flex justify-content-between gap-3 align-items-start">
+            <div class="identity">
+              <p class="admin-name p-0 m-0"><?= $nameWithLabels ?></p>
+              <p class="admin-email p-0 m-0"><?= $email ?></p>
+            </div>
+            <button type="button" class=" px-3 py-1 unassign-btn delete" data-user-id="<?= $id ?>" data-content-type="fetch-cell-admins" data-cell-id="<?= $cell_id ?>">Remove</button>
+          </div>
+        </li>
+      <?php endif; ?>
 
-  ob_start();
-  ?>
-  <ol class="cell-admins-list p-0 m-0 ps-4">
+      <?php foreach ($others as $admin):
+        $name = $admin['name'];
+        $email = $admin['email'];
+        $id = $admin['id'];
+      ?>
+        <li>
+          <div class="d-flex justify-content-between gap-3 align-items-start">
+            <div class="identity">
+              <p class="admin-name p-0 m-0"><?= $name ?></p>
+              <p class="admin-email p-0 m-0"><?= $email ?></p>
+            </div>
+            <button type="button" class=" px-3 py-1 unassign-btn delete" data-user-id="<?= $id ?>" data-content-type="fetch-cell-admins" data-cell-id="<?= $cell_id ?>">Remove</button>
+          </div>
+        </li>
+      <?php endforeach; ?>
+    </ol>
     <?php
-    if ($loggedInUser):
-      $labelText = !empty($loggedInUser['labels']) ? ' (' . implode(') (', $loggedInUser['labels']) . ')' : '';
-      $nameWithLabels = $loggedInUser['name'] . $labelText;
-      $email = $loggedInUser['email'];
-      $id = $loggedInUser['id'];
-    ?>
-      <li>
-        <div class="d-flex justify-content-between gap-3 align-items-start">
-          <div class="identity">
-            <p class="admin-name p-0 m-0"><?= $nameWithLabels ?></p>
-            <p class="admin-email p-0 m-0"><?= $email ?></p>
-          </div>
-          <button type="button" class=" px-3 py-1 unassign-btn" data-user-id="<?= $id ?>" data-content-type="fetch-cell-admins" data-cell-id="<?= $cell_id ?>">Unassign</button>
-        </div>
-      </li>
-    <?php endif; ?>
+    $html = ob_get_clean();
 
-    <?php
-    if ($cellLeader && (!$loggedInUser || $cellLeader['email'] !== $loggedInUser['email'])):
-      $labelText = !empty($cellLeader['labels']) ? ' (' . implode(') (', $cellLeader['labels']) . ')' : '';
-      $nameWithLabels = $cellLeader['name'] . $labelText;
-      $email = $cellLeader['email'];
-      $id = $cellLeader['id'];
-    ?>
-      <li>
-        <div class="d-flex justify-content-between gap-3 align-items-start">
-          <div class="identity">
-            <p class="admin-name p-0 m-0"><?= $nameWithLabels ?></p>
-            <p class="admin-email p-0 m-0"><?= $email ?></p>
-          </div>
-          <button type="button" class=" px-3 py-1 unassign-btn delete" data-user-id="<?= $id ?>" data-content-type="fetch-cell-admins" data-cell-id="<?= $cell_id ?>">Remove</button>
+    echo <<<HTML
+      <div class="action-modal-inner scrollable px-4 pt-2">
+        <span class="p-0 pb-1 m-0 mb-2 fw-bold">Admins</span>
+        <div class="cell-admins-list-container mt-2">
+          {$html}
+          <p class="text-center admins-list-info m-0 p-0 fs-6"></p>
         </div>
-      </li>
-    <?php endif; ?>
-
-    <?php foreach ($others as $admin):
-      $name = $admin['name'];
-      $email = $admin['email'];
-      $id = $admin['id'];
-    ?>
-      <li>
-        <div class="d-flex justify-content-between gap-3 align-items-start">
-          <div class="identity">
-            <p class="admin-name p-0 m-0"><?= $name ?></p>
-            <p class="admin-email p-0 m-0"><?= $email ?></p>
-          </div>
-          <button type="button" class=" px-3 py-1 unassign-btn delete" data-user-id="<?= $id ?>" data-content-type="fetch-cell-admins" data-cell-id="<?= $cell_id ?>">Remove</button>
-        </div>
-      </li>
-    <?php endforeach; ?>
-  </ol>
-  <?php
-  $html = ob_get_clean();
-
-  echo <<<HTML
-    <div class="action-modal-inner scrollable px-4 pt-2">
-      <span class="p-0 pb-1 m-0 mb-2 fw-bold">Admins</span>
-      <div class="cell-admins-list-container mt-2">
-        {$html}
-        <p class="text-center admins-list-info m-0 p-0 fs-6"></p>
       </div>
-    </div>
-  HTML;
+    HTML;
 
-  exit;
-}
-
-
+    exit;
+  }
 
 }
