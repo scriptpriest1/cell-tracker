@@ -1,4 +1,4 @@
-<div id="action-modal" class="action-modal position-absolute w-100 h-100 m-0 p-0">
+<div id="action-modal" class="action-modal position-fixed top-0 start-0 end-0 bottom-0 w-100 h-100 m-0 p-0">
   <div class="modal-overlay w-100 h-100 m-0 p-0 position-relative">
     <div class="action-panel position-absolute">
 

@@ -64,102 +64,116 @@ $(document).ready(() => {
   });
 
   /*********************************************
-              Add A Cell Functionality
+          Add A Cell Functionality starts
   *********************************************/
 
-function validateCellAdminAssignment() {
-  const $role = $("#add-cell-form #admin-role");
-  const role = $role.val();
-  if (role === "") return;
-
-  const $firstName = $("#add-cell-form #admin-first-name"),
-    $lastName = $("#add-cell-form #admin-last-name"),
-    $email = $("#add-cell-form #admin-email"),
-    $pw = $("#add-cell-form #admin-password"),
-    $confPw = $("#add-cell-form #admin-password-confirm");
-
-  return (
-    isFilled($firstName) &&
-    isFilled($lastName) &&
-    isFilled($email) &&
-    isFilled($pw) &&
-    isFilled($confPw) &&
-    $pw.val() === $confPw.val()
-  );
-}
-
-function inValidateCellAdminAssignment() {
-  const $role = $("#add-cell-form #admin-role");
-  const role = $role.val();
-  if (role !== "") return;
-
-  const $firstName = $("#add-cell-form #admin-first-name"),
-    $lastName = $("#add-cell-form #admin-last-name"),
-    $email = $("#add-cell-form #admin-email"),
-    $pw = $("#add-cell-form #admin-password"),
-    $confPw = $("#add-cell-form #admin-password-confirm");
-
-  return (
-    isNotFilled($firstName) &&
-    isNotFilled($lastName) &&
-    isNotFilled($email) &&
-    isNotFilled($pw) &&
-    isNotFilled($confPw)
-  );
-}
-
-$(document).on(
-  "input change",
-  "#add-cell-form .form-control, #add-cell-form .form-select, #add-cell-form [name='assign_to']",
-  function () {
-    const isNameFilled = isFilled($("#add-cell-form #cell-name"));
-    const assignTo = $("#add-cell-form input[name='assign_to']:checked").val();
-
-    let valid = false;
-
-    if (assignTo === "self") {
-      valid = isNameFilled && isFilled($("#add-cell-form #admin-role"));
-    } else if (assignTo === "someone_else") {
-      valid = isNameFilled && validateCellAdminAssignment();
-    } else {
-      valid = isNameFilled; // no admin assignment
-    }
-
-    $("#add-cell-form .submit-btn").prop("disabled", !valid);
+  // Utility function for password match
+  function passwordsMatch($pw, $confPw) {
+    return $pw.val() === $confPw.val();
   }
-);
 
-$(document).on("submit", "#add-cell-form", function (e) {
-  e.preventDefault();
+  // Validate full admin form (for 'else')
+  function validateCellAdminAssignment() {
+    const $role = $("#add-cell-form #admin-role"),
+      $firstName = $("#add-cell-form #admin-first-name"),
+      $lastName = $("#add-cell-form #admin-last-name"),
+      $email = $("#add-cell-form #admin-email"),
+      $pw = $("#add-cell-form #admin-password"),
+      $confPw = $("#add-cell-form #admin-password-confirm");
 
-  const $btn = $("#add-cell-form .submit-btn")
-    .prop("disabled", true)
-    .text("Adding…");
+    return (
+      isFilled($role) &&
+      isFilled($firstName) &&
+      isFilled($lastName) &&
+      isFilled($email) &&
+      isFilled($pw) &&
+      isFilled($confPw) &&
+      passwordsMatch($pw, $confPw)
+    );
+  }
 
-  const data = $(this).serialize();
+  // Toggle visibility of form sections based on choose-admin selection
+  function handleAdminSelection(val) {
+    const $roleContainer = $("#add-cell-form .role-container");
+    const $hiddenSection = $("#add-cell-form .hidden-section");
 
-  $.ajax({
-    url: "../php/ajax.php?action=add_a_cell",
-    method: "POST",
-    data,
-    success: (res) => {
-      if (res === "success") {
-        alert("Cell added successfully!");
-        fetchAllCells();
-        $("#add-cell-form").trigger("reset");
-        $btn.prop("disabled", false).text("Add Cell");
+    if (val === "self") {
+      $roleContainer.removeClass("d-none");
+      $hiddenSection.addClass("d-none");
+    } else if (val === "else") {
+      $roleContainer.removeClass("d-none");
+      $hiddenSection.removeClass("d-none");
+    } else {
+      $roleContainer.addClass("d-none");
+      $hiddenSection.addClass("d-none");
+    }
+  }
+
+  // Watch all relevant inputs for validation
+  $(document).on(
+    "input change",
+    "#add-cell-form .form-control, #add-cell-form .form-select",
+    function () {
+      const $form = $("#add-cell-form");
+      const cellNameFilled = isFilled($form.find("#cell-name"));
+      const chooseAdmin = $form.find("#choose-admin").val();
+      let formValid = false;
+
+      if (chooseAdmin === "self") {
+        const roleFilled = isFilled($form.find("#admin-role"));
+        formValid = cellNameFilled && roleFilled;
+      } else if (chooseAdmin === "else") {
+        formValid = cellNameFilled && validateCellAdminAssignment();
       } else {
-        alert("Error: " + res);
-        $btn.prop("disabled", false).text("Add Cell");
+        // no admin assigned
+        formValid = cellNameFilled;
       }
-    },
-    error: () => {
-      alert("Server error");
-      $btn.prop("disabled", false).text("Add Cell");
-    },
-  });
-});
 
+      $form.find(".submit-btn").prop("disabled", !formValid);
+    }
+  );
+
+  // Handle change of choose-admin to toggle fields
+  $(document).on("change", "#add-cell-form #choose-admin", function () {
+    const selected = $(this).val();
+    handleAdminSelection(selected);
+    $("#add-cell-form").trigger("input"); // trigger validation re-check
+  });
+
+  // Submit Add Cell form
+  $(document).on("submit", "#add-cell-form", function (e) {
+    e.preventDefault();
+
+    const $btn = $(this)
+      .find(".submit-btn")
+      .prop("disabled", true)
+      .text("Adding…");
+    const data = $(this).serialize();
+
+    $.ajax({
+      url: "../php/ajax.php?action=add_a_cell",
+      method: "POST",
+      data,
+      success: (res) => {
+        if (res === "success") {
+          alert("Cell added successfully!");
+          fetchAllCells();
+          $("#add-cell-form").trigger("reset");
+          $("#add-cell-form .submit-btn")
+            .prop("disabled", true)
+            .text("Add Cell");
+          handleAdminSelection(""); // reset visibility
+        } else {
+          alert("Error: " + res);
+          $btn.prop("disabled", false).text("Add Cell");
+        }
+      },
+      error: () => {
+        alert("Server error");
+        $btn.prop("disabled", false).text("Add Cell");
+      },
+    });
+  });
 
   /*********************************************
     Assign Cell Admin when Cell already exists
@@ -185,7 +199,7 @@ $(document).on("submit", "#add-cell-form", function (e) {
           // Optional: reload cells or close modal
           fetchAllCells();
           $btn.text("Assign").prop("disabled", false);
-          $form.trigger('reset');
+          $form.trigger("reset");
         } else {
           alert("Error: " + res);
           $btn.text("Assign").prop("disabled", false);
@@ -267,7 +281,11 @@ $(document).on("submit", "#add-cell-form", function (e) {
 
   // Action Modal
 
-  $(document).on("click", ".load-action-modal-dyn-content", loadDynamicContentfunction); 
+  $(document).on(
+    "click",
+    ".load-action-modal-dyn-content",
+    loadDynamicContentfunction
+  );
   function loadDynamicContentfunction(e) {
     let $thisElement = $(this);
     let contentType = $thisElement.data("content-type");
@@ -293,18 +311,22 @@ $(document).on("submit", "#add-cell-form", function (e) {
           $("#action-modal header .title").text($thisElement.data("cell-name"));
           $("#action-modal .content-container").html(res);
           if ($("#action-modal .cell-admins-list li").length === 0) {
-            $("#action-modal .cell-admins-list-container .admins-list-info").text("No admins found.");
+            $(
+              "#action-modal .cell-admins-list-container .admins-list-info"
+            ).text("No admins found.");
           }
           toggleActionModal();
         } else if (contentType === "fetch-cell-admins") {
           $("#action-modal .content-container").html(res);
           if ($("#action-modal .cell-admins-list li").length === 0) {
-            $("#action-modal .cell-admins-list-container .admins-list-info").text("No admins found.");
+            $(
+              "#action-modal .cell-admins-list-container .admins-list-info"
+            ).text("No admins found.");
           }
         } else return;
       },
     });
-  };
+  }
 
   // Unassign cell admin logic
   $(document).on("click", ".unassign-btn", function (e) {
@@ -329,9 +351,9 @@ $(document).on("submit", "#add-cell-form", function (e) {
       },
       success: (res) => {
         if (res.status === "success") {
-          loadDynamicContentfunction.call(this, e); 
+          loadDynamicContentfunction.call(this, e);
           fetchAllCells();
-          alert("Unassigned admin successfully.")
+          alert("Unassigned admin successfully.");
         } else {
           alert(res.message || "Failed to unassign admin.");
         }
@@ -341,5 +363,4 @@ $(document).on("submit", "#add-cell-form", function (e) {
       },
     });
   });
-
 });

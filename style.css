@@ -42,7 +42,7 @@
 
 html,
 body {
-  height: 100vh;
+  height: 100vh !important;
   margin: 0;
   padding: 0;
 }
@@ -109,6 +109,7 @@ button {
 
 /* Container-fluid */
 .container-fluid {
+  height: inherit !important;
   background-color: var(--bg);
 }
 
@@ -248,6 +249,7 @@ button {
 
 ===========================================*/
 .mainframe {
+  height: inherit !important;
   grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
 }
 
@@ -386,6 +388,10 @@ button {
 }
 .screen header .menu-btn svg {
   fill: var(--text-primary);
+}
+
+.screen .body {
+  overflow-y: auto;
 }
 
 /* Dashboard page */
