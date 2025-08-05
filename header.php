@@ -37,8 +37,8 @@ if (isset($_SESSION['user_id'])) {
   <!-- CSS Link -->
   <link rel="stylesheet" href="<?php echo BASE_URL; ?>style.css" />
 </head>
-<body>
-<div class="container-fluid w-100 m-0 p-0">
+<body class="w-100 h-100">
+<div class="container-fluid w-100 vh-100 m-0 p-0">
 
   <?php if ($isLoggedIn === false) {
     echo '

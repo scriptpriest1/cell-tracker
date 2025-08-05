@@ -42,7 +42,6 @@
 
 html,
 body {
-  height: 100vh !important;
   margin: 0;
   padding: 0;
 }
@@ -109,7 +108,7 @@ button {
 
 /* Container-fluid */
 .container-fluid {
-  height: inherit !important;
+  /* height: inherit !important; */
   background-color: var(--bg);
 }
 
@@ -248,19 +247,19 @@ button {
   Dashboard Styling 
 
 ===========================================*/
-.mainframe {
-  height: inherit !important;
+#mainframe {
+  max-height: 100% !important;
   grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
 }
 
 /* Sidebar */
 
-.sidebar {
+#sidebar {
   z-index: 5;
   background-color: var(--tertiary);
 }
 
-.sidebar header {
+#sidebar header {
   border-bottom: 1px solid var(--stroke-on-tertiary);
   min-height: 50px;
   height: 50px;
@@ -268,7 +267,7 @@ button {
   background-color: var(--tertiary);
 }
 
-.sidebar header .user-role {
+#sidebar header .user-role {
   color: var(--text-secondary-on-tertiary);
   margin: 0;
   overflow-x: hidden;
@@ -277,81 +276,81 @@ button {
   white-space: nowrap;
 }
 
-.sidebar header .switch-account-btn {
+#sidebar header .switch-account-btn {
   color: var(--text-secondary-on-tertiary);
   border: 1px solid var(--border-on-tertiary);
   border-radius: 10px;
   font-size: 12px;
 }
-.sidebar header .switch-account-btn:hover {
+#sidebar header .switch-account-btn:hover {
   background-color: var(--tertiary-lighter);
 }
 
-.sidebar header .close-btn {
+#sidebar header .close-btn {
   border: none;
   padding: 0 !important;
   margin: 0 !important;
 }
 
-.sidebar header .close-btn svg {
+#sidebar header .close-btn svg {
   fill: var(--text-secondary-on-tertiary);
 }
 
-.sidebar .nav {
+#sidebar .nav {
   height: 100%;
   overflow-y: auto;
 }
 
-.sidebar .nav li {
+#sidebar .nav li {
   list-style: none;
   cursor: pointer;
   border-radius: 10px;
   width: 100%;
   margin-top: 12px;
 }
-.sidebar .nav li .text {
+#sidebar .nav li .text {
   color: var(--text-secondary-on-tertiary);
 }
-.sidebar .nav li:hover {
-  background-color: var(--tertiary-lighter);
-}
-.sidebar .nav li.active {
+#sidebar .nav li:hover {
   background-color: var(--tertiary-light);
 }
-.sidebar .nav li .icon svg {
+#sidebar .nav li.active {
+  background-color: var(--tertiary-lighter);
+}
+#sidebar .nav li .icon svg {
   fill: var(--text-secondary-on-tertiary);
 }
 
-.sidebar .nav li:first-child {
+#sidebar .nav li:first-child {
   margin-top: 0;
 }
 
-.sidebar footer {
+#sidebar footer {
   z-index: 2;
   background-color: var(--tertiary);
   border-top: 1px solid var(--stroke-on-tertiary);
 }
 
-.sidebar footer .logout-btn {
+#sidebar footer .logout-btn {
   color: var(--text-secondary-on-tertiary);
   cursor: pointer;
   border-radius: 10px;
   width: 100%;
   border: none;
 }
-.sidebar footer .logout-btn:hover {
-  background-color: var(--tertiary-lighter);
+#sidebar footer .logout-btn:hover {
+  background-color: var(--tertiary-light);
 }
 
-.sidebar footer .logout-btn .icon svg {
+#sidebar footer .logout-btn .icon svg {
   fill: var(--text-secondary-on-tertiary);
 }
-.sidebar footer .logout-btn .text {
+#sidebar footer .logout-btn .text {
   color: var(--text-secondary-on-tertiary);
 }
 
 @media screen and (max-width: 767px) {
-  .sidebar {
+  #sidebar {
     position: absolute;
     top: 0;
     left: -100%;
@@ -360,7 +359,7 @@ button {
 
 /* Screen */
 
-.screen header {
+#screen header {
   min-height: 50px;
   height: 50px;
   max-height: 50px;
@@ -369,7 +368,7 @@ button {
   border-bottom: 1px solid var(--border);
 }
 
-.screen header .account-name-bar .account {
+#screen header .account-name-bar .account {
   margin: 0;
   overflow-x: hidden;
   flex: 40%;
@@ -377,20 +376,20 @@ button {
   white-space: nowrap;
 }
 
-.screen header .account-name-bar .divider,
-.screen header .account-name-bar .page-title {
+#screen header .account-name-bar .divider,
+#screen header .account-name-bar .page-title {
   color: var(--text-secondary);
   margin: 0;
 }
 
-.screen header .menu-btn {
+#screen header .menu-btn {
   border: none;
 }
-.screen header .menu-btn svg {
+#screen header .menu-btn svg {
   fill: var(--text-primary);
 }
 
-.screen .body {
+#screen .body {
   overflow-y: auto;
 }
 

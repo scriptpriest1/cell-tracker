@@ -1,4 +1,4 @@
-<section class="sidebar w-100 h-100 d-flex flex-column justify-content-start gap-0 p-0 m-0">
+<section id="sidebar" class="sidebar w-100 h-100 d-flex flex-column justify-content-start gap-0 p-0 m-0">
 
   <header class="sidebar-header m-0 px-3 py-2 d-flex align-items-center justify-content-between gap-3">
     <div class="masthead d-flex align-items-center gap-2">

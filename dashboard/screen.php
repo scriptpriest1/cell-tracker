@@ -1,4 +1,4 @@
-<section class="screen w-100 h-100 m-0 p-0 m-0">
+<section id="screen"class="screen w-100 h-100 m-0 p-0 m-0">
 
   <header class="screen-header m-0 px-3 py-2 d-flex align-items-center justify-content-between gap-3 position-sticky top-0">
     <div class="account-name-bar d-flex align-items-center gap-2">
