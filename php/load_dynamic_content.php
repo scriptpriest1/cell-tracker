@@ -11,8 +11,8 @@ if (isset($_POST['content-type'])) {
       <form id="add-cell-form" class="action-modal-form position-relative">
         <div class="body px-4 pt-2">
           <div class="form-group">
-            <label for="cell-name">Name of Cell:</label>
-            <input type="text" name="cell_name" id="cell-name" class="form-control" placeholder="e.g Haven (don't add &quot;Cell&quot; to the name)" required>
+            <label for="cell-name" class="">Name of Cell: &nbsp; <span class="text-warning d-block d-md-inline-block" style="font-size: 14px; margin-top: -5px;">(Don't add "Cell" to the name)</span></label>
+            <input type="text" name="cell_name" id="cell-name" class="form-control" placeholder="e.g &quot;Haven&quot; not &quot;Haven Cell&quot;" required>
           </div>
 
           <div class="admin-assignment-section mt-4">
@@ -50,6 +50,11 @@ if (isset($_POST['content-type'])) {
               <div class="form-group">
                 <label for="admin-email">Email:</label>
                 <input type="email" name="admin_email" id="admin-email" class="form-control">
+              </div>
+
+              <div class="form-group">
+                <label for="admin-phone">Phone number:</label>
+                <input type="phone" name="admin_phone" id="admin-phone" class="form-control">
               </div>
 
               <div class="form-group">
@@ -136,6 +141,11 @@ if (isset($_POST['content-type'])) {
             </div>
 
             <div class="form-group">
+              <label for="phone">Phone number:</label>
+              <input type="phone" name="phone" id="phone" class="form-control">
+            </div>
+
+            <div class="form-group">
               <label for="password">Create login password:</label>
               <input
                 type="password"
@@ -172,7 +182,7 @@ if (isset($_POST['content-type'])) {
     $cell_id = $_POST['cell-id'] ?? null;
 
     if (!$cell_id) {
-      echo "Missing cell ID";
+      echo "Cannot access Cell";
       exit;
     }
 
@@ -298,4 +308,61 @@ if (isset($_POST['content-type'])) {
     exit;
   }
 
+  if ($content_type === 'edit-cell-admin') {
+    $admin_id = $_POST['admin_id'] ?? null;
+
+    // if (!$admin_id) {
+    //   echo "Cannot access Admin";
+    //   exit;
+    // } 
+
+    echo <<<HTML
+      <form id="edit-cell-admin-form" class="action-modal-form position-relative pt-2">
+        <input type="hidden" name="cell_id" value="" id="cell-id" />
+        <div class="body px-4 pt-2">
+          <div class="form-group">
+            <label for="role">Role:</label>
+            <select name="role" id="role" class="form-control form-select">
+              <option value="leader">Cell Leader</option>
+              <option value="executive">Cell Executive</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="first-name">First name:</label>
+            <input
+              type="text"
+              name="first_name"
+              id="first-name"
+              class="form-control"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="last-name">Last name:</label>
+            <input
+              type="text"
+              name="last_name"
+              id="last-name"
+              class="form-control"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" name="email" id="email" class="form-control" />
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone number:</label>
+            <input type="phone" name="phone" id="phone" class="form-control" />
+          </div>
+        </div>
+
+        <footer class="position-absolute bottom-0 py-3 px-4 w-100">
+          <button type="submit" class="submit-btn w-100" disabled>Save</button>
+        </footer>
+      </form>
+    HTML;
+  }
 }

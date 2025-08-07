@@ -35,6 +35,14 @@ if ($action === 'add_a_cell') {
     exit;
   }
 
+  // === Check if a cell with the same name already exists in this church ===
+  $stmt = $conn->prepare('SELECT id FROM cells WHERE cell_name = ? AND church_id = ?');
+  $stmt->execute([$cellName, $churchId]);
+  if ($stmt->fetchColumn()) {
+    echo 'A Cell with this name already exists';
+    exit;
+  }
+
   // === Validate admin (before inserting cell) ===
   if ($adminType === 'self') {
     $adminRole = clean_input($_POST['admin_role'] ?? '');
@@ -47,7 +55,7 @@ if ($action === 'add_a_cell') {
     $stmt = $conn->prepare('SELECT cell_id FROM users WHERE id = ? AND cell_id IS NOT NULL');
     $stmt->execute([$_SESSION['user_id']]);
     if ($stmt->fetchColumn()) {
-      echo 'already assigned to a cell';
+      echo 'Already assigned to a cell';
       exit;
     }
   }
@@ -57,10 +65,11 @@ if ($action === 'add_a_cell') {
     $firstName = clean_input($_POST['admin_first_name'] ?? '');
     $lastName = clean_input($_POST['admin_last_name'] ?? '');
     $adminEmail = clean_input($_POST['admin_email'] ?? '');
+    $adminPhone = clean_input($_POST['admin_phone'] ?? '');
     $password = clean_input($_POST['admin_password'] ?? '');
     $confPw = clean_input($_POST['admin_password_confirm'] ?? '');
 
-    if (!$adminRole || !$firstName || !$lastName || !$adminEmail || !$password || !$confPw) {
+    if (!$adminRole || !$firstName || !$lastName || !$adminEmail || !$adminPhone || !$password || !$confPw) {
       echo 'incomplete admin fields';
       exit;
     }
@@ -97,17 +106,18 @@ if ($action === 'add_a_cell') {
   }
 
   // === Assign someone else as admin ===
-  if ($adminType === 'other') {
+  if ($adminType === 'else') {
     $stmt = $conn->prepare('
       INSERT INTO users (
-        cell_role, first_name, last_name, user_login, password, cell_id, date_created
-      ) VALUES (?, ?, ?, ?, ?, ?, NOW())
+        cell_role, first_name, last_name, user_login, phone_number, password, cell_id, date_created
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
     ');
     $success = $stmt->execute([
       $adminRole,
       $firstName,
       $lastName,
       $adminEmail,
+      $adminPhone,
       $password, // hash later
       $cellId
     ]);
@@ -125,8 +135,6 @@ if ($action === 'add_a_cell') {
   echo 'success';
   exit;
 }
-
-
 
 /*=======================================
           Login Functionality
@@ -297,12 +305,13 @@ if ($action === 'assign_cell_admin') {
     $first_name       = $_POST['first_name']        ?? '';
     $last_name        = $_POST['last_name']         ?? '';
     $email            = $_POST['email']             ?? '';
+    $phone            = $_POST['phone']             ?? '';
     $password         = $_POST['password']          ?? '';
     $password_confirm = $_POST['password_confirm']  ?? '';
 
     if (
       !$first_name || !$last_name ||
-      !$email      || !$password ||
+      !$email || !$phone     || !$password ||
       $password !== $password_confirm
     ) {
       echo "Invalid input";
@@ -323,13 +332,14 @@ if ($action === 'assign_cell_admin') {
     $hashed_pw = password_hash($password, PASSWORD_DEFAULT);
     $stmt = $conn->prepare(
       'INSERT INTO users
-         (first_name, last_name, user_login, password, cell_id, cell_role)
-       VALUES (?, ?, ?, ?, ?, ?)'
+         (first_name, last_name, user_login, phone_number, password, cell_id, cell_role)
+       VALUES (?, ?, ?, ?, ?, ?, ?)'
     );
     $stmt->execute([
       $first_name,
       $last_name,
       $email,
+      $phone,
       $hashed_pw,
       $cell_id,
       $role
@@ -383,3 +393,52 @@ if ($action === 'unassign_cell_admin') {
     echo json_encode(['status' => 'success']);
     exit;
 }
+
+/*=======================================
+      Edit Cell Name Functionality
+=======================================*/
+if ($action === 'edit_cell_name') {
+  $inputValue = trim($_POST['input_value'] ?? '');
+  $cellId = intval($_POST['cell_id'] ?? 0);
+
+  if ($inputValue === '' || $cellId === 0) {
+    echo json_encode([
+      'status' => 'error',
+      'message' => 'Invalid input or cell ID.',
+    ]);
+    exit;
+  }
+
+  $churchId = $_SESSION['entity_id'];
+
+  // ✅ Case-sensitive check using BINARY
+  $checkQuery = $conn->prepare("SELECT id FROM cells WHERE cell_name = ? AND church_id = ? AND id != ?");
+  $checkQuery->execute([$inputValue, $churchId, $cellId]);
+
+  if ($checkQuery->rowCount() > 0) {
+    echo json_encode([
+      'status' => 'error',
+      'message' => 'A cell with this name already exists.',
+    ]);
+    exit;
+  }
+
+  $updateQuery = $conn->prepare("UPDATE cells SET cell_name = ? WHERE id = ? AND church_id = ?");
+  $updated = $updateQuery->execute([$inputValue, $cellId, $churchId]);
+
+  if ($updated) {
+    echo json_encode([
+      'status' => 'success',
+      'new_cell_name' => $inputValue
+    ]);
+  } else {
+    echo json_encode([
+      'status' => 'error',
+      'message' => 'Failed to update cell name.'
+    ]);
+  }
+
+  exit;
+}
+
+

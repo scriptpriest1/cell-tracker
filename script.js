@@ -11,6 +11,8 @@ $(document).ready(function () {
         $(actionModal).css("display", "none");
       });
       actionPanel.animate({ top: "45%" }, 200);
+      $("#action-modal #edit-title-container").empty();
+      $("#action-modal .side-panel").empty();
     } else {
       actionModal
         .css({ display: "block", opacity: 0 })
@@ -20,6 +22,17 @@ $(document).ready(function () {
     return this;
   }
   window.toggleActionModal = toggleActionModal;
+
+  function toggleActionModalSidePanel() {
+    const sidePanel = $("#action-modal .side-panel");
+    sidePanel.toggleClass("reveal");
+    if (sidePanel.hasClass("reveal")) {
+      $("#action-modal .action-panel .panel-body").css({
+        height: `400px`
+      });
+    }
+  }
+  window.toggleActionModalSidePanel = toggleActionModalSidePanel;
 
   // Toggle Sidebar
 
@@ -73,7 +86,10 @@ $(document).ready(function () {
   });
 
   // Call action modal when the Add a cell btn is clicked
-  $(document).on("click", "#action-modal header .close-btn", toggleActionModal);
+  $(document).on("click", "#action-modal header .close-btn", function () {
+    $("#action-modal .side-panel").removeClass("reveal");
+    toggleActionModal();
+  });
 
   // Show/Hide Assign Cell Admin Fields based on Admin Selection
   $(document).on(
@@ -131,6 +147,14 @@ $(document).ready(function () {
     validateAssignAdminForm
   );
   window.validateAssignAdminForm = validateAssignAdminForm;
+
+  // Edit Cell Info
+  $(document).on("click", "#action-modal #editTitleBtn", function () {
+    let inputVal = $.trim($("#action-modal .edit-title-input").val());
+    $("#action-modal .edit-title-bar").toggleClass("d-none");
+    $("#action-modal .edit-title-input").val(inputVal);
+    $("#action-modal .edit-title-input").focus();
+  });
 
   // Close Ready function
 });

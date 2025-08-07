@@ -1,25 +1,48 @@
-<!-- This should be fetched dynamically from the db users table just like Cells were fetched from the db cells table -->
-<div id="cell-admins-list-container">
-  <ol id="cell-admins-list p-0 m-0">
-    <li
-      class="list-item d-flex justify-content-between gap-3 align-items-start p-0 m-0"
-    >
-      <div class="identity">
-        <p class="admin-name p-0 m-0">Harry Potter (You)</p>
-        <p class="admin-email p-0 m-0">harrypotter@gmail.com</p>
-      </div>
-      <button type="button" class="px-3 py-1 unassign-btn" data-user-id="">Unassign</button>
-    </li>
-    <li
-      class="list-item d-flex justify-content-between gap-3 align-items-start p-0 m-0"
-    >
-      <div class="identity">
-        <p class="admin-name p-0 m-0">Fred George</p>
-        <p class="admin-email p-0 m-0">fredgeorge@gmail.com</p>
-      </div>
-      <button type="button" class="px-3 py-1 unassign-btn delete" data-user-id="">Remove admin</button>
-    </li>
-  </ol>
-</div>
+<form id="edit-cell-admin-form" class="action-modal-form position-relative">
+  <input type="hidden" name="cell_id" value="" id="cell-id" />
+  <div class="body px-4 pt-2">
+    <div class="form-group role-container d-none">
+      <label for="role">Role:</label>
+      <select name="role" id="role" class="form-control form-select">
+        <option value="leader">Cell Leader</option>
+        <option value="executive">Cell Executive</option>
+      </select>
+    </div>
 
+    <div class="hidden-section mt-3 d-none">
+      <div class="form-group">
+        <label for="first-name">First name:</label>
+        <input
+          type="text"
+          name="first_name"
+          id="first-name"
+          class="form-control"
+        />
+      </div>
 
+      <div class="form-group">
+        <label for="last-name">Last name:</label>
+        <input
+          type="text"
+          name="last_name"
+          id="last-name"
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" name="email" id="email" class="form-control" />
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone number:</label>
+        <input type="phone" name="phone" id="phone" class="form-control" />
+      </div>
+    </div>
+  </div>
+
+  <footer class="position-absolute bottom-0 py-3 px-4 w-100">
+    <button type="submit" class="submit-btn w-100" disabled>Save</button>
+  </footer>
+</form>

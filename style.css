@@ -19,6 +19,7 @@
   /* Background */
   --bg: #fbfbfb;
   --hover-on-bg: #f6f6f6;
+  --hover-on-bg-heavy: #dadada;
   --hover-on-primary: #5296fc;
   --border: #ebebeb;
   --border-on-tertiary: #5a5a5a;
@@ -37,7 +38,8 @@
   --info: #0d6efd;
 
   /* Others */
-  --box-shadow: 0 5px 20px var(--hover);
+  --box-shadow: 0 5px 20px var(--hover-on-bg);
+  --box-shadow-heavy: 0 5px 20px var(--hover-on-bg-heavy);
 }
 
 html,
@@ -106,6 +108,15 @@ button {
   border-radius: 10px;
 }
 
+button.check-btn {
+  background-color: var(--primary);
+  color: var(--text-tertiary);
+}
+
+button.check-btn svg {
+  fill: var(--text-tertiary);
+}
+
 /* Container-fluid */
 .container-fluid {
   /* height: inherit !important; */
@@ -155,17 +166,62 @@ button {
   transform: translate(-50%, -50%);
   width: 500px;
   height: fit-content;
+  max-height: 450px;
   background-color: var(--tertiary-alt);
   border-radius: 20px;
   border: 1px solid var(--border);
   overflow: hidden;
-  box-shadow: var(--box-shadow);
 }
 
-.action-modal .action-panel .header,
+.action-modal .action-panel .header {
+  background-color: inherit;
+  z-index: 2;
+}
 .action-modal .action-panel .footer {
   background-color: inherit;
   z-index: 2;
+}
+
+.action-modal .action-panel .panel-body .side-panel {
+  background-color: var(--tertiary-alt);
+  transform: translateX(100%);
+  right: 0;
+  top: 0;
+  z-index: 1;
+  height: fit-content;
+}
+.action-modal .action-panel .panel-body .side-panel.reveal {
+  /* position: static !important; */
+  transform: translateX(0);
+}
+
+.action-modal .action-panel .header #editTitleBtn {
+}
+
+.action-modal .action-panel .header #editTitleBtn svg {
+  border: 1px solid var(--primary);
+  border-radius: 20px;
+  padding: 3px !important;
+  fill: var(--primary);
+  margin-bottom: 3px;
+  transform: scale(0.9);
+}
+
+.action-modal .action-panel .header .edit-title-bar {
+  display: flex;
+}
+
+.action-modal
+  .action-panel
+  .header
+  .edit-title-bar
+  .form-control.edit-title-input {
+  box-shadow: var(--box-shadow-heavy) !important;
+  width: 200px;
+}
+
+.action-modal .action-panel .header .edit-title-bar .check-btn {
+  box-shadow: var(--box-shadow-heavy);
 }
 
 @media screen and (max-width: 767px) {
@@ -492,7 +548,7 @@ button {
   background-color: var(--hover-on-bg);
 }
 
-.action-modal-form .body {
+.action-modal-form .panel-body {
   overflow-y: auto;
   max-height: 350px;
   padding-bottom: 70px;

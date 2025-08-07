@@ -244,11 +244,11 @@ $(document).ready(() => {
             <td>${cell.cell_leader_name || "—"}</td>
             <td>${cell.cell_members_count}</td>
             <td><button type="button" class="load-action-modal-dyn-content view-cell-details-btn action-btn px-3 py-1" data-content-type="view-cell-details" data-cell-name="${
-              cell.cell_name + " Cell"
+              cell.cell_name
             }" data-cell-id="${
             cell.id
           }">View</button> <button type="button" class="load-action-modal-dyn-content assign-cell-admin action-btn px-3 py-1" data-content-type="assign-cell-admin" data-cell-name="${
-            cell.cell_name + " Cell"
+            cell.cell_name
           }" data-cell-id="${cell.id}">Assign admin</button></td>
           </tr>`;
           tbody.append(row);
@@ -290,6 +290,21 @@ $(document).ready(() => {
     let $thisElement = $(this);
     let contentType = $thisElement.data("content-type");
     let cellId = $thisElement.data("cell-id");
+    let cellName = $thisElement.data("cell-name");
+    const $editModalTitleContent = `
+      <div class="m-0 mb-1 p-0">
+        <button class="p-0 m-0 dropdown-btn" id="editTitleBtn" title="Edit Cell Name">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill=""><path class= "p-0 m-0" d="M200-200h57l391-391-57-57-391 391v57Zm-40 80q-17 0-28.5-11.5T120-160v-97q0-16 6-30.5t17-25.5l505-504q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L313-143q-11 11-25.5 17t-30.5 6h-97Zm600-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>
+        </button>
+
+        <div class="position-absolute d-none align-items-center gap-2 p-0 m-0 edit-title-bar" style="border: none !important; left: 0; top: 30px">
+          <input type="text" class="form-control edit-title-input" placeholder="Edit Cell name">
+          <button class="check-btn save-btn px-2" data-cell-id>
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill=""><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>
+          </button>
+        </div>
+      </div>
+    `;
 
     $.ajax({
       url: "../php/load_dynamic_content.php",
@@ -301,14 +316,24 @@ $(document).ready(() => {
           $("#action-modal .content-container").html(res);
           toggleActionModal();
         } else if (contentType === "assign-cell-admin") {
-          $("#action-modal header .title").text($thisElement.data("cell-name"));
+          $("#action-modal header .title").text(cellName + " Cell");
           $("#action-modal .content-container").html(res);
           $("#action-modal .content-container #cell-id").val(
             $thisElement.data("cell-id")
           );
           toggleActionModal();
         } else if (contentType === "view-cell-details") {
-          $("#action-modal header .title").text($thisElement.data("cell-name"));
+          $("#action-modal header .title").text(cellName + " Cell");
+          $("#action-modal #edit-title-container").html($editModalTitleContent);
+          $.trim(
+            $("#action-modal #edit-title-container .edit-title-input").val(
+              cellName
+            )
+          );
+          $("#action-modal #edit-title-container .save-btn").data(
+            "cell-id",
+            cellId
+          );
           $("#action-modal .content-container").html(res);
           if ($("#action-modal .cell-admins-list li").length === 0) {
             $(
@@ -323,12 +348,18 @@ $(document).ready(() => {
               "#action-modal .cell-admins-list-container .admins-list-info"
             ).text("No admins found.");
           }
-        } else return;
+        } else if (contentType === "edit-cell-admin") {
+          $("#action-modal .side-panel").html(res);
+          toggleActionModalSidePanel();
+        }
+        else return;
       },
     });
   }
 
-  // Unassign cell admin logic
+  /*********************************************
+            Unassign cell admin logic
+  *********************************************/
   $(document).on("click", ".unassign-btn", function (e) {
     const $thisElement = $(this);
     const userId = $thisElement.data("user-id");
@@ -359,8 +390,61 @@ $(document).ready(() => {
         }
       },
       error: () => {
-        alert("Server error.");
+        alert("Server error!");
       },
     });
   });
+
+  /*********************************************
+              Edit cell Name logic
+  *********************************************/
+  $(document).on(
+    "click",
+    "#action-modal #edit-title-container .save-btn",
+    function () {
+      let $thisElement = $(this);
+      let cellId = $thisElement.data("cell-id");
+      let inputValue = $.trim(
+        $("#action-modal #edit-title-container .edit-title-input").val()
+      );
+      if (inputValue != "") {
+        $.ajax({
+          url: "../php/ajax.php?action=edit_cell_name",
+          method: "POST",
+          dataType: "json",
+          data: {
+            input_value: inputValue,
+            cell_id: cellId,
+          },
+          success: (res) => {
+            if (res.status === "success") {
+              alert("Cell name successfully changed");
+              $("#action-modal header .title").text(
+                res.new_cell_name + " Cell"
+              );
+              $("#action-modal .edit-title-bar").addClass("d-none");
+              fetchAllCells();
+            } else {
+              alert(res.message);
+            }
+          },
+          error: () => {
+            alert("Server error!");
+          },
+        });
+      }
+    }
+  );
+
+  /*********************************************
+            Edit Admin details logic
+  *********************************************/
+  $(document).on(
+    "click",
+    "#action-modal #sidebar",
+    function () {
+      let $thisElement = $(this);
+    });
+
+  // Close ready() function
 });
