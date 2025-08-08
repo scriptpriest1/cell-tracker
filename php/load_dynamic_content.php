@@ -253,9 +253,42 @@ if (isset($_POST['content-type'])) {
               <p class="admin-name p-0 m-0"><?= $nameWithLabels ?></p>
               <p class="admin-email p-0 m-0"><?= $email ?></p>
             </div>
-            <button type="button" class=" px-3 py-1 unassign-btn" data-user-id="<?= $id ?>" data-content-type="fetch-cell-admins" data-cell-id="<?= $cell_id ?>">Unassign</button>
+
+            <!-- Dropdown Toggle -->
+            <div class="dropdown">
+              <button
+                class="px-2 py-0 m-0"
+                type="button"
+                id="adminOptions<?= $id ?>"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                ⋮
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="adminOptions<?= $id ?>">
+                <?php if ($email !== $user_login): ?>
+                  <li>
+                    <a 
+                      class="dropdown-item load-action-modal-dyn-content edit-admin-btn" 
+                      href="#" 
+                      data-content-type="edit-cell-admin"
+                      data-cell-id="<?= $cell_id ?>"
+                      data-admin-id="<?= $id ?>"
+                    >Edit</a>
+                  </li>
+                <?php endif; ?>
+                <li>
+                  <?php if ($email === $user_login): ?>
+                    <a class="dropdown-item unassign-btn" href="#" data-content-type="fetch-cell-admins" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">Unassign</a>
+                  <?php else: ?>
+                    <a class="dropdown-item delete unassign-btn" href="#" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">Remove</a>
+                  <?php endif; ?>
+                </li>
+              </ul>
+            </div>
           </div>
         </li>
+
       <?php endif; ?>
 
       <?php
@@ -271,7 +304,39 @@ if (isset($_POST['content-type'])) {
               <p class="admin-name p-0 m-0"><?= $nameWithLabels ?></p>
               <p class="admin-email p-0 m-0"><?= $email ?></p>
             </div>
-            <button type="button" class=" px-3 py-1 unassign-btn delete" data-user-id="<?= $id ?>" data-content-type="fetch-cell-admins" data-cell-id="<?= $cell_id ?>">Remove</button>
+
+            <!-- Dropdown Toggle -->
+            <div class="dropdown">
+              <button
+                class="px-2 py-0 m-0"
+                type="button"
+                id="adminOptions<?= $id ?>"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                ⋮
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="adminOptions<?= $id ?>">
+                <?php if ($email !== $user_login): ?>
+                  <li>
+                    <a 
+                      class="dropdown-item load-action-modal-dyn-content edit-admin-btn" 
+                      href="#" 
+                      data-content-type="edit-cell-admin"
+                      data-cell-id="<?= $cell_id ?>"
+                      data-admin-id="<?= $id ?>"
+                    >Edit</a>
+                  </li>
+                <?php endif; ?>
+                <li>
+                  <?php if ($email === $user_login): // self ?>
+                    <a class="dropdown-item unassign-btn" href="#" data-content-type="fetch-cell-admins" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">Unassign</a>
+                  <?php else: ?>
+                    <a class="dropdown-item delete unassign-btn" href="#" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">Remove</a>
+                  <?php endif; ?>
+                </li>
+              </ul>
+            </div>
           </div>
         </li>
       <?php endif; ?>
@@ -287,7 +352,39 @@ if (isset($_POST['content-type'])) {
               <p class="admin-name p-0 m-0"><?= $name ?></p>
               <p class="admin-email p-0 m-0"><?= $email ?></p>
             </div>
-            <button type="button" class=" px-3 py-1 unassign-btn delete" data-user-id="<?= $id ?>" data-content-type="fetch-cell-admins" data-cell-id="<?= $cell_id ?>">Remove</button>
+
+            <!-- Dropdown Toggle -->
+            <div class="dropdown">
+              <button
+                class="px-2 py-0 m-0"
+                type="button"
+                id="adminOptions<?= $id ?>"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                ⋮
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="adminOptions<?= $id ?>">
+                <?php if ($email !== $user_login): ?>
+                  <li>
+                    <a 
+                      class="dropdown-item load-action-modal-dyn-content edit-admin-btn" 
+                      href="#" 
+                      data-content-type="edit-cell-admin"
+                      data-cell-id="<?= $cell_id ?>"
+                      data-admin-id="<?= $id ?>"
+                    >Edit</a>
+                  </li>
+                <?php endif; ?>
+                <li>
+                  <?php if ($email === $user_login): // self ?>
+                    <a class="dropdown-item unassign-btn" href="#" data-content-type="fetch-cell-admins" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">Unassign</a>
+                  <?php else: ?>
+                    <a class="dropdown-item delete unassign-btn" href="#" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">Remove</a>
+                  <?php endif; ?>
+                </li>
+              </ul>
+            </div>
           </div>
         </li>
       <?php endforeach; ?>
@@ -308,21 +405,44 @@ if (isset($_POST['content-type'])) {
     exit;
   }
 
+  /*=======================================
+      Fetch form for Editing a Cell Admin
+            - Functionality
+  =======================================*/
   if ($content_type === 'edit-cell-admin') {
-    $admin_id = $_POST['admin_id'] ?? null;
+    $cell_id = $_POST['cell-id'] ?? null;
+    $admin_id = $_POST['admin-id'] ?? null;
 
-    // if (!$admin_id) {
-    //   echo "Cannot access Admin";
-    //   exit;
-    // } 
+    if (!$admin_id) {
+      echo "<p class='text-center mt-4'>Cannot access Admin</p>";
+      exit;
+    } 
 
-    echo <<<HTML
-      <form id="edit-cell-admin-form" class="action-modal-form position-relative pt-2">
-        <input type="hidden" name="cell_id" value="" id="cell-id" />
+    $stmt = $conn->prepare("SELECT cell_role, first_name, last_name, user_login, phone_number FROM users WHERE id = ?");
+    $stmt->execute([$admin_id]);
+    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$admin) {
+      echo "<p class='text-center mt-4'>Admin not found</p>";
+      exit;
+    }
+
+    $role = htmlspecialchars($admin['cell_role']);
+    $first_name = htmlspecialchars($admin['first_name']);
+    $last_name = htmlspecialchars($admin['last_name']);
+    $email = htmlspecialchars($admin['user_login']);
+    $phone_number = htmlspecialchars($admin['phone_number']);
+
+    ob_start();
+    ?>
+      <form id="edit-cell-admin-form" class="action-modal-form load-action-modal-dyn-content position-relative pt-2" data-content-type="fetch-cell-admins" data-cell-id="<?= $cell_id ?>">
+        <input type="hidden" name="cell_id" value="<?= $cell_id ?>" id="cell-id" />
+        <input type="hidden" name="admin_id" value="<?= $admin_id ?>" id="admin-id" />
         <div class="body px-4 pt-2">
           <div class="form-group">
             <label for="role">Role:</label>
             <select name="role" id="role" class="form-control form-select">
+              <option value="<?= $role ?>" selected>Default</option>
               <option value="leader">Cell Leader</option>
               <option value="executive">Cell Executive</option>
             </select>
@@ -335,6 +455,7 @@ if (isset($_POST['content-type'])) {
               name="first_name"
               id="first-name"
               class="form-control"
+              value="<?= $first_name ?>"
             />
           </div>
 
@@ -345,24 +466,30 @@ if (isset($_POST['content-type'])) {
               name="last_name"
               id="last-name"
               class="form-control"
+              value="<?= $last_name ?>"
             />
           </div>
 
           <div class="form-group">
             <label for="email">Email:</label>
-            <input type="email" name="email" id="email" class="form-control" />
+            <input type="email" name="email" id="email" class="form-control" value="<?= $email ?>"/>
           </div>
 
           <div class="form-group">
             <label for="phone">Phone number:</label>
-            <input type="phone" name="phone" id="phone" class="form-control" />
+            <input type="phone" name="phone" id="phone" class="form-control" value="<?= $phone_number ?>"/>
           </div>
         </div>
 
-        <footer class="position-absolute bottom-0 py-3 px-4 w-100">
-          <button type="submit" class="submit-btn w-100" disabled>Save</button>
+        <footer class="position-absolute bottom-0 py-3 px-4 w-100 d-flex align-items-center gap-2">
+          <button type="button" class="cancel-btn w-100">Cancel</button>
+          <button type="submit" class="submit-btn w-100">Save</button>
         </footer>
       </form>
-    HTML;
+    <?php
+    $form = ob_get_clean();
+    echo $form;
+
+    exit;
   }
 }

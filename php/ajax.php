@@ -441,4 +441,67 @@ if ($action === 'edit_cell_name') {
   exit;
 }
 
+/*=======================================
+      Edit Cell Admins' details 
+            Functionality
+=======================================*/
+if ($action === 'update_cell_admin') {
+  $cellId  = intval($_POST['cell_id']  ?? 0);
+  $adminId = intval($_POST['admin_id'] ?? 0);
+
+  // Prevent editing yourself
+  if ($adminId === $_SESSION['user_id']) {
+    echo json_encode(['status'=>'error','message'=>'Cannot edit your own admin record.']);
+    exit;
+  }
+
+  // Capture new values
+  $newRole  = clean_input($_POST['role']       ?? '');
+  $first    = clean_input($_POST['first_name'] ?? '');
+  $last     = clean_input($_POST['last_name']  ?? '');
+  $email    = clean_input($_POST['email']      ?? '');
+  $phone    = clean_input($_POST['phone']      ?? '');
+
+  // Basic validation
+  if (!$newRole || !$first || !$last || !$email || !$phone) {
+    echo json_encode(['status'=>'error','message'=>'All fields are required.']);
+    exit;
+  }
+
+  // 4. Prevent duplicate leader
+  if ($newRole === 'leader') {
+    $check = $conn->prepare(
+      'SELECT COUNT(*) FROM users 
+       WHERE cell_id = ? 
+         AND cell_role = "leader" 
+         AND id != ?'
+    );
+    $check->execute([$cellId, $adminId]);
+    if ($check->fetchColumn() > 0) {
+      echo json_encode(['status'=>'error','message'=>'A Cell Leader already exists.']);
+      exit;
+    }
+  }
+
+  // Perform update
+  $upd = $conn->prepare(
+    'UPDATE users
+       SET cell_role  = ?,
+           first_name = ?,
+           last_name  = ?,
+           user_login = ?,
+           phone_number = ?
+     WHERE id = ? AND cell_id = ?'
+  );
+  $success = $upd->execute([
+    $newRole, $first, $last, $email, $phone, $adminId, $cellId
+  ]);
+
+  if ($success) {
+    echo json_encode(['status'=>'success']);
+  } else {
+    echo json_encode(['status'=>'error','message'=>'Update failed.']);
+  }
+  exit;
+}
 

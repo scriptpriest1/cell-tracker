@@ -27,12 +27,19 @@ $(document).ready(function () {
     const sidePanel = $("#action-modal .side-panel");
     sidePanel.toggleClass("reveal");
     if (sidePanel.hasClass("reveal")) {
-      $("#action-modal .action-panel .panel-body").css({
-        height: `400px`
-      });
+      $("#action-modal .panel-body").removeClass("h-100");
+      $("#action-modal .panel-body").css('height', `${sidePanel.height() + 48}`);
+    } else {
+      $("#action-modal .panel-body").addClass("h-100");
+      $("#action-modal .panel-body").css('height', '');
     }
   }
   window.toggleActionModalSidePanel = toggleActionModalSidePanel;
+
+  // Toggle Action Modal Side Panel when action modal cancel btn is clicked
+  $(document).on('click', '#action-modal .cancel-btn', function() {
+    toggleActionModalSidePanel();
+  })
 
   // Toggle Sidebar
 

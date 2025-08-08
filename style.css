@@ -87,6 +87,7 @@ a,
 .btn:focus-visible,
 .btn-link:focus,
 .btn-link:active {
+  background: none !important;
   outline: none !important;
   box-shadow: none !important;
   text-decoration: none !important;
@@ -182,17 +183,19 @@ button.check-btn svg {
   z-index: 2;
 }
 
+.action-modal .action-panel .panel-body {
+}
+
 .action-modal .action-panel .panel-body .side-panel {
+  display: none;
   background-color: var(--tertiary-alt);
-  transform: translateX(100%);
-  right: 0;
+  left: 0;
   top: 0;
   z-index: 1;
   height: fit-content;
 }
 .action-modal .action-panel .panel-body .side-panel.reveal {
-  /* position: static !important; */
-  transform: translateX(0);
+  display: block;
 }
 
 .action-modal .action-panel .header #editTitleBtn {
@@ -548,7 +551,7 @@ button.check-btn svg {
   background-color: var(--hover-on-bg);
 }
 
-.action-modal-form .panel-body {
+.action-modal-form .body {
   overflow-y: auto;
   max-height: 350px;
   padding-bottom: 70px;
@@ -576,6 +579,14 @@ button.check-btn svg {
   background-color: var(--hover-on-primary);
 }
 
+.action-modal-form .cancel-btn {
+  background-color: var(--bg);
+  border: 1px solid var(--border);
+}
+.action-modal-form .cancel-btn:hover {
+  background-color: var(--hover-on-bg);
+}
+
 #action-modal .cell-admins-list-container .cell-admins-list li {
   margin-bottom: 7px;
 }
@@ -590,16 +601,14 @@ button.check-btn svg {
 }
 
 #action-modal .cell-admins-list-container .cell-admins-list li .unassign-btn {
-  font-size: 14px;
-  background-color: var(--tertiary);
-  color: var(--text-tertiary);
+  color: var(--tertiary);
 }
 #action-modal
   .cell-admins-list-container
   .cell-admins-list
   li
   .unassign-btn.delete {
-  background-color: var(--error);
+  color: var(--error);
 }
 
 #action-modal .cell-admins-list-container .admins-list-info {

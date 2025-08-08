@@ -291,6 +291,7 @@ $(document).ready(() => {
     let contentType = $thisElement.data("content-type");
     let cellId = $thisElement.data("cell-id");
     let cellName = $thisElement.data("cell-name");
+    let adminId = $thisElement.data("admin-id");
     const $editModalTitleContent = `
       <div class="m-0 mb-1 p-0">
         <button class="p-0 m-0 dropdown-btn" id="editTitleBtn" title="Edit Cell Name">
@@ -309,7 +310,11 @@ $(document).ready(() => {
     $.ajax({
       url: "../php/load_dynamic_content.php",
       method: "POST",
-      data: { "content-type": contentType, "cell-id": cellId },
+      data: {
+        "content-type": contentType != undefined ? contentType : null,
+        "cell-id": cellId != undefined ? cellId : null,
+        "admin-id": adminId != undefined ? adminId : null,
+      },
       success: (res) => {
         if (contentType === "add-a-cell-form") {
           $("#action-modal header .title").text("Add a Cell");
@@ -351,8 +356,7 @@ $(document).ready(() => {
         } else if (contentType === "edit-cell-admin") {
           $("#action-modal .side-panel").html(res);
           toggleActionModalSidePanel();
-        }
-        else return;
+        } else return;
       },
     });
   }
@@ -437,14 +441,43 @@ $(document).ready(() => {
   );
 
   /*********************************************
-            Edit Admin details logic
+              Edit cell Admin details logic
   *********************************************/
-  $(document).on(
-    "click",
-    "#action-modal #sidebar",
-    function () {
-      let $thisElement = $(this);
+  $(document).on("submit", "#edit-cell-admin-form", function (e) {
+    e.preventDefault();
+    const $form = $(this);
+    const $btn = $form
+      .find(".submit-btn")
+      .prop("disabled", true)
+      .text("Saving…");
+
+    const cellId = $form.find("input[name='cell_id']").val();
+    const data = $form.serialize();
+
+    $.ajax({
+      url: "../php/ajax.php?action=update_cell_admin",
+      method: "POST",
+      dataType: "json",
+      data,
+      success: (res) => {
+        if (res.status === "success") {
+          toggleActionModalSidePanel();
+          loadDynamicContentfunction.call(this, e);
+          fetchAllCells();
+          alert("Admin details updated.");
+        } else {
+          alert(res.message || "Update failed.");
+        }
+      },
+      error: () => {
+        alert("Server error.");
+      },
+      complete: () => {
+        // always re-enable the button
+        $btn.prop("disabled", false).text("Save");
+      },
     });
+  });
 
   // Close ready() function
 });
