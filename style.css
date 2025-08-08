@@ -294,7 +294,7 @@ button.check-btn svg {
 
   color: white;
 
-  background-color: var(--primary);
+  background-color: var(--primary) !important;
 
   border-radius: 10px;
 

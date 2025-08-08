@@ -37,8 +37,10 @@ $(document).ready(function () {
   window.toggleActionModalSidePanel = toggleActionModalSidePanel;
 
   // Toggle Action Modal Side Panel when action modal cancel btn is clicked
-  $(document).on('click', '#action-modal .cancel-btn', function() {
+  $(document).on('click', '#action-modal .action-modal-form .cancel-btn', function() {
     toggleActionModalSidePanel();
+    $("#action-modal .panel-body").addClass("h-100");
+    $("#action-modal .panel-body").css("height", "");
   })
 
   // Toggle Sidebar
@@ -95,6 +97,8 @@ $(document).ready(function () {
   // Call action modal when the Add a cell btn is clicked
   $(document).on("click", "#action-modal header .close-btn", function () {
     $("#action-modal .side-panel").removeClass("reveal");
+    $("#action-modal .panel-body").addClass("h-100");
+    $("#action-modal .panel-body").css("height", "");
     toggleActionModal();
   });
 
