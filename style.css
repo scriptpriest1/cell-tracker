@@ -157,18 +157,30 @@ button.check-btn svg {
   background-color: var(--tertiary);
   border: 1px solid var(--stroke-on-tertiary) !important;
   box-shadow: var(--box-shadow-heavy);
+  width: 250px !important;
 }
 
 .dropdown-menu.switch-profile * {
   color: var(--text-tertiary);
 }
 
-.dropdown-menu.switch-profile .dropdown-item {
+.dropdown-menu.switch-profile .dropdown-item * {
   color: var(--text-secondary-on-tertiary);
 }
+.dropdown-menu.switch-profile .dropdown-item span.entity-name {
+  flex-basis: 90% !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .dropdown-menu.switch-profile .dropdown-item:hover {
   background-color: var(--tertiary-lighter) !important;
   color: var(--text-secondary-on-tertiary) !important;
+}
+.dropdown-menu.switch-profile .dropdown-item.active * {
+  color: #00ff7f !important;
+  /* font-weight: bold !important; */
 }
 
 /* Container-fluid */

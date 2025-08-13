@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'connect_db.php';   // sets up $conn as a PDO instance
+include 'connect_db.php';
 include 'functions.php';
 
 $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';

@@ -479,5 +479,26 @@ $(document).ready(() => {
     });
   });
 
+  /*********************************************
+              Switch account profile logic
+  *********************************************/
+  $(document).on("click", ".switch-profile .dropdown-item", function (e) {
+    e.preventDefault();
+    var profileType = $(this).data("profile-type");
+    var entityId = $(this).data("entity-id");
+
+    $.post(
+      "../php/switch_profile.php",
+      { profile_type: profileType, entity_id: entityId },
+      function (response) {
+        if (response === "success") {
+          location.reload();
+        } else {
+          alert("Could not switch profile.");
+        }
+      }
+    );
+  });
+
   // Close ready() function
 });

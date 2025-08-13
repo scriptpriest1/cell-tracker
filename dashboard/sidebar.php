@@ -14,12 +14,53 @@
         <div class="m-0 mb-2 p-0">
           <small class="fw-bold px-3 heading">Profiles</small>
         </div>
-        <li>
-          <a 
-            class="dropdown-item" 
-            href="#"
-          >The Way Cell - (Cell Leader)</a>
-        </li>
+
+        <?php
+        $userId = $_SESSION['user_id'];
+
+        $stmt = $conn->prepare("
+          SELECT cell_id, church_id, group_id FROM users WHERE id = ? LIMIT 1
+        ");
+        $stmt->execute([$userId]);
+        $userProfiles = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Profile list mapping
+        $profiles = [];
+
+        if (!empty($userProfiles['group_id'])) {
+          $profiles[] = [
+            'type' => 'group',
+            'id'   => $userProfiles['group_id'],
+            'name' => 'CE ' . $conn->query("SELECT group_name FROM groups WHERE id = {$userProfiles['group_id']}")->fetchColumn() . ' Group'
+          ];
+        }
+        if (!empty($userProfiles['church_id'])) {
+          $profiles[] = [
+            'type' => 'church',
+            'id'   => $userProfiles['church_id'],
+            'name' => 'CE ' . $conn->query("SELECT church_name FROM churches WHERE id = {$userProfiles['church_id']}")->fetchColumn() . ' Church'
+          ];
+        }
+        if (!empty($userProfiles['cell_id'])) {
+          $profiles[] = [
+            'type' => 'cell',
+            'id'   => $userProfiles['cell_id'],
+            'name' => $conn->query("SELECT cell_name FROM cells WHERE id = {$userProfiles['cell_id']}")->fetchColumn() . ' Cell'
+          ];
+        }
+        foreach ($profiles as $p) {
+          $isActive = ($_SESSION['admin_type'] === $p['type'] && $_SESSION['entity_id'] == $p['id']) ? 'active' : '';
+          $activeLabel = $isActive ? "<span class='active-label'>&#9679;</span>" : "";
+
+          echo "
+            <li>
+              <a href='#' class='dropdown-item {$isActive} d-flex align-items-center gap-2 justify-content-between' data-profile-type='{$p['type']}' data-entity-id='{$p['id']}'>
+                <span class='entity-name fw-normal'>{$p['name']}</span>
+                {$activeLabel}
+              </a>
+            </li>";
+        }
+      ?>
       </ul>
 
     </div>
