@@ -157,7 +157,7 @@ button.check-btn svg {
   background-color: var(--tertiary);
   border: 1px solid var(--stroke-on-tertiary) !important;
   box-shadow: var(--box-shadow-heavy);
-  width: 250px !important;
+  width: 220px !important;
 }
 
 .dropdown-menu.switch-profile * {
@@ -352,7 +352,7 @@ button.check-btn svg {
 ===========================================*/
 #mainframe {
   max-height: 100% !important;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+  grid-template-columns: minmax(0, 2fr) minmax(0, 7fr);
 }
 
 /* Sidebar */
@@ -412,7 +412,7 @@ button.check-btn svg {
   color: var(--text-secondary-on-tertiary);
 }
 #sidebar .nav li:hover {
-  background-color: var(--tertiary-light);
+  background-color: var(--tertiary-lighter);
 }
 #sidebar .nav li.active {
   background-color: var(--tertiary-lighter);
@@ -439,7 +439,7 @@ button.check-btn svg {
   border: none;
 }
 #sidebar footer .logout-btn:hover {
-  background-color: var(--tertiary-light);
+  background-color: var(--tertiary-lighter);
 }
 
 #sidebar footer .logout-btn .icon svg {
@@ -523,13 +523,13 @@ button.check-btn svg {
 
 /* Cells page */
 
-.cell-table-section .control-panel .cell-count {
+.cell-table-section .control-panel .cell-count, .cell-table-section .control-panel .cell-member-count {
   padding: 1px 7px;
   border-radius: 5px;
   background-color: var(--border);
 }
 
-#table-info-block .info {
+.table-info-block .info {
   color: var(--text-secondary);
 }
 
@@ -547,19 +547,15 @@ button.check-btn svg {
   }
 }
 
-.cell-table-section .add-cell-btn {
+.cell-table-section .add-cell-btn, .cell-table-section .add-member-btn {
   border: none;
   border-radius: 10px;
   background-color: var(--primary);
   margin-left: auto;
   color: var(--text-tertiary);
 }
-.cell-table-section .add-cell-btn:hover {
+.cell-table-section .add-cell-btn:hover, .cell-table-section .add-member-btn:hover {
   background-color: var(--hover-on-primary);
-}
-
-.cell-table-section .add-cell-btn svg {
-  fill: var(--primary);
 }
 
 .cells-table-container {

@@ -231,7 +231,7 @@ $(document).ready(() => {
         $(".cell-count").text(cells.length);
 
         if (cells.length === 0) {
-          $("#table-info-block .info").text("No data found!");
+          $("#cells-table-info-block .info").text("No data found!");
           return;
         }
 
@@ -356,6 +356,10 @@ $(document).ready(() => {
         } else if (contentType === "edit-cell-admin") {
           $("#action-modal .side-panel").html(res);
           toggleActionModalSidePanel();
+        } else if (contentType === "add-cell-member-form") {
+          $("#action-modal header .title").text("Add a member");
+          $("#action-modal .content-container").html(res);
+          toggleActionModal();
         } else return;
       },
     });
