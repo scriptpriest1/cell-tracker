@@ -255,17 +255,18 @@ if (isset($_POST['content-type'])) {
             </div>
 
             <!-- Dropdown Toggle -->
-            <div class="dropdown">
+            <div class="dropdown static">
               <button
                 class="px-2 py-0 m-0"
                 type="button"
                 id="adminOptions<?= $id ?>"
                 data-bs-toggle="dropdown"
+                data-bs-display="static"
                 aria-expanded="false"
               >
                 ⋮
               </button>
-              <ul class="dropdown-menu" aria-labelledby="adminOptions<?= $id ?>">
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminOptions<?= $id ?>">
                 <?php if ($email !== $user_login): ?>
                   <li>
                     <a 
@@ -281,7 +282,7 @@ if (isset($_POST['content-type'])) {
                   <?php if ($email === $user_login): ?>
                     <a class="dropdown-item unassign-btn" href="#" data-content-type="fetch-cell-admins" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">Unassign</a>
                   <?php else: ?>
-                    <a class="dropdown-item delete unassign-btn" href="#" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">Remove</a>
+                    <a class="dropdown-item delete unassign-btn" href="#" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">Remove Admin</a>
                   <?php endif; ?>
                 </li>
               </ul>
@@ -306,17 +307,18 @@ if (isset($_POST['content-type'])) {
             </div>
 
             <!-- Dropdown Toggle -->
-            <div class="dropdown">
+            <div class="dropdown static">
               <button
                 class="px-2 py-0 m-0"
                 type="button"
                 id="adminOptions<?= $id ?>"
                 data-bs-toggle="dropdown"
+                data-bs-display="static"
                 aria-expanded="false"
               >
                 ⋮
               </button>
-              <ul class="dropdown-menu" aria-labelledby="adminOptions<?= $id ?>">
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminOptions<?= $id ?>">
                 <?php if ($email !== $user_login): ?>
                   <li>
                     <a 
@@ -332,7 +334,7 @@ if (isset($_POST['content-type'])) {
                   <?php if ($email === $user_login): // self ?>
                     <a class="dropdown-item unassign-btn" href="#" data-content-type="fetch-cell-admins" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">Unassign</a>
                   <?php else: ?>
-                    <a class="dropdown-item delete unassign-btn" href="#" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">Remove</a>
+                    <a class="dropdown-item delete unassign-btn" href="#" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">Remove Admin</a>
                   <?php endif; ?>
                 </li>
               </ul>
@@ -354,17 +356,18 @@ if (isset($_POST['content-type'])) {
             </div>
 
             <!-- Dropdown Toggle -->
-            <div class="dropdown">
+            <div class="dropdown static">
               <button
                 class="px-2 py-0 m-0"
                 type="button"
                 id="adminOptions<?= $id ?>"
                 data-bs-toggle="dropdown"
+                data-bs-display="static"
                 aria-expanded="false"
               >
                 ⋮
               </button>
-              <ul class="dropdown-menu" aria-labelledby="adminOptions<?= $id ?>">
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminOptions<?= $id ?>">
                 <?php if ($email !== $user_login): ?>
                   <li>
                     <a 
@@ -380,7 +383,7 @@ if (isset($_POST['content-type'])) {
                   <?php if ($email === $user_login): // self ?>
                     <a class="dropdown-item unassign-btn" href="#" data-content-type="fetch-cell-admins" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">Unassign</a>
                   <?php else: ?>
-                    <a class="dropdown-item delete unassign-btn" href="#" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">Remove</a>
+                    <a class="dropdown-item delete unassign-btn" href="#" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">Remove Admin</a>
                   <?php endif; ?>
                 </li>
               </ul>

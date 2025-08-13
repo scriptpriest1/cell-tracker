@@ -1,23 +1,26 @@
 <section id="sidebar" class="sidebar w-100 h-100 d-flex flex-column justify-content-start gap-0 p-0 m-0">
 
-  <header class="sidebar-header m-0 px-3 py-2 d-flex align-items-center justify-content-between gap-3">
-    <div class="masthead d-flex align-items-center gap-2">
+  <header class="sidebar-header m-0 px-3 py-3 d-flex align-items-center justify-content-between gap-3">
+    <div class="masthead dropdown d-flex align-items-center gap-2">
 
-      <h4 class="user-role m-0 p-0 fs-5">
-        <?php
-        if ($_SESSION['admin_type'] === 'group') {
-          echo 'Group Admin';
-        }
-        if ($_SESSION['admin_type'] === 'church') {
-          echo 'Church Admin';
-        }
-        if ($_SESSION['admin_type'] === 'cell') {
-          echo 'Cell Admin';
-        }
-        ?>
-      </h4>
+      <button id="userRoleBtn" class="d-flex align-items-center gap-1  switch-profile-btn dropdown-icon ps-3 pe-3 py-1 m-0 p-0 fw-bold" title="Switch account" data-bs-toggle="dropdown" aria-expanded="false">
+        <span>
+          Switch profile
+        </span>
+         <!-- <svg style="margin-top: 2px;" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill=""><path d="M480-361q-8 0-15-2.5t-13-8.5L268-556q-11-11-11-28t11-28q11-11 28-11t28 11l156 156 156-156q11-11 28-11t28 11q11 11 11 28t-11 28L508-372q-6 6-13 8.5t-15 2.5Z"/></svg> -->
+      </button>
 
-      <button class="switch-account-btn px-3 py-1">Switch account</button>
+      <ul class="dropdown-menu switch-profile mt-1" aria-labelledby="userRoleBtn">
+        <div class="m-0 mb-2 p-0">
+          <small class="fw-bold px-3 heading">Profiles</small>
+        </div>
+        <li>
+          <a 
+            class="dropdown-item" 
+            href="#"
+          >The Way Cell - (Cell Leader)</a>
+        </li>
+      </ul>
 
     </div>
 
@@ -29,7 +32,7 @@
     
   </header>
 
-  <nav class="nav px-3 py-3 w-100">
+  <nav class="nav px-3 py-2 w-100">
     <ul class="p-0 m-0 w-100">
       <li id="dashboard-link" class="active px-2 py-2 d-flex align-items-center gap-2">
         <span class="icon">

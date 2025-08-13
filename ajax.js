@@ -228,7 +228,7 @@ $(document).ready(() => {
         const tbody = $("#cells-table tbody");
         tbody.empty();
 
-        $("#cell-count").text(cells.length);
+        $(".cell-count").text(cells.length);
 
         if (cells.length === 0) {
           $("#table-info-block .info").text("No data found!");

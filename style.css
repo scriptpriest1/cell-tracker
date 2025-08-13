@@ -38,8 +38,8 @@
   --info: #0d6efd;
 
   /* Others */
-  --box-shadow: 0 5px 20px var(--hover-on-bg);
-  --box-shadow-heavy: 0 5px 20px var(--hover-on-bg-heavy);
+  --box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  --box-shadow-heavy: 0 5px 20px rgba(0, 0, 0, 0.3);
 }
 
 html,
@@ -52,7 +52,7 @@ body {
 *,
 *::before,
 *::after {
-  box-sizing: border-box;
+  box-sizing: border-box !important;
   transition: 0.4s;
   scrollbar-width: none;
   scrollbar-color: transparent;
@@ -118,12 +118,6 @@ button.check-btn svg {
   fill: var(--text-tertiary);
 }
 
-/* Container-fluid */
-.container-fluid {
-  /* height: inherit !important; */
-  background-color: var(--bg);
-}
-
 /* Feedback pop-ups */
 #success-msg,
 #err-msg {
@@ -143,6 +137,44 @@ button.check-btn svg {
 #success-msg {
   background: var(--success);
   color: var(--text-primary);
+}
+
+/* Dropdown menu styling */
+.dropdown-menu {
+  position: fixed !important;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--box-shadow);
+}
+.dropdown-menu .dropdown-item {
+  font-size: 15px !important;
+}
+.dropdown-menu .dropdown-item:hover {
+  background-color: var(--hover-on-bg) !important;
+}
+
+.dropdown-menu.switch-profile {
+  background-color: var(--tertiary);
+  border: 1px solid var(--stroke-on-tertiary) !important;
+  box-shadow: var(--box-shadow-heavy);
+}
+
+.dropdown-menu.switch-profile * {
+  color: var(--text-tertiary);
+}
+
+.dropdown-menu.switch-profile .dropdown-item {
+  color: var(--text-secondary-on-tertiary);
+}
+.dropdown-menu.switch-profile .dropdown-item:hover {
+  background-color: var(--tertiary-lighter) !important;
+  color: var(--text-secondary-on-tertiary) !important;
+}
+
+/* Container-fluid */
+.container-fluid {
+  max-height: 100% !important;
+  background-color: var(--bg);
 }
 
 /* =========================================
@@ -219,7 +251,7 @@ button.check-btn svg {
   .header
   .edit-title-bar
   .form-control.edit-title-input {
-  box-shadow: var(--box-shadow-heavy) !important;
+  box-shadow: var(--box-shadow) !important;
   width: 200px;
 }
 
@@ -319,30 +351,27 @@ button.check-btn svg {
 }
 
 #sidebar header {
-  border-bottom: 1px solid var(--stroke-on-tertiary);
   min-height: 50px;
-  height: 50px;
-  max-height: 50px;
   background-color: var(--tertiary);
 }
 
-#sidebar header .user-role {
-  color: var(--text-secondary-on-tertiary);
+#sidebar header .switch-profile-btn {
   margin: 0;
   overflow-x: hidden;
   flex: 40%;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-#sidebar header .switch-account-btn {
   color: var(--text-secondary-on-tertiary);
   border: 1px solid var(--border-on-tertiary);
   border-radius: 10px;
-  font-size: 12px;
 }
-#sidebar header .switch-account-btn:hover {
+#sidebar header .switch-profile-btn:hover {
   background-color: var(--tertiary-lighter);
+}
+
+#sidebar header .switch-profile-btn * {
+  color: var(--text-secondary-on-tertiary);
+  fill: var(--text-secondary-on-tertiary);
 }
 
 #sidebar header .close-btn {
@@ -482,7 +511,7 @@ button.check-btn svg {
 
 /* Cells page */
 
-.cell-table-section .control-panel #cell-count {
+.cell-table-section .control-panel .cell-count {
   padding: 1px 7px;
   border-radius: 5px;
   background-color: var(--border);
@@ -600,15 +629,11 @@ button.check-btn svg {
   margin-top: -3px !important;
 }
 
-#action-modal .cell-admins-list-container .cell-admins-list li .unassign-btn {
-  color: var(--tertiary);
+.dropdown-item.unassign-btn {
+  color: var(--error) !important;
 }
-#action-modal
-  .cell-admins-list-container
-  .cell-admins-list
-  li
-  .unassign-btn.delete {
-  color: var(--error);
+.dropdown-item.unassign-btn.delete {
+  color: var(--error) !important;
 }
 
 #action-modal .cell-admins-list-container .admins-list-info {

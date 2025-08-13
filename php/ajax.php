@@ -288,7 +288,7 @@ if ($action === 'assign_cell_admin') {
       exit;
     }
     if ($current_cell && $current_cell != $cell_id) {
-      echo 'Already assigned to another cell. Unassign first before assigning to this cell.';
+      echo 'Already assigned to a cell.';
       exit;
     }
 

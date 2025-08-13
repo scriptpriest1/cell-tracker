@@ -36,22 +36,22 @@
 
         <div class="data-block stats-block d-grid">
           <div class="stat px-3 py-2">
-            <span class="value fs-4 fw-bold d-block">10</span>
+            <span class="value fs-4 fw-bold d-block cell-count">--</span>
             <span class="title d-block">Total no. of cells</span>
           </div>
 
           <div class="stat px-3 py-2">
-            <span class="value fs-4 fw-bold d-block">121</span>
+            <span class="value fs-4 fw-bold d-block">--</span>
             <span class="title d-block">Total no. of cell members</span>
           </div>
 
           <div class="stat px-3 py-2">
-            <span class="value fs-4 fw-bold d-block">19</span>
+            <span class="value fs-4 fw-bold d-block">--</span>
             <span class="title d-block">Cell meetings reported</span>
           </div>
 
           <div class="stat px-3 py-2">
-            <span class="value fs-4 fw-bold d-block">7</span>
+            <span class="value fs-4 fw-bold d-block">--</span>
             <span class="title d-block">Cell outreaches reported</span>
           </div>
         </div>
@@ -65,7 +65,7 @@
 
       <div class="cell-table-section">
         <div class="control-panel d-flex align-items-center gap-3 justify-content-between mb-2">
-          <h6 class="m-0">Total no. of Cells: &nbsp;<span id="cell-count"></span></h6>
+          <h6 class="m-0">Total no. of Cells: &nbsp;<span class="cell-count"></span></h6>
 
           <button id="add-cell-btn" class="load-action-modal-dyn-content add-cell-btn px-3" data-content-type="add-a-cell-form">Add a Cell
           </button>

@@ -1,4 +1,52 @@
 $(document).ready(function () {
+  // Control Bootstrap dropdown behaviour
+  $(document).on("show.bs.dropdown", ".dropdown.static", function () {
+    var $dropdown = $(this);
+    var $toggle = $dropdown.find('[data-bs-toggle="dropdown"]');
+    var $menu = $dropdown.find(".dropdown-menu");
+
+    // Clone menu instead of moving it (keeps Bootstrap happy)
+    var $menuClone = $menu
+      .clone(true)
+      .addClass("cloned-dropdown")
+      .appendTo("body");
+
+    var rect = $toggle[0].getBoundingClientRect();
+
+    // Align right side of dropdown with right side of button
+    var leftPos = rect.right - $menuClone.outerWidth();
+
+    $menuClone.css({
+      position: "absolute",
+      top: rect.bottom + "px",
+      left: leftPos + "px",
+      zIndex: 9999,
+      display: "block",
+    });
+
+    // Store reference so we can remove it later
+    $dropdown.data("cloned-menu", $menuClone);
+
+    // Hide original to prevent double display
+    $menu.hide();
+  });
+
+  $(document).on("hide.bs.dropdown", ".dropdown", function () {
+    var $dropdown = $(this);
+    var $menu = $dropdown.find(".dropdown-menu");
+    var $menuClone = $dropdown.data("cloned-menu");
+
+    // Remove cloned one
+    if ($menuClone) {
+      $menuClone.remove();
+      $dropdown.removeData("cloned-menu");
+    }
+
+    // Show original again
+    $menu.show();
+  });
+
+
   // Toggle Action Modal
   function toggleActionModal() {
     const actionModal = $("#action-modal");
