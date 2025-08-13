@@ -102,44 +102,17 @@ $(document).ready(function () {
   });
 
   // Page navigation
-  const sidebarLinks = $(".sidebar nav li");
   $(document).on("click", ".sidebar nav li", function () {
-    const clickedLinkId = $(this).attr("id");
-    $(".sidebar").css({ left: "-100%" });
-
-    switch (clickedLinkId) {
-      case "dashboard-link":
-        $(".screen header .page-title").text("Dashboard");
-        sidebarLinks.removeClass("active");
-        $(this).addClass("active");
-        $(".data-container").removeClass("d-none").addClass("d-none");
-        $("#dashboard-page").removeClass("d-none");
-        break;
-
-      case "cells-link":
-        $(".screen header .page-title").text("Cells");
-        sidebarLinks.removeClass("active");
-        $(this).addClass("active");
-        $(".data-container").removeClass("d-none").addClass("d-none");
-        $("#cells-page").removeClass("d-none");
-        break;
-
-      case "reports-link":
-        $(".screen header .page-title").text("Reports");
-        sidebarLinks.removeClass("active");
-        $(this).addClass("active");
-        $(".data-container").removeClass("d-none").addClass("d-none");
-        $("#reports-page").removeClass("d-none");
-        break;
-
-      case "settings-link":
-        $(".screen header .page-title").text("Settings");
-        sidebarLinks.removeClass("active");
-        $(this).addClass("active");
-        $(".data-container").removeClass("d-none").addClass("d-none");
-        $("#settings-page").removeClass("d-none");
-        break;
-    }
+    let sidebarLinks = $(".sidebar nav li");
+    let $thisLink = $(this);
+    // Close sidebar
+    $("#sidebar").css({ left: "-100%" });
+    // Dynamic alterations
+    $("#screen header .page-title").text(`${$thisLink.data('page-title')}`);
+    sidebarLinks.removeClass("active");
+    $thisLink.addClass("active");
+    $(".data-container").removeClass("d-none").addClass("d-none");
+    $(`#${$thisLink.data('page-id')}`).removeClass("d-none");
   });
 
   // Call action modal when the Add a cell btn is clicked

@@ -34,6 +34,7 @@
 
         <h3>Stats</h3>
 
+        <?php if ($_SESSION['admin_type'] === 'church'): ?>
         <div class="data-block stats-block d-grid">
           <div class="stat px-3 py-2">
             <span class="value fs-4 fw-bold d-block cell-count">--</span>
@@ -47,6 +48,25 @@
 
           <div class="stat px-3 py-2">
             <span class="value fs-4 fw-bold d-block">--</span>
+            <span class="title d-block">Total cell meetings reported</span>
+          </div>
+
+          <div class="stat px-3 py-2">
+            <span class="value fs-4 fw-bold d-block">--</span>
+            <span class="title d-block">Total cell outreaches reported</span>
+          </div>
+        </div>
+        <?php endif ?>
+
+        <?php if ($_SESSION['admin_type'] === 'cell'): ?>
+        <div class="data-block stats-block d-grid">
+          <div class="stat px-3 py-2">
+            <span class="value fs-4 fw-bold d-block cell-members-count">--</span>
+            <span class="title d-block">Cell members</span>
+          </div>
+
+          <div class="stat px-3 py-2">
+            <span class="value fs-4 fw-bold d-block">--</span>
             <span class="title d-block">Cell meetings reported</span>
           </div>
 
@@ -55,11 +75,13 @@
             <span class="title d-block">Cell outreaches reported</span>
           </div>
         </div>
+        <?php endif ?>
 
       </div>
 
     </div>
 
+    <?php if ($_SESSION['admin_type'] === 'church'): ?>
     <!-- Cells page -->
     <div id="cells-page" class="data-container d-none">
 
@@ -101,6 +123,14 @@
         <p class="info p-2 m-0 text-center"></p>
       </div>
     </div>
+    <?php endif ?>
+
+    <?php if ($_SESSION['admin_type'] === 'cell'): ?>
+    <!-- Cell Members page -->
+    <div id="cell-members-page" class="data-container d-none">
+      
+    </div>
+    <?php endif ?>
 
     <!-- Reports page -->
     <div id="reports-page" class="data-container d-none">
