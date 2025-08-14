@@ -496,6 +496,9 @@ if (isset($_POST['content-type'])) {
     exit;
   }
 
+    /*=======================================
+        Add Cell Member - Functionality
+  =======================================*/
   if ($content_type === 'add-cell-member-form') {
     echo <<<HTML
       <form id="add-cell-member-form" class="action-modal-form position-relative">
@@ -503,6 +506,7 @@ if (isset($_POST['content-type'])) {
           <div class="form-group">
             <label for="title">Title:</label>
             <select name="title" id="title" class="form-control form-select">
+              <option value="">Select</option>
               <option value="brother">Brother</option>
               <option value="sister">Sister</option>
               <option value="pastor">Pastor</option>
@@ -546,6 +550,7 @@ if (isset($_POST['content-type'])) {
             <div class="d-flex align-items-center gap-2">
               <!-- MONTH -->
               <select name="dob-month" id="dob-month" class="form-control form-select">
+                <option value="">Month</option>
                 <option value="jan">Jan</option>
                 <option value="feb">Feb</option>
                 <option value="mar">Mar</option>
@@ -561,6 +566,7 @@ if (isset($_POST['content-type'])) {
               </select>
               <!-- DAY -->
               <select name="dob-day" id="dob-day" class="form-control form-select">
+                <option value="">Day</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
@@ -619,6 +625,7 @@ if (isset($_POST['content-type'])) {
           <div class="form-group">
             <label for="dob">Foundation sch. status:</label>
             <select name="fs-status" id="fs-status" class="form-control form-select">
+              <option value="">Select</option>
               <option value="not-enrolled">Not enrolled</option>
               <option value="enrolled">Enrolled</option>
               <option value="graduated">Graduated</option>
@@ -662,5 +669,232 @@ if (isset($_POST['content-type'])) {
         </footer>
       </form>
     HTML;
+  }
+
+  if ($content_type === 'edit-cell-member-details') {
+    $member_id = $_POST['cell-member-id'] ?? null;
+
+    if (!$member_id) {
+      echo "<p class='text-center mt-4'>Error fetching details</p>";
+      exit;
+    } 
+
+    $stmt = $conn->prepare("SELECT 
+      title,
+      first_name,
+      last_name,
+      phone_number,
+      email,
+      dob_month,
+      dob_day,
+      occupation,
+      residential_address,
+      foundation_sch_status,
+      dept_in_cell,
+      dept_in_church,
+      date_joined_ministry FROM cell_members WHERE id = ?");
+    $stmt->execute([$member_id]);
+    $member = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$member) {
+      echo "<p class='text-center mt-4'>Error fetching member</p>";
+      exit;
+    }
+
+    $title = htmlspecialchars($member['title']);
+    $first_name = htmlspecialchars($member['first_name']);
+    $last_name = htmlspecialchars($member['last_name']);
+    $phone_number = htmlspecialchars($member['phone_number']);
+    $email = htmlspecialchars($member['email']);
+    $dob_month = htmlspecialchars($member['dob_month']);
+    $dob_day = htmlspecialchars($member['dob_day']);
+    $occupation = htmlspecialchars($member['occupation']);
+    $res_address = htmlspecialchars($member['residential_address']);
+    $fs_status = htmlspecialchars($member['foundation_sch_status']);
+    $dept_in_cell = htmlspecialchars($member['dept_in_cell']);
+    $dept_in_church = htmlspecialchars($member['dept_in_church']);
+    $date_joined_ministry = htmlspecialchars($member['date_joined_ministry']);
+
+    ob_start();
+    ?>
+    <form id="edit-cell-member-form" class="action-modal-form position-relative">
+      <input type="hidden" value="<?=$member_id?>">
+      <div class="body px-4 pt-2">
+        <div class="form-group">
+          <label for="title">Title:</label>
+          <select name="title" id="title" class="form-control form-select">
+            <option value="<?=$title?>" selected><?=ucfirst($title != '' ? $title : 'Select')?></option>
+            <option value="brother">Brother</option>
+            <option value="sister">Sister</option>
+            <option value="pastor">Pastor</option>
+            <option value="deacon">Deacon</option>
+            <option value="deaconess">Deaconess</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="first-name">First name:</label>
+          <input
+            type="text"
+            name="first_name"
+            id="first-name"
+            class="form-control"
+            value="<?=$first_name?>"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="last-name">Last name:</label>
+          <input
+            type="text"
+            name="last_name"
+            id="last-name"
+            class="form-control"
+            value="<?=$last_name?>"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone number:</label>
+          <input type="phone" name="phone" id="phone" class="form-control" value="<?=$phone_number?>" />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input type="email" name="email" id="email" class="form-control" value="<?=$email?>"/>
+        </div>
+
+        <div class="form-group">
+          <label for="dob">Date of birth:</label>
+          <div class="d-flex align-items-center gap-2">
+            <!-- MONTH -->
+            <select name="dob-month" id="dob-month" class="form-control form-select">
+              <option value="<?=$dob_month?>"><?=ucfirst($dob_month != '' ? $dob_month : 'Month')?></option>
+              <option value="jan">Jan</option>
+              <option value="feb">Feb</option>
+              <option value="mar">Mar</option>
+              <option value="apr">Apr</option>
+              <option value="may">May</option>
+              <option value="jun">Jun</option>
+              <option value="jul">Jul</option>
+              <option value="aug">Aug</option>
+              <option value="sep">Sep</option>
+              <option value="oct">Oct</option>
+              <option value="nov">Nov</option>
+              <option value="dec">Dec</option>
+            </select>
+            <!-- DAY -->
+            <select name="dob-day" id="dob-day" class="form-control form-select">
+              <option value="<?=$dob_day?>"><?=$dob_day != '' ? $dob_day : 'Day'?></option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+              <option value="13">13</option>
+              <option value="14">14</option>
+              <option value="15">15</option>
+              <option value="16">16</option>
+              <option value="17">17</option>
+              <option value="18">18</option>
+              <option value="19">19</option>
+              <option value="20">20</option>
+              <option value="21">21</option>
+              <option value="22">22</option>
+              <option value="23">23</option>
+              <option value="24">24</option>
+              <option value="25">25</option>
+              <option value="26">26</option>
+              <option value="27">27</option>
+              <option value="28">28</option>
+              <option value="29">29</option>
+              <option value="30">30</option>
+              <option value="31">31</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="occupation">Occupation:</label>
+          <input
+            type="text"
+            name="occupation"
+            id="occupation"
+            class="form-control"
+            value="<?=$occupation?>"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="res-address">Residential address:</label>
+          <input
+            type="text"
+            name="res_address"
+            id="res-address"
+            class="form-control"
+            value="<?=$res_address?>"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="dob">Foundation sch. status:</label>
+          <select name="fs-status" id="fs-status" class="form-control form-select">
+            <option value="<?=$fs_status?>" selected><?=ucfirst($fs_status != '' ? $fs_status : 'Select')?></option>
+            <option value="not-enrolled">Not enrolled</option>
+            <option value="enrolled">Enrolled</option>
+            <option value="graduated">Graduated</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="dept-in-cell">Dept. in Cell:</label>
+          <input
+            type="text"
+            name="dept-in-cell"
+            id="dept-in-cell"
+            class="form-control"
+            value="<?=$dept_in_cell?>"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="dept-in-cell">Dept. in Church:</label>
+          <input
+            type="text"
+            name="dept-in-church"
+            id="dept-in-church"
+            class="form-control"
+            value="<?=$dept_in_church?>"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="joined-ministry-date">Date joined ministry:</label>
+          <input
+            type="date"
+            name="joined-ministry-date"
+            id="joined-ministry-date"
+            class="form-control"
+            value="<?=$date_joined_ministry?>"
+          />
+        </div>
+
+      </div>
+
+      <footer class="position-absolute bottom-0 py-3 px-4 w-100 d-flex align-items-center gap-2">
+        <button type="submit" class="submit-btn w-100">Save</button>
+      </footer>
+    </form>
+    <?php
+    $html = ob_get_clean();
+    echo $html;
+    exit;
   }
 }

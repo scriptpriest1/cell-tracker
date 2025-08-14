@@ -1,6 +1,8 @@
 $(document).ready(() => {
   // Load Cells into Cells Table
   fetchAllCells();
+  // Load Cell Members into the Cell Members Table
+  fetchAllCellMembers();
 
   // Feedback alerts
   const successMsg = $("#success-msg");
@@ -238,23 +240,23 @@ $(document).ready(() => {
         cells.forEach(function (cell, index) {
           const row = `
           <tr>
-            <td></td> <!-- SN will be filled by another function -->
+            <td class="sn-col"></td> <!-- SN will be filled by another function -->
             <td>${cell.cell_name + " Cell"}</td>
             <td>${cell.date_created}</td>
-            <td>${cell.cell_leader_name || "—"}</td>
+            <td>${cell.cell_leader_name || ""}</td>
             <td>${cell.cell_members_count}</td>
-            <td><button type="button" class="load-action-modal-dyn-content view-cell-details-btn action-btn px-3 py-1" data-content-type="view-cell-details" data-cell-name="${
+            <td class="d-flex align-items-center gap-2"><button type="button" class="load-action-modal-dyn-content view-cell-details-btn action-btn px-3 py-1" data-content-type="view-cell-details" data-cell-name="${
               cell.cell_name
             }" data-cell-id="${
             cell.id
-          }">View</button> <button type="button" class="load-action-modal-dyn-content assign-cell-admin action-btn px-3 py-1" data-content-type="assign-cell-admin" data-cell-name="${
+          }">View</button> <button type="button" class="load-action-modal-dyn-content assign-cell-admin-btn action-btn px-3 py-1" data-content-type="assign-cell-admin" data-cell-name="${
             cell.cell_name
           }" data-cell-id="${cell.id}">Assign admin</button></td>
           </tr>`;
           tbody.append(row);
         });
 
-        updateCellsTableSN(); // Call to number rows
+        updateTableSN(); // Call to number rows
       },
       error: () => {
         alert("Error fetching cells.");
@@ -266,11 +268,15 @@ $(document).ready(() => {
       Auto-insert Serial Number to Table rows 
                   - Function
   *********************************************/
-  function updateCellsTableSN() {
-    $("#cells-table tbody tr").each(function (index) {
+  function updateTableSN() {
+    $("#cells-table, #cell-members-table").each(function () {
       $(this)
-        .find("td:first")
-        .text(`${index + 1}.`);
+        .find("tbody tr")
+        .each(function (index) {
+          $(this)
+            .find("td.sn-col")
+            .text(`${index + 1}.`);
+        });
     });
   }
 
@@ -292,6 +298,7 @@ $(document).ready(() => {
     let cellId = $thisElement.data("cell-id");
     let cellName = $thisElement.data("cell-name");
     let adminId = $thisElement.data("admin-id");
+    let cellMemberId = $thisElement.data("member-id");
     const $editModalTitleContent = `
       <div class="m-0 mb-1 p-0">
         <button class="p-0 m-0 dropdown-btn" id="editTitleBtn" title="Edit Cell Name">
@@ -314,6 +321,7 @@ $(document).ready(() => {
         "content-type": contentType != undefined ? contentType : null,
         "cell-id": cellId != undefined ? cellId : null,
         "admin-id": adminId != undefined ? adminId : null,
+        "cell-member-id": cellMemberId != undefined ? cellMemberId : null,
       },
       success: (res) => {
         if (contentType === "add-a-cell-form") {
@@ -360,6 +368,12 @@ $(document).ready(() => {
           $("#action-modal header .title").text("Add a member");
           $("#action-modal .content-container").html(res);
           toggleActionModal();
+        } else if (contentType === "edit-cell-member-details") {
+          $("#action-modal header .title").text(
+            $thisElement.data("member-name")
+          );
+          $("#action-modal .content-container").html(res);
+          toggleActionModal();
         } else return;
       },
     });
@@ -368,7 +382,7 @@ $(document).ready(() => {
   /*********************************************
             Unassign cell admin logic
   *********************************************/
-  $(document).on("click", ".unassign-btn", function (e) {
+  $(document).on("click", "#cells-table .unassign-btn", function (e) {
     const $thisElement = $(this);
     const userId = $thisElement.data("user-id");
     const cellId = $thisElement.data("cell-id");
@@ -502,6 +516,188 @@ $(document).ready(() => {
         }
       }
     );
+  });
+
+  /*********************************************
+              Add a cell member
+                 - Function
+  *********************************************/
+  $(document).on(
+    "input change",
+    "#add-cell-member-form .form-control, #add-cell-member-form .form-select",
+    function () {
+      let $form = $("#add-cell-member-form");
+      const firstNameFilled = isFilled($form.find("#first-name"));
+      const lastNameFilled = isFilled($form.find("#last-name"));
+
+      if (firstNameFilled && lastNameFilled) {
+        $($form).find(".submit-btn").prop("disabled", false);
+      } else {
+        $($form).find(".submit-btn").prop("disabled", true);
+      }
+    }
+  );
+
+  $(document).on("submit", "#add-cell-member-form", function (e) {
+    e.preventDefault();
+
+    const $btn = $(this)
+      .find(".submit-btn")
+      .prop("disabled", true)
+      .text("Adding…");
+    const data = $(this).serialize();
+
+    $.ajax({
+      url: "../php/ajax.php?action=add_cell_member",
+      method: "POST",
+      data,
+      success: (res) => {
+        if (res === "success") {
+          alert("Member added successfully!");
+          fetchAllCellMembers(); // Reload members table
+          $("#add-cell-member-form").trigger("reset");
+          $btn.prop("disabled", false).text("Add Member");
+        } else {
+          alert("Error: " + res);
+          $btn.prop("disabled", false).text("Add Member");
+        }
+      },
+      error: () => {
+        alert("Server error");
+        $btn.prop("disabled", false).text("Add Member");
+      },
+    });
+  });
+
+  /*********************************************
+        Load Cell Members into the Cell Members' Table 
+                 - Function
+  *********************************************/
+  function fetchAllCellMembers() {
+    if ($("#site-header").is(":visible")) return;
+
+    $.ajax({
+      url: "../php/ajax.php",
+      method: "POST",
+      data: { action: "fetch_all_cell_members" },
+      dataType: "json",
+      success: function (cellMembers) {
+        const tbody = $("#cell-members-table tbody");
+        tbody.empty();
+
+        $(".cell-member-count").text(cellMembers.length);
+
+        if (cellMembers.length === 0) {
+          $("#cell-members-table-info-block .info").text("No data found!");
+          return;
+        }
+
+        cellMembers.forEach(function (member, index) {
+          const row = `
+        <tr>
+          <td class="sn-col"></td> <!-- SN will be filled by another function -->
+          <td>${member.title || ""}</td>
+          <td>${member.first_name}</td>
+          <td>${member.last_name}</td>
+          <td>${member.phone_number || ""}</td>
+          <td>${member.email || ""}</td>
+          <td>${member.dob_month + " " + member.dob_day || ""}</td>
+          <td>${member.occupation || ""}</td>
+          <td>${member.residential_address || ""}</td>
+          <td>${member.foundation_sch_status || ""}</td>
+          <td>${member.dept_in_cell || ""}</td>
+          <td>${member.dept_in_church || ""}</td>
+          <td>${member.date_joined_ministry || ""}</td>
+          <td>${member.date_added || ""}</td>
+          <td class="d-flex align-items-center gap-2"><button class="px-3 py-1 action-btn edit-btn load-action-modal-dyn-content" data-content-type="edit-cell-member-details" data-member-name="${
+            member.first_name + " " + member.last_name
+          }" data-member-id="${
+            member.id
+          }">Edit</button> <button class="px-3 py-1 action-btn delete-btn" data-member-id="${
+            member.id
+          }">Delete</button></td>
+        </tr>`;
+          tbody.append(row);
+        });
+
+        updateTableSN();
+      },
+      error: () => {
+        alert("Error fetching cell members.");
+      },
+    });
+  }
+
+  /*********************************************
+            Edit Cell Members Details
+                  - Function
+  *********************************************/
+  $(document).on("submit", "#edit-cell-member-form", function (e) {
+    e.preventDefault();
+
+    const $btn = $(this).find(".submit-btn");
+    $btn.prop("disabled", true).text("Saving…");
+
+    const data = $(this).serialize();
+
+    $.ajax({
+      url: "../php/ajax.php?action=edit_cell_member",
+      method: "POST",
+      data,
+      dataType: "json",
+      success: (res) => {
+        if (res.status === "success") {
+          alert("Member details updated successfully!");
+          fetchAllCellMembers(); // Refresh the table
+          $("#edit-cell-member-form .submit-btn")
+            .prop("disabled", true)
+            .text("Save");
+        } else {
+          alert(res.message || "Error updating member.");
+          $btn.prop("disabled", false).text("Save");
+        }
+      },
+      error: () => {
+        alert("Server error!");
+        $btn.prop("disabled", false).text("Save");
+      },
+    });
+  });
+
+  /*********************************************
+              Delete Cell Member
+                 - Function
+  *********************************************/
+  $(document).on("click", "#cell-members-table .delete-btn", function () {
+    const $thisElement = $(this);
+    const memberId = $thisElement.data("member-id");
+
+    if (!memberId) {
+      alert("Missing member ID.");
+      return;
+    }
+
+    if (!confirm("Are you sure you want to delete this member?")) return;
+
+    $.ajax({
+      url: "../php/ajax.php?action=delete_cell_member",
+      method: "POST",
+      dataType: "json",
+      data: {
+        member_id: memberId,
+      },
+      success: (res) => {
+        if (res.status === "success") {
+          fetchAllCellMembers();
+          alert("Cell member deleted successfully.");
+        } else {
+          alert(res.message || "Failed to delete cell member.");
+        }
+      },
+      error: () => {
+        alert("Server error!");
+      },
+    });
   });
 
   // Close ready() function

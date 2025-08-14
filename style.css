@@ -345,6 +345,10 @@ button.check-btn svg {
   margin-top: 10px;
 }
 
+.auth-panel .auth-form .forgot-password {
+  text-decoration: underline !important;
+}
+
 /* =========================================
 
   Dashboard Styling 
@@ -523,7 +527,8 @@ button.check-btn svg {
 
 /* Cells page */
 
-.cell-table-section .control-panel .cell-count, .cell-table-section .control-panel .cell-member-count {
+.cell-table-section .control-panel .cell-count,
+.cell-table-section .control-panel .cell-member-count {
   padding: 1px 7px;
   border-radius: 5px;
   background-color: var(--border);
@@ -547,14 +552,16 @@ button.check-btn svg {
   }
 }
 
-.cell-table-section .add-cell-btn, .cell-table-section .add-member-btn {
+.cell-table-section .add-cell-btn,
+.cell-table-section .add-member-btn {
   border: none;
   border-radius: 10px;
   background-color: var(--primary);
   margin-left: auto;
   color: var(--text-tertiary);
 }
-.cell-table-section .add-cell-btn:hover, .cell-table-section .add-member-btn:hover {
+.cell-table-section .add-cell-btn:hover,
+.cell-table-section .add-member-btn:hover {
   background-color: var(--hover-on-primary);
 }
 
@@ -563,6 +570,7 @@ button.check-btn svg {
   border: 1px solid var(--border);
   background-color: var(--tertiary-alt);
   overflow: auto;
+  position: relative !important;
 }
 
 .cells-table-container table {
@@ -579,13 +587,30 @@ button.check-btn svg {
   border: 1px solid var(--border) !important;
 }
 
+/* .cells-table-container table th.sn-col,
+.cells-table-container table td.sn-col {
+  position: sticky !important;
+  left: 0 !important;
+} */
+
 .cells-table-container table tr .action-btn {
   color: var(--text-primary);
-  border: 1px solid var(--border);
+  border: 1px solid var(--tertiary);
   border-radius: 10px;
 }
 .cells-table-container table tr .action-btn:hover {
   background-color: var(--hover-on-bg);
+}
+
+.cells-table-container table tr .assign-cell-admin-btn {
+}
+
+.cells-table-container table tr .delete-btn {
+  border-color: var(--error);
+  color: var(--error);
+}
+.cells-table-container table tr .delete-btn:hover {
+  background-color: #ffb0b020;
 }
 
 .action-modal-form .body {

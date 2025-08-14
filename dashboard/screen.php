@@ -61,7 +61,7 @@
         <?php if ($_SESSION['admin_type'] === 'cell'): ?>
         <div class="data-block stats-block d-grid">
           <div class="stat px-3 py-2">
-            <span class="value fs-4 fw-bold d-block cell-members-count">--</span>
+            <span class="value fs-4 fw-bold d-block cell-member-count">--</span>
             <span class="title d-block">Cell members</span>
           </div>
 
@@ -105,7 +105,7 @@
           <table class="w-100" id="cells-table">
             <thead>
               <tr>
-                <th>SN</th>
+                <th class="sn-col">SN</th>
                 <th>Cell name</th>
                 <th>Date created</th>
                 <th>Cell leader</th>
@@ -146,9 +146,10 @@
         </div>
 
         <div class="cells-table-container w-100 p-0 m-0">
-          <table class="w-100" id="cells-table">
+          <table class="w-100" id="cell-members-table">
             <thead>
               <tr>
+                <th class="sn-col">SN</th>
                 <th>Title</th>
                 <th>First name</th>
                 <th>Last name</th>
@@ -162,6 +163,7 @@
                 <th>Dept in church</th>
                 <th>Date joined ministry</th>
                 <th>Date added</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody></tbody>

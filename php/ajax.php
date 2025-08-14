@@ -505,3 +505,166 @@ if ($action === 'update_cell_admin') {
   exit;
 }
 
+/*=======================================
+             Add Cell Members 
+              Functionality
+=======================================*/
+if ($action === 'add_cell_member') {
+  $title        = clean_input($_POST['title'] ?? '');
+  $firstName    = clean_input($_POST['first_name'] ?? '');
+  $lastName     = clean_input($_POST['last_name'] ?? '');
+  $phone        = clean_input($_POST['phone'] ?? '');
+  $email        = clean_input($_POST['email'] ?? '');
+  $dobMonth     = clean_input($_POST['dob-month'] ?? '');
+  $dobDay       = clean_input($_POST['dob-day'] ?? '');
+  $occupation   = clean_input($_POST['occupation'] ?? '');
+  $resAddress   = clean_input($_POST['res_address'] ?? '');
+  $fsStatus     = clean_input($_POST['fs-status'] ?? '');
+  $deptInCell   = clean_input($_POST['dept-in-cell'] ?? '');
+  $deptInChurch = clean_input($_POST['dept-in-church'] ?? '');
+  $joinedDate   = clean_input($_POST['joined-ministry-date'] ?? '');
+
+  // Server-side validation (first & last name required)
+  if ($firstName === '' || $lastName === '') {
+      echo 'First name and last name are required.';
+      exit;
+  }
+
+  // Determine cell_id from session
+  $cellId = $_SESSION['entity_id'] ?? null;
+  if (empty($cellId)) {
+      echo 'No cell recognized.';
+      exit;
+  }
+
+  $stmt = $conn->prepare("
+      INSERT INTO cell_members 
+        (title, first_name, last_name, phone_number, email, dob_month, dob_day, occupation, residential_address, foundation_sch_status, dept_in_cell, dept_in_church, date_joined_ministry, cell_id)
+      VALUES
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  ");
+
+  $executeResult = $stmt->execute([
+      $title, $firstName, $lastName, $phone, $email, $dobMonth, $dobDay, $occupation, $resAddress, $fsStatus, $deptInCell, $deptInChurch, $joinedDate, $cellId
+  ]);
+
+  if ($executeResult) {
+      echo 'success';
+      exit;
+  } else {
+      echo 'Could not add member.';
+      exit;
+  }
+}
+
+/*=======================================
+      Fetch Cell Members Functionality
+=======================================*/
+if ($action === 'fetch_all_cell_members') {
+  $cellId = $_SESSION['entity_id']; // Assuming entity_id is the current cell's ID for a Cell Admin
+
+  $stmt = $conn->prepare("
+    SELECT 
+      id,
+      CONCAT(UPPER(LEFT(title, 1)), SUBSTRING(title, 2)) AS title,
+      first_name,
+      last_name,
+      phone_number,
+      email,
+      CONCAT(UPPER(LEFT(dob_month, 1)), SUBSTRING(dob_month, 2)) AS dob_month,
+      dob_day,
+      occupation,
+      residential_address,
+      CONCAT(UPPER(LEFT(foundation_sch_status, 1)), SUBSTRING(foundation_sch_status, 2)) AS foundation_sch_status,
+      dept_in_cell,
+      dept_in_church,
+      date_joined_ministry,
+      DATE_FORMAT(date_added, '%d/%m/%Y') AS date_added,
+      cell_id
+    FROM cell_members
+    WHERE cell_id = :cell_id;
+  ");
+
+  $stmt->bindValue(':cell_id', $cellId, PDO::PARAM_INT);
+  $stmt->execute();
+
+  $cell_members = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+  echo json_encode($cell_members);
+  exit;
+}
+
+/*=======================================
+      Edit Cell Members' details 
+          - Functionality
+=======================================*/
+if ($action === 'edit_cell_member') {
+  $member_id = clean_input($_POST['member_id']);
+  $title = clean_input($_POST['title']);
+  $first_name = clean_input($_POST['first_name']);
+  $last_name = clean_input($_POST['last_name']);
+  $phone_number = clean_input($_POST['phone_number']);
+  $email = clean_input($_POST['email']);
+  $dob = clean_input($_POST['dob']);
+  $occupation = clean_input($_POST['occupation']);
+  $residential_address = clean_input($_POST['residential_address']);
+  $foundation_sch_status = clean_input($_POST['foundation_sch_status']);
+  $dept_in_cell = clean_input($_POST['dept_in_cell']);
+  $dept_in_church = clean_input($_POST['dept_in_church']);
+  $date_joined_ministry = clean_input($_POST['date_joined_ministry']);
+
+  $stmt = $conn->prepare("
+    UPDATE cell_members 
+    SET title = ?, first_name = ?, last_name = ?, phone_number = ?, email = ?, dob = ?, occupation = ?, residential_address = ?, foundation_sch_status = ?, dept_in_cell = ?, dept_in_church = ?, date_joined_ministry = ?
+    WHERE id = ?
+  ");
+  $success = $stmt->execute([
+    $title,
+    $first_name,
+    $last_name,
+    $phone_number,
+    $email,
+    $dob,
+    $occupation,
+    $residential_address,
+    $foundation_sch_status,
+    $dept_in_cell,
+    $dept_in_church,
+    $date_joined_ministry,
+    $member_id
+  ]);
+
+  if ($success) {
+    echo json_encode(["status" => "success"]);
+  } else {
+    echo json_encode(["status" => "error", "message" => "Failed to update member."]);
+  }
+}
+
+/*=======================================
+      Delete Cell Members Functionality
+=======================================*/
+if ($action === 'delete_cell_member') {
+  $member_id = clean_input($_POST['member_id'] ?? '');
+
+  if (empty($member_id)) {
+    echo json_encode([
+      'status' => 'error',
+      'message' => 'Missing member ID.'
+    ]);
+    exit;
+  }
+
+  $stmt = $conn->prepare("DELETE FROM cell_members WHERE id = ?");
+  $stmt->execute([$member_id]);
+
+  if ($stmt->rowCount() > 0) {
+    echo json_encode(['status' => 'success']);
+  } else {
+    echo json_encode([
+      'status' => 'error',
+      'message' => 'No member found or already deleted.'
+    ]);
+  }
+  exit;
+}
