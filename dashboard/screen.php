@@ -159,7 +159,7 @@
                 <th>Occupation</th>
                 <th>Residencial address</th>
                 <th>Foundation school status</th>
-                <th>Dept in cell</th>
+                <th>Delegation in cell</th>
                 <th>Dept in church</th>
                 <th>Date joined ministry</th>
                 <th>Date added</th>

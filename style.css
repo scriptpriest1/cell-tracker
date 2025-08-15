@@ -605,11 +605,11 @@ button.check-btn svg {
 .cells-table-container table tr .assign-cell-admin-btn {
 }
 
-.cells-table-container table tr .delete-btn {
+.cells-table-container table tr .delete-member-btn {
   border-color: var(--error);
   color: var(--error);
 }
-.cells-table-container table tr .delete-btn:hover {
+.cells-table-container table tr .delete-member-btn:hover {
   background-color: #ffb0b020;
 }
 

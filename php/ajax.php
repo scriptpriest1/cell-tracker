@@ -89,7 +89,7 @@ if ($action === 'add_a_cell') {
   }
 
   // === Passed all checks, now insert cell ===
-  $stmt = $conn->prepare('INSERT INTO cells (cell_name, church_id, date_created) VALUES (?, ?, NOW())');
+  $stmt = $conn->prepare('INSERT INTO cells (cell_name, church_id) VALUES (?, ?)');
   if (!$stmt->execute([$cellName, $churchId])) {
     echo 'cell_insert_failed';
     exit;
@@ -109,8 +109,8 @@ if ($action === 'add_a_cell') {
   if ($adminType === 'else') {
     $stmt = $conn->prepare('
       INSERT INTO users (
-        cell_role, first_name, last_name, user_login, phone_number, password, cell_id, date_created
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+        cell_role, first_name, last_name, user_login, phone_number, password, cell_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?))
     ');
     $success = $stmt->execute([
       $adminRole,
@@ -513,16 +513,16 @@ if ($action === 'add_cell_member') {
   $title        = clean_input($_POST['title'] ?? '');
   $firstName    = clean_input($_POST['first_name'] ?? '');
   $lastName     = clean_input($_POST['last_name'] ?? '');
-  $phone        = clean_input($_POST['phone'] ?? '');
+  $phone        = clean_input($_POST['phone_number'] ?? '');
   $email        = clean_input($_POST['email'] ?? '');
-  $dobMonth     = clean_input($_POST['dob-month'] ?? '');
-  $dobDay       = clean_input($_POST['dob-day'] ?? '');
+  $dobMonth     = clean_input($_POST['dob_month'] ?? '');
+  $dobDay       = clean_input($_POST['dob_day'] ?? '');
   $occupation   = clean_input($_POST['occupation'] ?? '');
   $resAddress   = clean_input($_POST['res_address'] ?? '');
-  $fsStatus     = clean_input($_POST['fs-status'] ?? '');
-  $deptInCell   = clean_input($_POST['dept-in-cell'] ?? '');
-  $deptInChurch = clean_input($_POST['dept-in-church'] ?? '');
-  $joinedDate   = clean_input($_POST['joined-ministry-date'] ?? '');
+  $fsStatus     = clean_input($_POST['fs_status'] ?? '');
+  $delgInCell   = clean_input($_POST['delg_in_cell'] ?? '');
+  $deptInChurch = clean_input($_POST['dept_in_church'] ?? '');
+  $joinedDate   = clean_input($_POST['date_joined_ministry'] ?? '');
 
   // Server-side validation (first & last name required)
   if ($firstName === '' || $lastName === '') {
@@ -539,13 +539,13 @@ if ($action === 'add_cell_member') {
 
   $stmt = $conn->prepare("
       INSERT INTO cell_members 
-        (title, first_name, last_name, phone_number, email, dob_month, dob_day, occupation, residential_address, foundation_sch_status, dept_in_cell, dept_in_church, date_joined_ministry, cell_id)
+        (title, first_name, last_name, phone_number, email, dob_month, dob_day, occupation, residential_address, foundation_sch_status, delg_in_cell, dept_in_church, date_joined_ministry, cell_id)
       VALUES
         (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   ");
 
   $executeResult = $stmt->execute([
-      $title, $firstName, $lastName, $phone, $email, $dobMonth, $dobDay, $occupation, $resAddress, $fsStatus, $deptInCell, $deptInChurch, $joinedDate, $cellId
+      $title, $firstName, $lastName, $phone, $email, $dobMonth, $dobDay, $occupation, $resAddress, $fsStatus, $delgInCell, $deptInChurch, $joinedDate, $cellId
   ]);
 
   if ($executeResult) {
@@ -576,7 +576,7 @@ if ($action === 'fetch_all_cell_members') {
       occupation,
       residential_address,
       CONCAT(UPPER(LEFT(foundation_sch_status, 1)), SUBSTRING(foundation_sch_status, 2)) AS foundation_sch_status,
-      dept_in_cell,
+      delg_in_cell,
       dept_in_church,
       date_joined_ministry,
       DATE_FORMAT(date_added, '%d/%m/%Y') AS date_added,
@@ -599,36 +599,44 @@ if ($action === 'fetch_all_cell_members') {
           - Functionality
 =======================================*/
 if ($action === 'edit_cell_member') {
-  $member_id = clean_input($_POST['member_id']);
+  $member_id = clean_input($_POST['member_id'] ?? '');
+
+  if (!$member_id) {
+    echo json_encode(["status" => "error", "message" => "Cell member ID not found!"]);
+    exit;
+  }
+
   $title = clean_input($_POST['title']);
   $first_name = clean_input($_POST['first_name']);
   $last_name = clean_input($_POST['last_name']);
   $phone_number = clean_input($_POST['phone_number']);
   $email = clean_input($_POST['email']);
-  $dob = clean_input($_POST['dob']);
+  $dob_month = clean_input($_POST['dob_month']);
+  $dob_day = clean_input($_POST['dob_day']);
   $occupation = clean_input($_POST['occupation']);
-  $residential_address = clean_input($_POST['residential_address']);
-  $foundation_sch_status = clean_input($_POST['foundation_sch_status']);
-  $dept_in_cell = clean_input($_POST['dept_in_cell']);
+  $residential_address = clean_input($_POST['res_address']);
+  $foundation_sch_status = clean_input($_POST['fs_status']);
+  $delg_in_cell = clean_input($_POST['delg_in_cell']);
   $dept_in_church = clean_input($_POST['dept_in_church']);
   $date_joined_ministry = clean_input($_POST['date_joined_ministry']);
 
-  $stmt = $conn->prepare("
-    UPDATE cell_members 
-    SET title = ?, first_name = ?, last_name = ?, phone_number = ?, email = ?, dob = ?, occupation = ?, residential_address = ?, foundation_sch_status = ?, dept_in_cell = ?, dept_in_church = ?, date_joined_ministry = ?
-    WHERE id = ?
-  ");
+  $stmt = $conn->prepare(
+    "UPDATE cell_members 
+    SET title = ?, first_name = ?, last_name = ?, phone_number = ?, email = ?, dob_month = ?, dob_day = ?, occupation = ?, residential_address = ?, foundation_sch_status = ?, delg_in_cell = ?, dept_in_church = ?, date_joined_ministry = ?
+    WHERE id = ?");
+  
   $success = $stmt->execute([
     $title,
     $first_name,
     $last_name,
     $phone_number,
     $email,
-    $dob,
+    $dob_month,
+    $dob_day,
     $occupation,
     $residential_address,
     $foundation_sch_status,
-    $dept_in_cell,
+    $delg_in_cell,
     $dept_in_church,
     $date_joined_ministry,
     $member_id
@@ -637,9 +645,11 @@ if ($action === 'edit_cell_member') {
   if ($success) {
     echo json_encode(["status" => "success"]);
   } else {
-    echo json_encode(["status" => "error", "message" => "Failed to update member."]);
+    echo json_encode(["status" => "error", "message" => "Failed to update member's details."]);
   }
+  exit;
 }
+
 
 /*=======================================
       Delete Cell Members Functionality

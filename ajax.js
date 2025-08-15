@@ -235,6 +235,8 @@ $(document).ready(() => {
         if (cells.length === 0) {
           $("#cells-table-info-block .info").text("No data found!");
           return;
+        } else {
+          $("#cells-table-info-block .info").text("");
         }
 
         cells.forEach(function (cell, index) {
@@ -590,6 +592,8 @@ $(document).ready(() => {
         if (cellMembers.length === 0) {
           $("#cell-members-table-info-block .info").text("No data found!");
           return;
+        } else {
+          $("#cell-members-table-info-block .info").text("");
         }
 
         cellMembers.forEach(function (member, index) {
@@ -605,15 +609,15 @@ $(document).ready(() => {
           <td>${member.occupation || ""}</td>
           <td>${member.residential_address || ""}</td>
           <td>${member.foundation_sch_status || ""}</td>
-          <td>${member.dept_in_cell || ""}</td>
+          <td>${member.delg_in_cell || ""}</td>
           <td>${member.dept_in_church || ""}</td>
           <td>${member.date_joined_ministry || ""}</td>
           <td>${member.date_added || ""}</td>
-          <td class="d-flex align-items-center gap-2"><button class="px-3 py-1 action-btn edit-btn load-action-modal-dyn-content" data-content-type="edit-cell-member-details" data-member-name="${
+          <td class="d-flex align-items-center gap-2"><button class="px-3 py-1 action-btn edit--member-btn load-action-modal-dyn-content" data-content-type="edit-cell-member-details" data-member-name="${
             member.first_name + " " + member.last_name
           }" data-member-id="${
             member.id
-          }">Edit</button> <button class="px-3 py-1 action-btn delete-btn" data-member-id="${
+          }">Edit</button> <button class="px-3 py-1 action-btn delete-member-btn" data-member-id="${
             member.id
           }">Delete</button></td>
         </tr>`;
@@ -647,13 +651,14 @@ $(document).ready(() => {
       dataType: "json",
       success: (res) => {
         if (res.status === "success") {
-          alert("Member details updated successfully!");
-          fetchAllCellMembers(); // Refresh the table
+          alert("Member details updated!");
+          fetchAllCellMembers();
           $("#edit-cell-member-form .submit-btn")
             .prop("disabled", true)
             .text("Save");
+          toggleActionModal();
         } else {
-          alert(res.message || "Error updating member.");
+          alert(res.message || "Error updating member's details.");
           $btn.prop("disabled", false).text("Save");
         }
       },
@@ -668,7 +673,7 @@ $(document).ready(() => {
               Delete Cell Member
                  - Function
   *********************************************/
-  $(document).on("click", "#cell-members-table .delete-btn", function () {
+  $(document).on("click", "#cell-members-table .delete-member-btn", function () {
     const $thisElement = $(this);
     const memberId = $thisElement.data("member-id");
 
@@ -684,7 +689,7 @@ $(document).ready(() => {
       method: "POST",
       dataType: "json",
       data: {
-        member_id: memberId,
+        "member_id": memberId,
       },
       success: (res) => {
         if (res.status === "success") {

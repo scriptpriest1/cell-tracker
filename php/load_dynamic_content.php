@@ -537,7 +537,7 @@ if (isset($_POST['content-type'])) {
 
           <div class="form-group">
             <label for="phone">Phone number:</label>
-            <input type="phone" name="phone" id="phone" class="form-control" />
+            <input type="phone" name="phone_number" id="phone" class="form-control" />
           </div>
 
           <div class="form-group">
@@ -549,7 +549,7 @@ if (isset($_POST['content-type'])) {
             <label for="dob">Date of birth:</label>
             <div class="d-flex align-items-center gap-2">
               <!-- MONTH -->
-              <select name="dob-month" id="dob-month" class="form-control form-select">
+              <select name="dob_month" id="dob-month" class="form-control form-select">
                 <option value="">Month</option>
                 <option value="jan">Jan</option>
                 <option value="feb">Feb</option>
@@ -565,7 +565,7 @@ if (isset($_POST['content-type'])) {
                 <option value="dec">Dec</option>
               </select>
               <!-- DAY -->
-              <select name="dob-day" id="dob-day" class="form-control form-select">
+              <select name="dob_day" id="dob-day" class="form-control form-select">
                 <option value="">Day</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
@@ -623,8 +623,8 @@ if (isset($_POST['content-type'])) {
           </div>
 
           <div class="form-group">
-            <label for="dob">Foundation sch. status:</label>
-            <select name="fs-status" id="fs-status" class="form-control form-select">
+            <label for="fs-status">Foundation sch. status:</label>
+            <select name="fs_status" id="fs-status" class="form-control form-select">
               <option value="">Select</option>
               <option value="not-enrolled">Not enrolled</option>
               <option value="enrolled">Enrolled</option>
@@ -633,31 +633,33 @@ if (isset($_POST['content-type'])) {
           </div>
 
           <div class="form-group">
-            <label for="dept-in-cell">Dept. in Cell:</label>
+            <label for="delg-in-cell">Delegation in Cell:</label>
             <input
               type="text"
-              name="dept-in-cell"
-              id="dept-in-cell"
+              name="delg_in_cell"
+              id="delg-in-cell"
               class="form-control"
+              placeholder="e.g: Cell leader, Secretary"
             />
           </div>
 
           <div class="form-group">
-            <label for="dept-in-cell">Dept. in Church:</label>
+            <label for="dept-in-church">Dept. in Church:</label>
             <input
               type="text"
-              name="dept-in-church"
+              name="dept_in_church"
               id="dept-in-church"
               class="form-control"
+              placeholder="e.g: Choir"
             />
           </div>
 
           <div class="form-group">
-            <label for="joined-ministry-date">Date joined ministry:</label>
+            <label for="date-joined-ministry">Date joined ministry:</label>
             <input
               type="date"
-              name="joined-ministry-date"
-              id="joined-ministry-date"
+              name="date_joined_ministry"
+              id="date-joined-ministry"
               class="form-control"
             />
           </div>
@@ -690,7 +692,7 @@ if (isset($_POST['content-type'])) {
       occupation,
       residential_address,
       foundation_sch_status,
-      dept_in_cell,
+      delg_in_cell,
       dept_in_church,
       date_joined_ministry FROM cell_members WHERE id = ?");
     $stmt->execute([$member_id]);
@@ -711,14 +713,14 @@ if (isset($_POST['content-type'])) {
     $occupation = htmlspecialchars($member['occupation']);
     $res_address = htmlspecialchars($member['residential_address']);
     $fs_status = htmlspecialchars($member['foundation_sch_status']);
-    $dept_in_cell = htmlspecialchars($member['dept_in_cell']);
+    $delg_in_cell = htmlspecialchars($member['delg_in_cell']);
     $dept_in_church = htmlspecialchars($member['dept_in_church']);
     $date_joined_ministry = htmlspecialchars($member['date_joined_ministry']);
 
     ob_start();
     ?>
     <form id="edit-cell-member-form" class="action-modal-form position-relative">
-      <input type="hidden" value="<?=$member_id?>">
+      <input type="hidden" name="member_id" value="<?=$member_id?>">
       <div class="body px-4 pt-2">
         <div class="form-group">
           <label for="title">Title:</label>
@@ -756,7 +758,7 @@ if (isset($_POST['content-type'])) {
 
         <div class="form-group">
           <label for="phone">Phone number:</label>
-          <input type="phone" name="phone" id="phone" class="form-control" value="<?=$phone_number?>" />
+          <input type="phone" name="phone_number" id="phone" class="form-control" value="<?=$phone_number?>" />
         </div>
 
         <div class="form-group">
@@ -768,7 +770,7 @@ if (isset($_POST['content-type'])) {
           <label for="dob">Date of birth:</label>
           <div class="d-flex align-items-center gap-2">
             <!-- MONTH -->
-            <select name="dob-month" id="dob-month" class="form-control form-select">
+            <select name="dob_month" id="dob-month" class="form-control form-select">
               <option value="<?=$dob_month?>"><?=ucfirst($dob_month != '' ? $dob_month : 'Month')?></option>
               <option value="jan">Jan</option>
               <option value="feb">Feb</option>
@@ -784,7 +786,7 @@ if (isset($_POST['content-type'])) {
               <option value="dec">Dec</option>
             </select>
             <!-- DAY -->
-            <select name="dob-day" id="dob-day" class="form-control form-select">
+            <select name="dob_day" id="dob-day" class="form-control form-select">
               <option value="<?=$dob_day?>"><?=$dob_day != '' ? $dob_day : 'Day'?></option>
               <option value="1">1</option>
               <option value="2">2</option>
@@ -845,7 +847,7 @@ if (isset($_POST['content-type'])) {
 
         <div class="form-group">
           <label for="dob">Foundation sch. status:</label>
-          <select name="fs-status" id="fs-status" class="form-control form-select">
+          <select name="fs_status" id="fs-status" class="form-control form-select">
             <option value="<?=$fs_status?>" selected><?=ucfirst($fs_status != '' ? $fs_status : 'Select')?></option>
             <option value="not-enrolled">Not enrolled</option>
             <option value="enrolled">Enrolled</option>
@@ -854,24 +856,26 @@ if (isset($_POST['content-type'])) {
         </div>
 
         <div class="form-group">
-          <label for="dept-in-cell">Dept. in Cell:</label>
+          <label for="delg-in-cell">Delegation in Cell:</label>
           <input
             type="text"
-            name="dept-in-cell"
-            id="dept-in-cell"
+            name="delg_in_cell"
+            id="delg-in-cell"
             class="form-control"
-            value="<?=$dept_in_cell?>"
+            value="<?=$delg_in_cell?>"
+            placeholder="e.g: Cell leader, Secretary"
           />
         </div>
 
         <div class="form-group">
-          <label for="dept-in-cell">Dept. in Church:</label>
+          <label for="dept-in-church">Dept. in Church:</label>
           <input
             type="text"
-            name="dept-in-church"
+            name="dept_in_church"
             id="dept-in-church"
             class="form-control"
             value="<?=$dept_in_church?>"
+            placeholder="e.g: Choir"
           />
         </div>
 
@@ -879,8 +883,8 @@ if (isset($_POST['content-type'])) {
           <label for="joined-ministry-date">Date joined ministry:</label>
           <input
             type="date"
-            name="joined-ministry-date"
-            id="joined-ministry-date"
+            name="date_joined_ministry"
+            id="date-joined-ministry"
             class="form-control"
             value="<?=$date_joined_ministry?>"
           />
