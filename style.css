@@ -258,9 +258,6 @@ button.check-btn svg {
   z-index: 2;
 }
 
-.action-modal .action-panel .panel-body {
-}
-
 .action-modal .action-panel .panel-body .side-panel {
   display: none;
   background-color: var(--tertiary-alt);
@@ -271,9 +268,6 @@ button.check-btn svg {
 }
 .action-modal .action-panel .panel-body .side-panel.reveal {
   display: block;
-}
-
-.action-modal .action-panel .header #editTitleBtn {
 }
 
 .action-modal .action-panel .header #editTitleBtn svg {
@@ -338,9 +332,6 @@ button.check-btn svg {
   .auth-panel {
     width: 85%;
   }
-}
-
-.auth-panel .auth-form {
 }
 
 .auth-panel .auth-form .step {
@@ -558,13 +549,6 @@ button.check-btn svg {
 
 /* Cells & Cell Members' page */
 
-.cell-table-section .control-panel .cell-count,
-.cell-table-section .control-panel .cell-member-count {
-  padding: 1px 7px;
-  border-radius: 5px;
-  background-color: var(--border);
-}
-
 .table-info-block .info {
   color: var(--text-secondary);
 }
@@ -633,9 +617,6 @@ button.check-btn svg {
   background-color: var(--hover-on-bg);
 }
 
-.cells-table-container table tr .assign-cell-admin-btn {
-}
-
 .cells-table-container table tr .delete-member-btn {
   border-color: var(--error);
   color: var(--error);
@@ -693,10 +674,10 @@ button.check-btn svg {
   margin-top: -3px !important;
 }
 
-.dropdown-item.unassign-btn {
-  color: var(--error) !important;
+.dropdown-item.edit-admin-btn {
+  color: var(--primary) !important;
 }
-.dropdown-item.unassign-btn.delete {
+.dropdown-item.unassign-admin-btn {
   color: var(--error) !important;
 }
 
@@ -707,17 +688,17 @@ button.check-btn svg {
 
 /* Reports Page */
 
-.reports-type-bar {
+.reports-status-bar {
   overflow: auto;
   white-space: nowrap;
 }
 
-.report-type.published .span-box{
+.report-status.published .span-box{
   background-color: var(--success-light);
 }
-.report-type.pending .span-box{
+.report-status.pending .span-box{
   background-color: var(--warning-light);
 }
-.report-type.unpublished .span-box{
+.report-status.unpublished .span-box{
   background-color: var(--error-light);
 }

@@ -279,11 +279,8 @@ if (isset($_POST['content-type'])) {
                   </li>
                 <?php endif; ?>
                 <li>
-                  <?php if ($email === $user_login): ?>
-                    <a class="dropdown-item unassign-btn" href="#" data-content-type="fetch-cell-admins" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">Unassign</a>
-                  <?php else: ?>
-                    <a class="dropdown-item delete unassign-btn" href="#" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">Remove Admin</a>
-                  <?php endif; ?>
+                  <a class="dropdown-item unassign-admin-btn" href="#" data-content-type="fetch-cell-admins" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">
+                  <?php if ($email === $user_login): ?>Unassign<?php else: ?>Remove Admin<?php endif; ?></a>
                 </li>
               </ul>
             </div>
@@ -331,11 +328,9 @@ if (isset($_POST['content-type'])) {
                   </li>
                 <?php endif; ?>
                 <li>
-                  <?php if ($email === $user_login): // self ?>
-                    <a class="dropdown-item unassign-btn" href="#" data-content-type="fetch-cell-admins" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">Unassign</a>
-                  <?php else: ?>
-                    <a class="dropdown-item delete unassign-btn" href="#" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">Remove Admin</a>
-                  <?php endif; ?>
+                  <a class="dropdown-item unassign-admin-btn" href="#" data-content-type="fetch-cell-admins" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">
+                  <?php if ($email === $user_login): ?>Unassign<?php else: ?>Remove Admin<?php endif; ?></a>
+                </li>
                 </li>
               </ul>
             </div>
@@ -380,11 +375,8 @@ if (isset($_POST['content-type'])) {
                   </li>
                 <?php endif; ?>
                 <li>
-                  <?php if ($email === $user_login): // self ?>
-                    <a class="dropdown-item unassign-btn" href="#" data-content-type="fetch-cell-admins" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">Unassign</a>
-                  <?php else: ?>
-                    <a class="dropdown-item delete unassign-btn" href="#" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">Remove Admin</a>
-                  <?php endif; ?>
+                  <a class="dropdown-item unassign-admin-btn" href="#" data-content-type="fetch-cell-admins" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">
+                  <?php if ($email === $user_login): ?>Unassign<?php else: ?>Remove Admin<?php endif; ?></a>
                 </li>
               </ul>
             </div>

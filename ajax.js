@@ -51,6 +51,8 @@ $(document).ready(() => {
   *********************************************/
 
   $(document).on("click", ".logout-btn", function () {
+    if (!confirm("Are you sure you want to log out?")) return;
+
     $.ajax({
       url: "../php/ajax.php?action=logout",
       success: (res) => {
@@ -384,7 +386,7 @@ $(document).ready(() => {
   /*********************************************
             Unassign cell admin logic
   *********************************************/
-  $(document).on("click", "#cells-table .unassign-btn", function (e) {
+  $(document).on("click", ".unassign-admin-btn", function (e) {
     const $thisElement = $(this);
     const userId = $thisElement.data("user-id");
     const cellId = $thisElement.data("cell-id");
