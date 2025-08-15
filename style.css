@@ -36,6 +36,12 @@
   --error: #dc3545;
   --warning: #ffc103;
   --info: #0d6efd;
+  --success-hover: #19875420;
+  --success-light: #19875440;
+  --error-hover: #dc354520;
+  --error-light: #dc354540;
+  --warning-hover: #ffc10320;
+  --warning-light: #ffc10340;
 
   /* Others */
   --box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
@@ -118,6 +124,12 @@ button.check-btn svg {
   fill: var(--text-tertiary);
 }
 
+.span-box {
+  padding: 1px 7px;
+  border-radius: 5px;
+  background-color: var(--border);
+}
+
 /* Feedback pop-ups */
 #success-msg,
 #err-msg {
@@ -132,6 +144,25 @@ button.check-btn svg {
   background: var(--error);
   color: var(--text-tertiary);
   border-radius: 5px;
+}
+
+/* Filter styling */
+.filter-bar {
+  overflow: auto;
+  white-space: nowrap;
+}
+
+.filter-bar .filter {
+  background-color: var(--border);
+  font-size: 14px;
+  padding: 4px 12px;
+  border-radius: 50px;
+}
+.filter-bar .filter:hover {
+  background-color: var(--primary-lighter);
+}
+.filter-bar .filter.active {
+  background-color: var(--primary-light);
 }
 
 #success-msg {
@@ -525,7 +556,7 @@ button.check-btn svg {
   }
 }
 
-/* Cells page */
+/* Cells & Cell Members' page */
 
 .cell-table-section .control-panel .cell-count,
 .cell-table-section .control-panel .cell-member-count {
@@ -610,7 +641,7 @@ button.check-btn svg {
   color: var(--error);
 }
 .cells-table-container table tr .delete-member-btn:hover {
-  background-color: #ffb0b020;
+  background-color: var(--error-hover);
 }
 
 .action-modal-form .body {
@@ -671,4 +702,22 @@ button.check-btn svg {
 
 #action-modal .cell-admins-list-container .admins-list-info {
   color: var(--text-secondary);
+}
+
+
+/* Reports Page */
+
+.reports-type-bar {
+  overflow: auto;
+  white-space: nowrap;
+}
+
+.report-type.published .span-box{
+  background-color: var(--success-light);
+}
+.report-type.pending .span-box{
+  background-color: var(--warning-light);
+}
+.report-type.unpublished .span-box{
+  background-color: var(--error-light);
 }

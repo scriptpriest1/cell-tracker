@@ -32,7 +32,7 @@
 
       <div class="stats">
 
-        <h3>Stats</h3>
+        <!-- <h3>Stats</h3> -->
 
         <?php if ($_SESSION['admin_type'] === 'church'): ?>
         <div class="data-block stats-block d-grid">
@@ -87,7 +87,7 @@
 
       <div class="cell-table-section">
         <div class="control-panel d-flex align-items-center gap-3 justify-content-between mb-2">
-          <h6 class="m-0">Cells: &nbsp;<span class="cell-count"></span></h6>
+          <h6 class="m-0">Total No.: &nbsp;<span class="cell-count fw-normal"></span></h6>
 
           <button id="add-cell-btn" class="load-action-modal-dyn-content add-cell-btn px-3" data-content-type="add-a-cell-form">Add a Cell
           </button>
@@ -131,7 +131,7 @@
 
       <div class="cell-table-section">
         <div class="control-panel d-flex align-items-center gap-3 justify-content-between mb-2">
-          <h6 class="m-0">Cell members: &nbsp;<span class="cell-member-count"></span></h6>
+          <h6 class="m-0">Total No.: &nbsp;<span class="cell-member-count fw-normal"></span></h6>
 
           <button id="add-members-btn" class="load-action-modal-dyn-content add-member-btn px-3" data-content-type="add-cell-member-form">Add members
           </button>
@@ -182,7 +182,42 @@
 
     <!-- Reports page -->
     <div id="reports-page" class="data-container d-none">
-      <h3>Reports</h3>
+      <!-- Church Dashboard Reports Section -->
+      <?php if ($_SESSION['admin_type'] === 'church'): ?>
+      <section class="reports-section">
+        Church Report Section
+      </section>
+      <?php endif ?>
+
+      <!-- Cell Dashboard Reports Section -->
+      <?php if ($_SESSION['admin_type'] === 'cell'): ?>
+      <section class="reports-section">
+
+        <div class="reports-type-bar d-flex align-items-center gap-4 mt-1">
+          <div class="report-type published d-flex align-items-center gap-2">
+            <h6 class="text m-0 p-0">Published:</h6>
+            <span class="count span-box">0</span>
+          </div>
+
+          <div class="report-type pending d-flex align-items-center gap-2">
+            <h6 class="text m-0 p-0">Pending:</h6>
+            <span class="count span-box">0</span>
+          </div>
+
+          <div class="report-type unpublished d-flex align-items-center gap-2">
+            <h6 class="text m-0 p-0">Unpublished:</h6>
+            <span class="count span-box">0</span>
+          </div>
+        </div>
+
+        <div class="filter-bar d-flex align-items-center gap-3 mt-4">
+          <button id="all" class="filter active">All</button>
+          <button id="meetings" class="filter">Meetings</button>
+          <button id="outreached" class="filter">Outreaches</button>
+        </div>
+
+      </section>
+      <?php endif ?>
     </div>
 
     <!-- Settings page -->

@@ -6,18 +6,6 @@ include 'functions.php';
 $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
 
 /*=======================================
-    Check if user_login already exists
-=======================================*/
-// if ($action === 'check_user_login') {
-//   $user_login = clean_input($_POST['user-login']);
-
-//   $stmt = $conn->prepare('SELECT COUNT(*) FROM users WHERE user_login = ?');
-//   $stmt->execute([$user_login]);
-//   echo $stmt->fetchColumn() ? 'notAvailable' : 'available';
-//   exit;
-// }
-
-/*=======================================
          Add a Cell Functionality
 =======================================*/
 if ($action === 'add_a_cell') {
