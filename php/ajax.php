@@ -666,3 +666,95 @@ if ($action === 'delete_cell_member') {
   }
   exit;
 }
+
+/*=======================================
+      Generate Cell Report Draft 
+          - Functionality
+=======================================*/
+if ($action === 'generate_report_draft') {
+  $cell_id = $_SESSION['entity_id'] ?? null;
+  if (!$cell_id) {
+    echo json_encode(['status' => 'error', 'message' => 'Cell ID not found in session']);
+    exit;
+  }
+
+  $type = in_array($_POST['type'] ?? 'meeting', ['meeting', 'outreach']) ? $_POST['type'] : 'meeting';
+
+  // Compute week-of-month (weeks start on Sunday)
+  // day = day of month (1..31)
+  // offset = weekday index of first day of month (0 = Sunday .. 6 = Saturday)
+  // week = floor((day + offset - 1) / 7) + 1
+  $today = new DateTime();                       // uses server date/time (when draft is generated)
+  $day = (int) $today->format('j');
+  $firstOfMonth = new DateTime($today->format('Y-m-01'));
+  $offset = (int) $firstOfMonth->format('w');   // 0 (Sun) .. 6 (Sat)
+  $week = (int) (floor(($day + $offset - 1) / 7) + 1);
+
+  try {
+    $stmt = $conn->prepare("
+      INSERT INTO cell_report_drafts (type, week, status, date_generated, cell_id)
+      VALUES (?, ?, 'pending', NOW(), ?)
+    ");
+    $stmt->execute([$type, $week, $cell_id]);
+
+    $lastId = $conn->lastInsertId();
+
+    if ($lastId) {
+      // return the newly created row
+      $sel = $conn->prepare("SELECT id, type, week, status, DATE_FORMAT(date_generated, '%Y-%m-%d %H:%i:%s') AS date_generated, cell_id FROM cell_report_drafts WHERE id = ? LIMIT 1");
+      $sel->execute([$lastId]);
+      $draft = $sel->fetch(PDO::FETCH_ASSOC);
+
+      // optional: set a description placeholder if you want
+      $draft['description'] = ''; // can be filled later
+
+      echo json_encode(['status' => 'success', 'message' => 'Draft generated', 'draft' => $draft]);
+      exit;
+    } else {
+      echo json_encode(['status' => 'error', 'message' => 'Failed to insert draft']);
+      exit;
+    }
+
+  } catch (PDOException $ex) {
+    error_log("generate_report_draft error: " . $ex->getMessage());
+    echo json_encode(['status' => 'error', 'message' => 'Database error']);
+    exit;
+  }
+}
+
+
+/*=======================================
+        Fetch Cell Report Draft 
+          - Functionality
+=======================================*/
+if ($action === 'fetch_report_drafts') {
+  $cell_id = $_SESSION['entity_id'] ?? null;
+  if (!$cell_id) {
+    echo json_encode(['status' => 'error', 'message' => 'Cell ID not found in session']);
+    exit;
+  }
+
+  try {
+    $q = $conn->prepare("
+      SELECT id, type, week, status, DATE_FORMAT(date_generated, '%Y-%m-%d %H:%i:%s') AS date_generated, cell_id
+      FROM cell_report_drafts
+      WHERE cell_id = ?
+      ORDER BY date_generated ASC
+    ");
+    $q->execute([$cell_id]);
+    $rows = $q->fetchAll(PDO::FETCH_ASSOC);
+
+    // Optionally add description placeholder if you need
+    foreach ($rows as &$r) {
+      $r['description'] = ''; // fill later from another column if you have one
+    }
+
+    echo json_encode(['status' => 'success', 'data' => $rows]);
+    exit;
+  } catch (PDOException $ex) {
+    error_log("fetch_report_drafts error: " . $ex->getMessage());
+    echo json_encode(['status' => 'error', 'message' => 'Database error']);
+    exit;
+  }
+}
+

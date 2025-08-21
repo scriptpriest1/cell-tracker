@@ -675,36 +675,294 @@ $(document).ready(() => {
               Delete Cell Member
                  - Function
   *********************************************/
-  $(document).on("click", "#cell-members-table .delete-member-btn", function () {
-    const $thisElement = $(this);
-    const memberId = $thisElement.data("member-id");
+  $(document).on(
+    "click",
+    "#cell-members-table .delete-member-btn",
+    function () {
+      const $thisElement = $(this);
+      const memberId = $thisElement.data("member-id");
 
-    if (!memberId) {
-      alert("Missing member ID.");
-      return;
+      if (!memberId) {
+        alert("Missing member ID.");
+        return;
+      }
+
+      if (!confirm("Are you sure you want to delete this member?")) return;
+
+      $.ajax({
+        url: "../php/ajax.php?action=delete_cell_member",
+        method: "POST",
+        dataType: "json",
+        data: {
+          member_id: memberId,
+        },
+        success: (res) => {
+          if (res.status === "success") {
+            fetchAllCellMembers();
+            alert("Cell member deleted successfully.");
+          } else {
+            alert(res.message || "Failed to delete cell member.");
+          }
+        },
+        error: () => {
+          alert("Server error!");
+        },
+      });
+    }
+  );
+
+  /*********************************************
+            Cell Reporting System
+                 - Function
+  *********************************************/
+  // Helper: format month-year from a date string "YYYY-MM-DD HH:MM:SS"
+  const formatMonthYear = (dateStr) => {
+    if (!dateStr) return "";
+    // Make it ISO-friendly for Date parsing
+    const iso = dateStr.replace(" ", "T");
+    const d = new Date(iso);
+    const monthName = d.toLocaleString(undefined, { month: "short" }); // e.g. "Aug"
+    const year = d.getFullYear();
+    return `${monthName} ${year}`; // e.g. "Aug 2025"
+  };
+
+  // Helper: return yyyy-mm-01 string used as data-date attribute (01-MM-YYYY format in your sample)
+  const monthDataDate = (dateStr) => {
+    const iso = dateStr.replace(" ", "T");
+    const d = new Date(iso);
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yyyy = d.getFullYear();
+    return `01-${mm}-${yyyy}`;
+  };
+
+  // Create single draft DOM element (matching your sample)
+  const buildDraftElement = (draft) => {
+    // draft: object with id, type, week, status, date_generated, description (optional)
+    const desc = draft.description ?? "Enter a paragraph here";
+    const status = draft.status ?? "pending";
+    const $el = $(`
+    <div class="report-draft px-3 py-2 d-flex align-items-center justify-content-between gap-2"
+         data-report-type="${draft.type}"
+         data-week="${draft.week}"
+         data-report-status="${status}"
+         data-id="${draft.id}"
+         data-date-generated="${draft.date_generated}">
+      <div class="text-bar d-flex align-items-center gap-2">
+        <h6 class="m-0 p-0 week">Week ${draft.week}:</h6>
+        <p class="m-0 p-0 description">${$("<div>").text(desc).html()}</p>
+      </div>
+
+      <div class="action-bar d-flex align-items-center justify-content-between gap-2">
+        <span class="label">${status === "published" ? "published" : ""}</span>
+        <button class="${
+          status === "published" ? "view-btn" : "publish-btn"
+        } m-0 p-0" data-cell-id="${draft.cell_id}">${
+      status === "published" ? "View" : "Publish"
+    }</button>
+      </div>
+    </div>
+  `);
+
+    return $el;
+  };
+
+  // Insert a draft into its month container in ascending order by date_generated
+  const insertDraftIntoMonthContainer = (draft) => {
+    const monthYear = formatMonthYear(draft.date_generated);
+    const monthData = monthDataDate(draft.date_generated); // like "01-08-2025"
+    // find existing date-bar with that month
+    let $monthBlock = null;
+    $(".reports-block").each(function () {
+      // there could be multiple .reports-block sections; find the .date-bar whose h5.date matches monthYear
+      const $h = $(this).find(".date-bar > .date, .date-bar > h5.date");
+      if ($h.length && $h.text().trim() === monthYear) {
+        $monthBlock = $(this).find(".reports-container").first();
+        return false; // break each
+      }
+    });
+
+    // if not found, create the html structure and insert it in chronological order
+    if (!$monthBlock || $monthBlock.length === 0) {
+      const $newBlock = $(`
+      <div class="reports-block mt-4">
+        <div class="date-bar">
+          <h5 class="date">${monthYear}</h5>
+          <div class="reports-container mt-2" data-date="${monthData}"></div>
+        </div>
+      </div>
+    `);
+
+      // Insert into the DOM in chronological order by data-date attribute (01-MM-YYYY)
+      // Convert data-date to YYYY-MM-01 for easy comparison
+      const toCompare = (dStr) => {
+        // dStr is 01-MM-YYYY
+        const parts = dStr.split("-");
+        if (parts.length !== 3) return null;
+        const mm = parts[1];
+        const yyyy = parts[2];
+        return `${yyyy}-${mm}-01`;
+      };
+
+      const $existingBlocks = $(".reports-block");
+      if ($existingBlocks.length === 0) {
+        // place in .reports-body -> keep the same structure as your page sample
+        $(".reports-body").append($newBlock);
+      } else {
+        let inserted = false;
+        $existingBlocks.each(function () {
+          const $rc = $(this).find(".reports-container").first();
+          const existingDate = $rc.attr("data-date"); // 01-MM-YYYY
+          if (!existingDate) return; // continue
+          const existingComp = toCompare(existingDate);
+          const newComp = toCompare(monthData);
+          if (!existingComp || !newComp) return;
+          // we want chronological ascending order: earlier months appear first.
+          if (newComp < existingComp) {
+            $(this).before($newBlock);
+            inserted = true;
+            return false; // break
+          }
+        });
+        if (!inserted) {
+          // append at the end
+          $(".reports-section .reports-body").append($newBlock);
+        }
+      }
+      $monthBlock = $newBlock.find(".reports-container").first();
     }
 
-    if (!confirm("Are you sure you want to delete this member?")) return;
+    // Now insert the draft inside $monthBlock in ascending order by date_generated
+    const $newDraft = buildDraftElement(draft);
 
+    // convert date_generated to comparable ISO string
+    const newDateISO = draft.date_generated.replace(" ", "T");
+
+    let placed = false;
+    $monthBlock.find(".report-draft").each(function () {
+      const existingDate = $(this).attr("data-date-generated") || "";
+      // normalize
+      const existingISO = existingDate.replace(" ", "T");
+      if (!existingISO) return;
+      if (new Date(newDateISO) < new Date(existingISO)) {
+        $(this).before($newDraft);
+        placed = true;
+        return false; // break
+      }
+    });
+
+    if (!placed) {
+      $monthBlock.append($newDraft);
+    }
+
+    // Update status counts
+    updateStatusCounts();
+  };
+
+  // Update status counters in the status bar
+  const updateStatusCounts = () => {
+    const $section = $(".reports-section");
+    if ($section.length === 0) return;
+    const $published = $section.find(
+      ".report-draft[data-report-status='published']"
+    ).length;
+    const $pending = $section.find(
+      ".report-draft[data-report-status='pending']"
+    ).length;
+    // unpublished (I assume means drafts not published yet OR some 'unpublished' state)
+    const $unpublished = $section.find(
+      ".report-draft[data-report-status!='published']"
+    ).length;
+    $section.find(".report-status.published .count").text($published);
+    $section.find(".report-status.pending .count").text($pending);
+    $section.find(".report-status.unpublished .count").text($unpublished);
+  };
+
+  // Fetch all drafts for the logged-in cell and render everything (fresh)
+  window.fetchReportDrafts = () => {
     $.ajax({
-      url: "../php/ajax.php?action=delete_cell_member",
-      method: "POST",
+      url: "../php/ajax.php",
+      type: "POST",
+      data: { action: "fetch_report_drafts" },
       dataType: "json",
-      data: {
-        "member_id": memberId,
-      },
       success: (res) => {
-        if (res.status === "success") {
-          fetchAllCellMembers();
-          alert("Cell member deleted successfully.");
+        if (res.status === "success" && Array.isArray(res.data)) {
+          // clear existing month blocks under .reports-body (but keep UI header/filter etc)
+          // We'll remove only generated .reports-blocks to avoid destroying other UI elements
+          $(".reports-section .reports-block").remove();
+
+          // Build month blocks + drafts
+          // Sort server results by date_generated ascending just to be safe
+          res.data.sort(
+            (a, b) =>
+              new Date(a.date_generated.replace(" ", "T")) -
+              new Date(b.date_generated.replace(" ", "T"))
+          );
+
+          res.data.forEach((draft) => {
+            insertDraftIntoMonthContainer(draft);
+          });
         } else {
-          alert(res.message || "Failed to delete cell member.");
+          // no drafts - clear blocks and update counts
+          $(".reports-section .reports-block").remove();
+          updateStatusCounts();
         }
       },
-      error: () => {
-        alert("Server error!");
+      error: (xhr, status, err) => {
+        console.error("fetchReportDrafts error:", err);
       },
     });
+  };
+
+  // Generate (create) a new draft row (manual button)
+  window.generateReportDraft = (type = "meeting") => {
+    $.ajax({
+      url: "../php/ajax.php",
+      type: "POST",
+      data: { action: "generate_report_draft", type: type },
+      dataType: "json",
+      success: (res) => {
+        if (res.status === "success" && res.draft) {
+          // Insert returned draft into DOM in correct place
+          insertDraftIntoMonthContainer(res.draft);
+          // Optionally, animate or highlight it
+          const $inserted = $(`.report-draft[data-id='${res.draft.id}']`);
+        } else {
+          alert(res.message || "Failed to generate draft");
+        }
+      },
+      error: (xhr, status, err) => {
+        console.error("generateReportDraft error:", err);
+        alert("Error generating draft. See console.");
+      },
+    });
+  };
+
+  // Wire up the temporary Create draft button (assumes single button)
+
+  // Load all cell report drafts
+  fetchReportDrafts();
+
+  // create draft button: you can change behavior later to choose meeting/outreach
+  $(".reports-body button:contains('Create draft')")
+    .off("click")
+    .on("click", (e) => {
+      e.preventDefault();
+      // default to 'meeting' for manual test
+      generateReportDraft("meeting");
+    });
+
+  // Delegated click handlers for publish/view buttons (placeholders)
+  $(document).on("click", ".publish-btn", (e) => {
+    const $btn = $(e.currentTarget);
+    const draftId = $btn.closest(".report-draft").data("id");
+    // TODO: open publish modal/form — left as placeholder
+    console.log("Publish clicked for draft", draftId);
+  });
+
+  $(document).on("click", ".view-btn", (e) => {
+    const draftId = $(e.currentTarget).closest(".report-draft").data("id");
+    console.log("View clicked for draft", draftId);
+    // TODO: open a view modal
   });
 
   // Close ready() function

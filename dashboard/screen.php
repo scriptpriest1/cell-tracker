@@ -181,7 +181,7 @@
     <?php endif ?>
 
     <!-- Reports page -->
-    <div id="reports-page" class="data-container d-none">
+    <div id="reports-page" class="data-container d-none position-relative">
       <!-- Church Dashboard Reports Section -->
       <?php if ($_SESSION['admin_type'] === 'church'): ?>
       <section class="reports-section">
@@ -218,14 +218,26 @@
 
         <div class="reports-body">
 
+          <button type="button" class="bg-dark text-white position-absolute top-0 end-0">Create draft</button> <!-- Will be removed later when auto-generation is integrated -->
+
           <div class="reports-block mt-4">
             <div class="date-bar">
               <h5 class="date">Aug 2025</h5>
 
-              <div class="reports-container mt-2">
-                <div class="report" data-report-type="meeting">
+              <div class="reports-container mt-2" data-date="01-08-2025">
 
-                </div>
+                <!-- <div class="report-draft px-3 py-2 d-flex align-items-center justify-content-between gap-2" data-report-type="meeting" data-week="2" data-report-status="pending">
+                  <div class="text-bar d-flex align-items-center gap-2">
+                    <h6 class="m-0 p-0 week">Week 2:</h6>
+                    <p class="m-0 p-0 description">Enter a paragraph here</p>
+                  </div>
+
+                  <div class="action-bar d-flex align-items-center justify-content-between gap-2">
+                    <span class="label"></span>
+                    <button class="publish-btn m-0 p-0" data-cell-id="">Publish</button>
+                  </div>
+                </div> -->
+
               </div>
             </div>
           </div>

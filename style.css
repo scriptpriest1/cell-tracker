@@ -702,3 +702,32 @@ button.check-btn svg {
 .report-status.unpublished .span-box{
   background-color: var(--error-light);
 }
+
+.report-draft {
+  background-color: var(--hover-on-bg);
+  border: 1px dashed var(--hover-on-bg-heavy);
+  min-height: 50px;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+.report-draft:first-child {
+  margin: 0;
+}
+
+.report-draft .description {
+  font-size: 14px;
+  font-style: italic;
+}
+
+.report-draft .label {
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-right: 20px;
+}
+
+.report-draft .publish-btn, .report-draft .view-btn {
+  color: var(--primary);
+}
+.report-draft .publish-btn:hover, .report-draft .view-btn:hover {
+  text-decoration: underline;
+}
