@@ -738,7 +738,7 @@ $(document).ready(() => {
   // Create single draft DOM element (matching your sample)
   const buildDraftElement = (draft) => {
     // draft: object with id, type, week, status, date_generated, description (optional)
-    const desc = draft.description ?? "Enter a paragraph here";
+    const desc = draft.description;
     const status = draft.status ?? "pending";
     const $el = $(`
     <div class="report-draft px-3 py-2 d-flex align-items-center justify-content-between gap-2"
@@ -787,8 +787,9 @@ $(document).ready(() => {
       <div class="reports-block mt-4">
         <div class="date-bar">
           <h5 class="date">${monthYear}</h5>
-          <div class="reports-container mt-2" data-date="${monthData}"></div>
         </div>
+
+        <div class="reports-container mt-2" data-date="${monthData}"></div>
       </div>
     `);
 
@@ -936,8 +937,6 @@ $(document).ready(() => {
       },
     });
   };
-
-  // Wire up the temporary Create draft button (assumes single button)
 
   // Load all cell report drafts
   fetchReportDrafts();

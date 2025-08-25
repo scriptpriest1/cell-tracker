@@ -688,25 +688,37 @@ if ($action === 'generate_report_draft') {
   $day = (int) $today->format('j');
   $firstOfMonth = new DateTime($today->format('Y-m-01'));
   $offset = (int) $firstOfMonth->format('w');   // 0 (Sun) .. 6 (Sat)
-  $week = (int) (floor(($day + $offset - 1) / 7) + 1);
+  if ($day > 0 && $day < 8) $week = 1;
+  if ($day > 7 && $day < 15) $week = 2;
+  if ($day > 14 && $day < 22) $week = 3;
+  if ($day > 21 && $day < 32) $week = 4;
+
+  if ($week === 1) {
+    $draft['description'] = 'Prayer and Planning';
+  } else if ($week === 2) {
+    $draft['description'] = 'Bible Study Class 1';
+  } else if ($week === 3) {
+    $draft['description'] = 'Bible Study Class 2';
+  } else {
+    $draft['description'] = 'Cell Outreach';
+  }
+
+  $description = $draft['description'];
 
   try {
     $stmt = $conn->prepare("
-      INSERT INTO cell_report_drafts (type, week, status, date_generated, cell_id)
-      VALUES (?, ?, 'pending', NOW(), ?)
+      INSERT INTO cell_report_drafts (type, week, description, status, date_generated, cell_id)
+      VALUES (?, ?, ?, 'pending', NOW(), ?)
     ");
-    $stmt->execute([$type, $week, $cell_id]);
+    $stmt->execute([$type, $week, $description, $cell_id]);
 
     $lastId = $conn->lastInsertId();
 
     if ($lastId) {
       // return the newly created row
-      $sel = $conn->prepare("SELECT id, type, week, status, DATE_FORMAT(date_generated, '%Y-%m-%d %H:%i:%s') AS date_generated, cell_id FROM cell_report_drafts WHERE id = ? LIMIT 1");
+      $sel = $conn->prepare("SELECT id, type, week, description, status, DATE_FORMAT(date_generated, '%Y-%m-%d %H:%i:%s') AS date_generated, cell_id FROM cell_report_drafts WHERE id = ? LIMIT 1");
       $sel->execute([$lastId]);
       $draft = $sel->fetch(PDO::FETCH_ASSOC);
-
-      // optional: set a description placeholder if you want
-      $draft['description'] = ''; // can be filled later
 
       echo json_encode(['status' => 'success', 'message' => 'Draft generated', 'draft' => $draft]);
       exit;
@@ -736,19 +748,13 @@ if ($action === 'fetch_report_drafts') {
 
   try {
     $q = $conn->prepare("
-      SELECT id, type, week, status, DATE_FORMAT(date_generated, '%Y-%m-%d %H:%i:%s') AS date_generated, cell_id
+      SELECT id, type, week, description, status, DATE_FORMAT(date_generated, '%Y-%m-%d %H:%i:%s') AS date_generated, cell_id
       FROM cell_report_drafts
       WHERE cell_id = ?
       ORDER BY date_generated ASC
     ");
     $q->execute([$cell_id]);
     $rows = $q->fetchAll(PDO::FETCH_ASSOC);
-
-    // Optionally add description placeholder if you need
-    foreach ($rows as &$r) {
-      $r['description'] = ''; // fill later from another column if you have one
-    }
-
     echo json_encode(['status' => 'success', 'data' => $rows]);
     exit;
   } catch (PDOException $ex) {
