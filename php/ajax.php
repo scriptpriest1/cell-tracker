@@ -525,6 +525,17 @@ if ($action === 'add_cell_member') {
       exit;
   }
 
+  // Check if the email already exists
+  $query = $conn->prepare("
+      SELECT id FROM cell_members WHERE email = ? 
+  ");
+  $query->execute([$email]);
+  if ($query->fetchColumn()) {
+    echo "Email address taken! Please use another email.";
+    exit;
+  }
+
+  // Insert cell member
   $stmt = $conn->prepare("
       INSERT INTO cell_members 
         (title, first_name, last_name, phone_number, email, dob_month, dob_day, occupation, residential_address, foundation_sch_status, delg_in_cell, dept_in_church, date_joined_ministry, cell_id)
@@ -607,6 +618,28 @@ if ($action === 'edit_cell_member') {
   $delg_in_cell = clean_input($_POST['delg_in_cell']);
   $dept_in_church = clean_input($_POST['dept_in_church']);
   $date_joined_ministry = clean_input($_POST['date_joined_ministry']);
+
+  // Server-side validation (first & last name required)
+  if ($first_name === '' || $last_name === '') {
+      echo 'First name and last name are required.';
+      exit;
+  }
+
+  // Check if the email already exists
+  if ($email !== '') {
+    // compare case-insensitively
+    $q = $conn->prepare("SELECT id FROM cell_members WHERE LOWER(email) = LOWER(?) LIMIT 1");
+    $q->execute([$email]);
+    $foundId = $q->fetchColumn();
+
+    if ($foundId && $foundId != $member_id) {
+      echo json_encode([
+        'status' => 'error',
+        'message' => 'Email address taken! Please use another email.'
+      ]);
+      exit;
+    }
+  }
 
   $stmt = $conn->prepare(
     "UPDATE cell_members 
