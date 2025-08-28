@@ -198,14 +198,19 @@ $(document).ready(() => {
       method: "POST",
       data,
       success: (res) => {
-        if (res === "success") {
-          alert("Admin successfully assigned!");
-          // Optional: reload cells or close modal
-          fetchAllCells();
-          $btn.text("Assign").prop("disabled", false);
-          $form.trigger("reset");
+        // If self-reassignment is successful, reload the browser
+        let result;
+        try {
+          result = typeof res === "string" ? JSON.parse(res) : res;
+        } catch {
+          result = { status: res };
+        }
+        if (result.status === "success" && result.profile) {
+          window.location.reload();
+        } else if (res === "success") {
+          window.location.reload();
         } else {
-          alert("Error: " + res);
+          alert("Error: " + (result.message || res));
           $btn.text("Assign").prop("disabled", false);
         }
       },
@@ -410,7 +415,7 @@ $(document).ready(() => {
         if (res.status === "success") {
           loadDynamicContentfunction.call(this, e);
           fetchAllCells();
-          alert("Unassigned admin successfully.");
+          window.location.reload();
         } else {
           alert(res.message || "Failed to unassign admin.");
         }
