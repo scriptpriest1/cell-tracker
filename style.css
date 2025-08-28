@@ -557,7 +557,7 @@ button.check-btn svg {
   width: 350px;
 }
 
- .search-icon svg {
+ .search-icon {
   fill: var(--text-secondary) !important;
 }
 
