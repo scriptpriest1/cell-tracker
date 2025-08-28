@@ -2,28 +2,13 @@
 session_start();
 include 'connect_db.php';
 include 'functions.php';
-require_once __DIR__ . '/../init.php';
 
 $action = isset($_REQUEST['action']) ? clean_input($_REQUEST['action']) : '';
-
-function get_csrf_from_request() {
-    $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? ($_POST['csrf'] ?? '');
-    return clean_input($token);
-}
-
-function csrf_or_die() {
-    $token = get_csrf_from_request();
-    if (!validate_csrf_token($token)) {
-        echo json_encode(['status'=>'error','code'=>'csrf','message'=>'Invalid CSRF token']);
-        exit;
-    }
-}
 
 /*=======================================
          Add a Cell Functionality
 =======================================*/
 if ($action === 'add_a_cell') {
-  csrf_or_die();
   if (!isset($_SESSION['entity_id']) || $_SESSION['admin_type'] !== 'church') {
     echo 'unauthorized';
     exit;
@@ -260,7 +245,6 @@ if ($action === 'fetch_all_cells') {
       Assign Cell Admin Functionality
 =======================================*/
 if ($action === 'assign_cell_admin') {
-  csrf_or_die();
   $cell_id     = clean_input($_POST['cell_id']        ?? null);
   $assign_type = clean_input($_POST['choose_admin']   ?? '');
   $role        = clean_input($_POST['role']           ?? '');
@@ -364,7 +348,6 @@ if ($action === 'assign_cell_admin') {
       Unassign Cell Admin Functionality
 =======================================*/
 if ($action === 'unassign_cell_admin') {
-    csrf_or_die();
     $userId = clean_input($_POST['user_id'] ?? null);
     $cellId = clean_input($_POST['cell_id'] ?? null);
 
@@ -406,7 +389,6 @@ if ($action === 'unassign_cell_admin') {
       Edit Cell Name Functionality
 =======================================*/
 if ($action === 'edit_cell_name') {
-  csrf_or_die();
   $inputValue = clean_input(trim($_POST['input_value'] ?? ''));
   $cellId = intval(clean_input($_POST['cell_id'] ?? 0));
 
@@ -455,7 +437,6 @@ if ($action === 'edit_cell_name') {
             Functionality
 =======================================*/
 if ($action === 'update_cell_admin') {
-  csrf_or_die();
   $cellId  = intval(clean_input($_POST['cell_id']  ?? 0));
   $adminId = intval(clean_input($_POST['admin_id'] ?? 0));
 
@@ -520,7 +501,6 @@ if ($action === 'update_cell_admin') {
               Functionality
 =======================================*/
 if ($action === 'add_cell_member') {
-  csrf_or_die();
   $title        = clean_input($_POST['title'] ?? '');
   $firstName    = clean_input($_POST['first_name'] ?? '');
   $lastName     = clean_input($_POST['last_name'] ?? '');
@@ -621,7 +601,6 @@ if ($action === 'fetch_all_cell_members') {
           - Functionality
 =======================================*/
 if ($action === 'edit_cell_member') {
-  csrf_or_die();
   $member_id = clean_input($_POST['member_id'] ?? '');
 
   if (!$member_id) {
@@ -700,7 +679,6 @@ if ($action === 'edit_cell_member') {
       Delete Cell Members Functionality
 =======================================*/
 if ($action === 'delete_cell_member') {
-  csrf_or_die();
   $member_id = clean_input($_POST['member_id'] ?? '');
 
   if (empty($member_id)) {
@@ -730,7 +708,6 @@ if ($action === 'delete_cell_member') {
           - Functionality
 =======================================*/
 if ($action === 'generate_report_draft') {
-  csrf_or_die();
   $cell_id = clean_input($_SESSION['entity_id'] ?? null);
   if (!$cell_id) {
     echo json_encode(['status' => 'error', 'message' => 'Cell ID not found in session']);
