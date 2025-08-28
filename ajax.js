@@ -415,6 +415,7 @@ $(document).ready(() => {
         if (res.status === "success") {
           loadDynamicContentfunction.call(this, e);
           fetchAllCells();
+          alert("Unassigned admin successfully.");
           window.location.reload();
         } else {
           alert(res.message || "Failed to unassign admin.");
