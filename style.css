@@ -557,9 +557,8 @@ button.check-btn svg {
   width: 350px;
 }
 
-.cell-table-section .search-bar .search-icon {
+.cell-table-section .search-bar .search-icon svg {
   fill: var(--text-secondary) !important;
-  visibility: visible;
 }
 
 @media screen and (max-width: 767px) {
