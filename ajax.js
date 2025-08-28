@@ -158,6 +158,7 @@ $(document).ready(() => {
       url: "../php/ajax.php?action=add_a_cell",
       method: "POST",
       data,
+      headers: { 'X-CSRF-Token': window.__CSRF_TOKEN__ },
       success: (res) => {
         if (res === "success") {
           alert("Cell added successfully!");
@@ -197,6 +198,7 @@ $(document).ready(() => {
       url: "../php/ajax.php?action=assign_cell_admin",
       method: "POST",
       data,
+      headers: { 'X-CSRF-Token': window.__CSRF_TOKEN__ },
       success: (res) => {
         // If self-reassignment is successful, reload the browser
         let result;
@@ -515,17 +517,19 @@ $(document).ready(() => {
     var profileType = $(this).data("profile-type");
     var entityId = $(this).data("entity-id");
 
-    $.post(
-      "../php/switch_profile.php",
-      { profile_type: profileType, entity_id: entityId },
-      function (response) {
+    $.ajax({
+      url: "../php/switch_profile.php",
+      method: "POST",
+      data: { profile_type: profileType, entity_id: entityId },
+      headers: { 'X-CSRF-Token': window.__CSRF_TOKEN__ },
+      success: function (response) {
         if (response === "success") {
-          location.reload();
+          window.location.href = "/dashboard";
         } else {
           alert("Could not switch profile.");
         }
       }
-    );
+    });
   });
 
   /*********************************************
@@ -561,6 +565,7 @@ $(document).ready(() => {
       url: "../php/ajax.php?action=add_cell_member",
       method: "POST",
       data,
+      headers: { 'X-CSRF-Token': window.__CSRF_TOKEN__ },
       success: (res) => {
         if (res === "success") {
           alert("Member added successfully!");

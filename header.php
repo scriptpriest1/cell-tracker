@@ -7,6 +7,7 @@ define('BASE_URL', 'http://cell-tracker.localhost/');
 
 // Include database connection
 require_once __DIR__ . '/php/connect_db.php';
+require_once __DIR__ . '/init.php';
 
 $isLoggedIn = false;
 
@@ -40,6 +41,7 @@ if (isset($_SESSION['user_id'])) {
 
   <!-- CSS Link -->
   <link rel="stylesheet" href="<?php echo BASE_URL; ?>style.css" />
+  <meta name="csrf-token" content="<?php echo htmlspecialchars(get_csrf_token()); ?>">
 </head>
 <body class="w-100 h-100">
 <div class="container-fluid w-100 vh-100 m-0 p-0">

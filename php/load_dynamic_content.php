@@ -4,11 +4,13 @@ include 'connect_db.php';
 include 'functions.php';
 
 if (isset($_POST['content-type'])) {
-  $content_type = $_POST['content-type'];
+  $content_type = clean_input($_POST['content-type']);
 
   if ($content_type === 'add-a-cell-form') {
+    $csrf = htmlspecialchars(get_csrf_token());
     echo <<<HTML
       <form id="add-cell-form" class="action-modal-form position-relative">
+        <input type="hidden" name="csrf" value="{$csrf}">
         <div class="body px-4 pt-2">
           <div class="form-group">
             <label for="cell-name" class="">Name of Cell: &nbsp; <span class="text-warning d-block d-md-inline-block" style="font-size: 14px; margin-top: -5px;">(Don't add "Cell" to the name)</span></label>
@@ -79,8 +81,10 @@ if (isset($_POST['content-type'])) {
   }
 
   if ($content_type === 'assign-cell-admin') {
+    $csrf = htmlspecialchars(get_csrf_token());
     echo <<<HTML
       <form id="assign-cell-admin-form" class="action-modal-form position-relative">
+        <input type="hidden" name="csrf" value="{$csrf}">
         <input type="hidden" name="cell_id" value="" id="cell-id">
         <div class="body px-4 pt-2">
           <div class="form-group">
@@ -179,14 +183,14 @@ if (isset($_POST['content-type'])) {
             - Functionality
   =======================================*/
   if ($content_type === 'view-cell-details' || $content_type === 'fetch-cell-admins') {
-    $cell_id = $_POST['cell-id'] ?? null;
+    $cell_id = clean_input($_POST['cell-id'] ?? null);
 
     if (!$cell_id) {
       echo "Cannot access Cell";
       exit;
     }
 
-    $user_login = $_SESSION['user_login'];
+    $user_login = clean_input($_SESSION['user_login']);
     $admins = [];
 
     // Fetch all users assigned to this cell
@@ -405,8 +409,8 @@ if (isset($_POST['content-type'])) {
             - Functionality
   =======================================*/
   if ($content_type === 'edit-cell-admin') {
-    $cell_id = $_POST['cell-id'] ?? null;
-    $admin_id = $_POST['admin-id'] ?? null;
+    $cell_id = clean_input($_POST['cell-id'] ?? null);
+    $admin_id = clean_input($_POST['admin-id'] ?? null);
 
     if (!$admin_id) {
       echo "<p class='text-center mt-4'>Cannot access Admin</p>";
@@ -414,7 +418,7 @@ if (isset($_POST['content-type'])) {
     } 
 
     $stmt = $conn->prepare("SELECT cell_role, first_name, last_name, user_login, phone_number FROM users WHERE id = ?");
-    $stmt->execute([$admin_id]);
+    $stmt->execute([clean_input($admin_id)]);
     $admin = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$admin) {
@@ -431,6 +435,7 @@ if (isset($_POST['content-type'])) {
     ob_start();
     ?>
       <form id="edit-cell-admin-form" class="action-modal-form load-action-modal-dyn-content position-relative pt-2" data-content-type="fetch-cell-admins" data-cell-id="<?= $cell_id ?>">
+        <input type="hidden" name="csrf" value="<?= $csrf ?>">
         <input type="hidden" name="cell_id" value="<?= $cell_id ?>" id="cell-id" />
         <input type="hidden" name="admin_id" value="<?= $admin_id ?>" id="admin-id" />
         <div class="body px-4 pt-2">
@@ -492,8 +497,10 @@ if (isset($_POST['content-type'])) {
         Add Cell Member - Functionality
   =======================================*/
   if ($content_type === 'add-cell-member-form') {
+    $csrf = htmlspecialchars(get_csrf_token());
     echo <<<HTML
       <form id="add-cell-member-form" class="action-modal-form position-relative">
+        <input type="hidden" name="csrf" value="{$csrf}">
         <div class="body px-4 pt-2">
           <div class="form-group">
             <label for="title">Title:</label>
@@ -666,7 +673,7 @@ if (isset($_POST['content-type'])) {
   }
 
   if ($content_type === 'edit-cell-member-details') {
-    $member_id = $_POST['cell-member-id'] ?? null;
+    $member_id = clean_input($_POST['cell-member-id'] ?? null);
 
     if (!$member_id) {
       echo "<p class='text-center mt-4'>Error fetching details</p>";
@@ -687,7 +694,7 @@ if (isset($_POST['content-type'])) {
       delg_in_cell,
       dept_in_church,
       date_joined_ministry FROM cell_members WHERE id = ?");
-    $stmt->execute([$member_id]);
+    $stmt->execute([clean_input($member_id)]);
     $member = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$member) {
@@ -712,6 +719,7 @@ if (isset($_POST['content-type'])) {
     ob_start();
     ?>
     <form id="edit-cell-member-form" class="action-modal-form position-relative">
+      <input type="hidden" name="csrf" value="<?=$csrf?>">
       <input type="hidden" name="member_id" value="<?=$member_id?>">
       <div class="body px-4 pt-2">
         <div class="form-group">

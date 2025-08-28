@@ -2,21 +2,36 @@
 session_start();
 include 'connect_db.php';
 include 'functions.php';
+require_once __DIR__ . '/../init.php';
 
-$action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
+$action = isset($_REQUEST['action']) ? clean_input($_REQUEST['action']) : '';
+
+function get_csrf_from_request() {
+    $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? ($_POST['csrf'] ?? '');
+    return clean_input($token);
+}
+
+function csrf_or_die() {
+    $token = get_csrf_from_request();
+    if (!validate_csrf_token($token)) {
+        echo json_encode(['status'=>'error','code'=>'csrf','message'=>'Invalid CSRF token']);
+        exit;
+    }
+}
 
 /*=======================================
          Add a Cell Functionality
 =======================================*/
 if ($action === 'add_a_cell') {
+  csrf_or_die();
   if (!isset($_SESSION['entity_id']) || $_SESSION['admin_type'] !== 'church') {
     echo 'unauthorized';
     exit;
   }
 
-  $churchId = $_SESSION['entity_id'];
+  $churchId = clean_input($_SESSION['entity_id']);
   $cellName = clean_input($_POST['cell_name'] ?? '');
-  $adminType = $_POST['choose_admin'] ?? ''; // 'self' or 'else'
+  $adminType = clean_input($_POST['choose_admin'] ?? ''); // 'self' or 'else'
 
   if (!$cellName) {
     echo 'missing cell name';
@@ -41,7 +56,7 @@ if ($action === 'add_a_cell') {
 
     // Check if current user already assigned to a cell
     $stmt = $conn->prepare('SELECT cell_id FROM users WHERE id = ? AND cell_id IS NOT NULL');
-    $stmt->execute([$_SESSION['user_id']]);
+    $stmt->execute([clean_input($_SESSION['user_id'])]);
     if ($stmt->fetchColumn()) {
       echo 'Already assigned to a cell';
       exit;
@@ -69,7 +84,7 @@ if ($action === 'add_a_cell') {
 
     // Check if email already exists AND is already assigned to a cell
     $stmt = $conn->prepare('SELECT cell_id FROM users WHERE user_login = ? AND cell_id IS NOT NULL');
-    $stmt->execute([$adminEmail]);
+    $stmt->execute([clean_input($adminEmail)]);
     if ($stmt->fetchColumn()) {
       echo 'admin email taken or already assigned';
       exit;
@@ -130,8 +145,8 @@ if ($action === 'add_a_cell') {
           Login Functionality
 =======================================*/
 if ($action === 'login') {
-  $user_login = clean_input($_POST['user-login']);
-  $password   = clean_input($_POST['password']);
+  $user_login = clean_input($_POST['user-login'] ?? '');
+  $password   = clean_input($_POST['password'] ?? '');
 
   // Fetch user with related names
   $stmt = $conn->prepare("
@@ -212,7 +227,7 @@ if ($action === 'logout') {
         Fetch Cells Functionality
 =======================================*/
 if ($action === 'fetch_all_cells') {
-  $churchId = $_SESSION['entity_id'];
+  $churchId = clean_input($_SESSION['entity_id']);
 
   $stmt = $conn->prepare("
     SELECT 
@@ -245,9 +260,10 @@ if ($action === 'fetch_all_cells') {
       Assign Cell Admin Functionality
 =======================================*/
 if ($action === 'assign_cell_admin') {
-  $cell_id     = $_POST['cell_id']        ?? null;
-  $assign_type = $_POST['choose_admin']   ?? '';
-  $role        = $_POST['role']           ?? '';
+  csrf_or_die();
+  $cell_id     = clean_input($_POST['cell_id']        ?? null);
+  $assign_type = clean_input($_POST['choose_admin']   ?? '');
+  $role        = clean_input($_POST['role']           ?? '');
 
   if (!$cell_id || !$assign_type || !$role) {
     echo "Missing required fields";
@@ -271,7 +287,7 @@ if ($action === 'assign_cell_admin') {
     $stmt = $conn->prepare(
       'SELECT cell_id FROM users WHERE user_login = ?'
     );
-    $stmt->execute([$_SESSION['user_login']]);
+    $stmt->execute([clean_input($_SESSION['user_login'])]);
     $current_cell = $stmt->fetchColumn();
 
     if ($current_cell == $cell_id) {
@@ -287,18 +303,18 @@ if ($action === 'assign_cell_admin') {
     $stmt = $conn->prepare(
       'UPDATE users SET cell_id = ?, cell_role = ? WHERE user_login = ?'
     );
-    $stmt->execute([$cell_id, $role, $_SESSION['user_login']]);
+    $stmt->execute([clean_input($cell_id), clean_input($role), clean_input($_SESSION['user_login'])]);
     echo "success";
     exit;
   }
 
   if ($assign_type === 'else') {
-    $first_name       = $_POST['first_name']        ?? '';
-    $last_name        = $_POST['last_name']         ?? '';
-    $email            = $_POST['email']             ?? '';
-    $phone            = $_POST['phone']             ?? '';
-    $password         = $_POST['password']          ?? '';
-    $password_confirm = $_POST['password_confirm']  ?? '';
+    $first_name       = clean_input($_POST['first_name']        ?? '');
+    $last_name        = clean_input($_POST['last_name']         ?? '');
+    $email            = clean_input($_POST['email']             ?? '');
+    $phone            = clean_input($_POST['phone']             ?? '');
+    $password         = clean_input($_POST['password']          ?? '');
+    $password_confirm = clean_input($_POST['password_confirm']  ?? '');
 
     if (
       !$first_name || !$last_name ||
@@ -313,7 +329,7 @@ if ($action === 'assign_cell_admin') {
     $stmt = $conn->prepare(
       'SELECT COUNT(*) FROM users WHERE user_login = ?'
     );
-    $stmt->execute([$email]);
+    $stmt->execute([clean_input($email)]);
     if ($stmt->fetchColumn() > 0) {
       echo 'User already exists';
       exit;
@@ -327,13 +343,13 @@ if ($action === 'assign_cell_admin') {
        VALUES (?, ?, ?, ?, ?, ?, ?)'
     );
     $stmt->execute([
-      $first_name,
-      $last_name,
-      $email,
-      $phone,
+      clean_input($first_name),
+      clean_input($last_name),
+      clean_input($email),
+      clean_input($phone),
       $hashed_pw,
-      $cell_id,
-      $role
+      clean_input($cell_id),
+      clean_input($role)
     ]);
 
     echo "success";
@@ -348,19 +364,20 @@ if ($action === 'assign_cell_admin') {
       Unassign Cell Admin Functionality
 =======================================*/
 if ($action === 'unassign_cell_admin') {
-    $userId = $_POST['user_id'] ?? null;
-    $cellId = $_POST['cell_id'] ?? null;
+    csrf_or_die();
+    $userId = clean_input($_POST['user_id'] ?? null);
+    $cellId = clean_input($_POST['cell_id'] ?? null);
 
     if (!$userId || !$cellId) {
         echo json_encode(['status' => 'error', 'message' => 'Missing required parameters.']);
         exit;
     }
 
-    $loggedInUserId = $_SESSION['user_id'] ?? null;
+    $loggedInUserId = clean_input($_SESSION['user_id'] ?? null);
 
     // Fetch the user being unassigned
     $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
-    $stmt->execute([$userId]);
+    $stmt->execute([clean_input($userId)]);
     $targetUser = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$targetUser) {
@@ -374,11 +391,11 @@ if ($action === 'unassign_cell_admin') {
     if ($isSelf || $hasHigherRole) {
         // Just unassign (don’t delete)
         $stmt = $conn->prepare("UPDATE users SET cell_id = NULL, cell_role = '' WHERE id = ?");
-        $stmt->execute([$userId]);
+        $stmt->execute([clean_input($userId)]);
     } else {
         // Delete the cell-only admin
         $stmt = $conn->prepare("DELETE FROM users WHERE id = ? AND church_id IS NULL AND group_id IS NULL");
-        $stmt->execute([$userId]);
+        $stmt->execute([clean_input($userId)]);
     }
 
     echo json_encode(['status' => 'success']);
@@ -389,8 +406,9 @@ if ($action === 'unassign_cell_admin') {
       Edit Cell Name Functionality
 =======================================*/
 if ($action === 'edit_cell_name') {
-  $inputValue = trim($_POST['input_value'] ?? '');
-  $cellId = intval($_POST['cell_id'] ?? 0);
+  csrf_or_die();
+  $inputValue = clean_input(trim($_POST['input_value'] ?? ''));
+  $cellId = intval(clean_input($_POST['cell_id'] ?? 0));
 
   if ($inputValue === '' || $cellId === 0) {
     echo json_encode([
@@ -400,11 +418,11 @@ if ($action === 'edit_cell_name') {
     exit;
   }
 
-  $churchId = $_SESSION['entity_id'];
+  $churchId = clean_input($_SESSION['entity_id']);
 
   // ✅ Case-sensitive check using BINARY
   $checkQuery = $conn->prepare("SELECT id FROM cells WHERE cell_name = ? AND church_id = ? AND id != ?");
-  $checkQuery->execute([$inputValue, $churchId, $cellId]);
+  $checkQuery->execute([clean_input($inputValue), clean_input($churchId), clean_input($cellId)]);
 
   if ($checkQuery->rowCount() > 0) {
     echo json_encode([
@@ -415,7 +433,7 @@ if ($action === 'edit_cell_name') {
   }
 
   $updateQuery = $conn->prepare("UPDATE cells SET cell_name = ? WHERE id = ? AND church_id = ?");
-  $updated = $updateQuery->execute([$inputValue, $cellId, $churchId]);
+  $updated = $updateQuery->execute([clean_input($inputValue), clean_input($cellId), clean_input($churchId)]);
 
   if ($updated) {
     echo json_encode([
@@ -437,8 +455,9 @@ if ($action === 'edit_cell_name') {
             Functionality
 =======================================*/
 if ($action === 'update_cell_admin') {
-  $cellId  = intval($_POST['cell_id']  ?? 0);
-  $adminId = intval($_POST['admin_id'] ?? 0);
+  csrf_or_die();
+  $cellId  = intval(clean_input($_POST['cell_id']  ?? 0));
+  $adminId = intval(clean_input($_POST['admin_id'] ?? 0));
 
   // Prevent editing yourself
   if ($adminId === $_SESSION['user_id']) {
@@ -467,7 +486,7 @@ if ($action === 'update_cell_admin') {
          AND cell_role = "leader" 
          AND id != ?'
     );
-    $check->execute([$cellId, $adminId]);
+    $check->execute([clean_input($cellId), clean_input($adminId)]);
     if ($check->fetchColumn() > 0) {
       echo json_encode(['status'=>'error','message'=>'A Cell Leader already exists.']);
       exit;
@@ -485,7 +504,7 @@ if ($action === 'update_cell_admin') {
      WHERE id = ? AND cell_id = ?'
   );
   $success = $upd->execute([
-    $newRole, $first, $last, $email, $phone, $adminId, $cellId
+    clean_input($newRole), clean_input($first), clean_input($last), clean_input($email), clean_input($phone), clean_input($adminId), clean_input($cellId)
   ]);
 
   if ($success) {
@@ -501,6 +520,7 @@ if ($action === 'update_cell_admin') {
               Functionality
 =======================================*/
 if ($action === 'add_cell_member') {
+  csrf_or_die();
   $title        = clean_input($_POST['title'] ?? '');
   $firstName    = clean_input($_POST['first_name'] ?? '');
   $lastName     = clean_input($_POST['last_name'] ?? '');
@@ -522,7 +542,7 @@ if ($action === 'add_cell_member') {
   }
 
   // Determine cell_id from session
-  $cellId = $_SESSION['entity_id'] ?? null;
+  $cellId = clean_input($_SESSION['entity_id'] ?? null);
   if (empty($cellId)) {
       echo 'No cell recognized.';
       exit;
@@ -532,7 +552,7 @@ if ($action === 'add_cell_member') {
   $query = $conn->prepare("
       SELECT id FROM cell_members WHERE email = ? 
   ");
-  $query->execute([$email]);
+  $query->execute([clean_input($email)]);
   if ($query->fetchColumn()) {
     echo "Email address taken! Please use another email.";
     exit;
@@ -547,7 +567,7 @@ if ($action === 'add_cell_member') {
   ");
 
   $executeResult = $stmt->execute([
-      $title, $firstName, $lastName, $phone, $email, $dobMonth, $dobDay, $occupation, $resAddress, $fsStatus, $delgInCell, $deptInChurch, $joinedDate, $cellId
+      clean_input($title), clean_input($firstName), clean_input($lastName), clean_input($phone), clean_input($email), clean_input($dobMonth), clean_input($dobDay), clean_input($occupation), clean_input($resAddress), clean_input($fsStatus), clean_input($delgInCell), clean_input($deptInChurch), clean_input($joinedDate), clean_input($cellId)
   ]);
 
   if ($executeResult) {
@@ -563,7 +583,7 @@ if ($action === 'add_cell_member') {
       Fetch Cell Members Functionality
 =======================================*/
 if ($action === 'fetch_all_cell_members') {
-  $cellId = $_SESSION['entity_id']; // Assuming entity_id is the current cell's ID for a Cell Admin
+  $cellId = clean_input($_SESSION['entity_id']); // Assuming entity_id is the current cell's ID for a Cell Admin
 
   $stmt = $conn->prepare("
     SELECT 
@@ -587,7 +607,7 @@ if ($action === 'fetch_all_cell_members') {
     WHERE cell_id = :cell_id;
   ");
 
-  $stmt->bindValue(':cell_id', $cellId, PDO::PARAM_INT);
+  $stmt->bindValue(':cell_id', clean_input($cellId), PDO::PARAM_INT);
   $stmt->execute();
 
   $cell_members = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -601,6 +621,7 @@ if ($action === 'fetch_all_cell_members') {
           - Functionality
 =======================================*/
 if ($action === 'edit_cell_member') {
+  csrf_or_die();
   $member_id = clean_input($_POST['member_id'] ?? '');
 
   if (!$member_id) {
@@ -632,7 +653,7 @@ if ($action === 'edit_cell_member') {
   if ($email !== '') {
     // compare case-insensitively
     $q = $conn->prepare("SELECT id FROM cell_members WHERE LOWER(email) = LOWER(?) LIMIT 1");
-    $q->execute([$email]);
+    $q->execute([clean_input($email)]);
     $foundId = $q->fetchColumn();
 
     if ($foundId && $foundId != $member_id) {
@@ -650,20 +671,20 @@ if ($action === 'edit_cell_member') {
     WHERE id = ?");
   
   $success = $stmt->execute([
-    $title,
-    $first_name,
-    $last_name,
-    $phone_number,
-    $email,
-    $dob_month,
-    $dob_day,
-    $occupation,
-    $residential_address,
-    $foundation_sch_status,
-    $delg_in_cell,
-    $dept_in_church,
-    $date_joined_ministry,
-    $member_id
+    clean_input($title),
+    clean_input($first_name),
+    clean_input($last_name),
+    clean_input($phone_number),
+    clean_input($email),
+    clean_input($dob_month),
+    clean_input($dob_day),
+    clean_input($occupation),
+    clean_input($residential_address),
+    clean_input($foundation_sch_status),
+    clean_input($delg_in_cell),
+    clean_input($dept_in_church),
+    clean_input($date_joined_ministry),
+    clean_input($member_id)
   ]);
 
   if ($success) {
@@ -679,6 +700,7 @@ if ($action === 'edit_cell_member') {
       Delete Cell Members Functionality
 =======================================*/
 if ($action === 'delete_cell_member') {
+  csrf_or_die();
   $member_id = clean_input($_POST['member_id'] ?? '');
 
   if (empty($member_id)) {
@@ -690,7 +712,7 @@ if ($action === 'delete_cell_member') {
   }
 
   $stmt = $conn->prepare("DELETE FROM cell_members WHERE id = ?");
-  $stmt->execute([$member_id]);
+  $stmt->execute([clean_input($member_id)]);
 
   if ($stmt->rowCount() > 0) {
     echo json_encode(['status' => 'success']);
@@ -708,13 +730,14 @@ if ($action === 'delete_cell_member') {
           - Functionality
 =======================================*/
 if ($action === 'generate_report_draft') {
-  $cell_id = $_SESSION['entity_id'] ?? null;
+  csrf_or_die();
+  $cell_id = clean_input($_SESSION['entity_id'] ?? null);
   if (!$cell_id) {
     echo json_encode(['status' => 'error', 'message' => 'Cell ID not found in session']);
     exit;
   }
 
-  $type = in_array($_POST['type'] ?? 'meeting', ['meeting', 'outreach']) ? $_POST['type'] : 'meeting';
+  $type = in_array(clean_input($_POST['type'] ?? 'meeting'), ['meeting', 'outreach']) ? clean_input($_POST['type']) : 'meeting';
 
   // Compute week-of-month (weeks start on Sunday)
   // day = day of month (1..31)
@@ -746,14 +769,14 @@ if ($action === 'generate_report_draft') {
       INSERT INTO cell_report_drafts (type, week, description, status, date_generated, cell_id)
       VALUES (?, ?, ?, 'pending', NOW(), ?)
     ");
-    $stmt->execute([$type, $week, $description, $cell_id]);
+    $stmt->execute([$type, $week, $description, clean_input($cell_id)]);
 
     $lastId = $conn->lastInsertId();
 
     if ($lastId) {
       // return the newly created row
       $sel = $conn->prepare("SELECT id, type, week, description, status, DATE_FORMAT(date_generated, '%Y-%m-%d %H:%i:%s') AS date_generated, cell_id FROM cell_report_drafts WHERE id = ? LIMIT 1");
-      $sel->execute([$lastId]);
+      $sel->execute([clean_input($lastId)]);
       $draft = $sel->fetch(PDO::FETCH_ASSOC);
 
       echo json_encode(['status' => 'success', 'message' => 'Draft generated', 'draft' => $draft]);
@@ -776,7 +799,7 @@ if ($action === 'generate_report_draft') {
           - Functionality
 =======================================*/
 if ($action === 'fetch_report_drafts') {
-  $cell_id = $_SESSION['entity_id'] ?? null;
+  $cell_id = clean_input($_SESSION['entity_id'] ?? null);
   if (!$cell_id) {
     echo json_encode(['status' => 'error', 'message' => 'Cell ID not found in session']);
     exit;
@@ -789,7 +812,7 @@ if ($action === 'fetch_report_drafts') {
       WHERE cell_id = ?
       ORDER BY date_generated ASC
     ");
-    $q->execute([$cell_id]);
+    $q->execute([clean_input($cell_id)]);
     $rows = $q->fetchAll(PDO::FETCH_ASSOC);
     echo json_encode(['status' => 'success', 'data' => $rows]);
     exit;
