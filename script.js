@@ -101,18 +101,59 @@ $(document).ready(function () {
     $(".sidebar").css({ left: "-100%" });
   });
 
-  // Page navigation
+  // URL-based page navigation
+  function showPageFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    let page = params.get("p") || "dashboard";
+    let filter = params.get("filter") || null;
+
+    // Hide all pages
+    $(".data-container").addClass("d-none");
+    // Show the requested page
+    $(`#${page}-page`).removeClass("d-none");
+
+    // Update page title
+    let $activeSidebarLink = $(`.sidebar nav li[data-page-id='${page}-page']`);
+    if ($activeSidebarLink.length) {
+      $(".sidebar nav li").removeClass("active");
+      $activeSidebarLink.addClass("active");
+      $("#screen header .page-title").text($activeSidebarLink.data("page-title"));
+    }
+
+    // Reports filter logic
+    if (page === "reports" && filter) {
+      $(".filter").removeClass("active");
+      $(`#${filter}`).addClass("active");
+      // Optionally, filter report drafts here
+      // $(".report-draft").hide();
+      // $(".report-draft[data-report-type='" + filter + "']").show();
+    }
+  }
+
+  // Initial page load
+  showPageFromURL();
+
+  // Listen for browser navigation (back/forward)
+  window.addEventListener("popstate", showPageFromURL);
+
+  // Sidebar navigation: update URL and show page
   $(document).on("click", ".sidebar nav li", function () {
-    let sidebarLinks = $(".sidebar nav li");
-    let $thisLink = $(this);
+    let pageId = $(this).data("page-id").replace("-page", "");
+    let pageTitle = $(this).data("page-title");
     // Close sidebar
-    $("#sidebar").css({ left: "-100%" });
-    // Dynamic alterations
-    $("#screen header .page-title").text(`${$thisLink.data('page-title')}`);
-    sidebarLinks.removeClass("active");
-    $thisLink.addClass("active");
-    $(".data-container").removeClass("d-none").addClass("d-none");
-    $(`#${$thisLink.data('page-id')}`).removeClass("d-none");
+    $(".sidebar").css({ left: "-100%" });
+    // Update URL
+    history.pushState({}, "", `?p=${pageId}`);
+    showPageFromURL();
+  });
+
+  // Reports filter navigation: update URL and show filtered reports
+  $(document).on("click", ".filter", function () {
+    let filterId = $(this).attr("id");
+    let params = new URLSearchParams(window.location.search);
+    params.set("filter", filterId);
+    history.pushState({}, "", `?p=reports&filter=${filterId}`);
+    showPageFromURL();
   });
 
   // Call action modal when the Add a cell btn is clicked

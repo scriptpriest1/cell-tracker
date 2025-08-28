@@ -95,10 +95,12 @@ if ($action === 'add_a_cell') {
 
   // === Assign someone else as admin ===
   if ($adminType === 'else') {
+    // Hash password before insert
+    $hashed_pw = password_hash($password, PASSWORD_DEFAULT);
     $stmt = $conn->prepare('
       INSERT INTO users (
         cell_role, first_name, last_name, user_login, phone_number, password, cell_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?))
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)
     ');
     $success = $stmt->execute([
       $adminRole,
@@ -106,7 +108,7 @@ if ($action === 'add_a_cell') {
       $lastName,
       $adminEmail,
       $adminPhone,
-      $password, // hash later
+      $hashed_pw,
       $cellId
     ]);
 
@@ -158,7 +160,8 @@ if ($action === 'login') {
     exit;
   }
 
-  if (trim($user['password']) !== trim($password)) {
+  // Use password_verify for authentication
+  if (!password_verify($password, $user['password'])) {
     echo 'wrongDetails'; // Incorrect password
     exit;
   }

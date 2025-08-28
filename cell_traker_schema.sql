@@ -274,7 +274,7 @@ CREATE TABLE `users` (
   `first_name` varchar(50) NOT NULL,
   `last_name` varchar(50) NOT NULL,
   `user_login` varchar(50) NOT NULL,
-  `password` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL, -- Store only password hashes using password_hash()
   `phone_number` varchar(50) NOT NULL,
   `date_created` timestamp NOT NULL DEFAULT current_timestamp(),
   `cell_id` bigint(20) DEFAULT NULL,
@@ -284,6 +284,8 @@ CREATE TABLE `users` (
   `church_role` varchar(50) NOT NULL,
   `group_role` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Note: When inserting/updating users, always use password_hash() in PHP.
 
 --
 -- Dumping data for table `users`

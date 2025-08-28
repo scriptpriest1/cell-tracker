@@ -1,4 +1,4 @@
-<section id="screen"class="screen w-100 h-100 m-0 p-0 m-0">
+<section id="screen" class="screen w-100 h-100 m-0 p-0 m-0">
 
   <header class="screen-header m-0 px-3 py-2 d-flex align-items-center justify-content-between gap-3 position-sticky top-0">
     <div class="account-name-bar d-flex align-items-center gap-2">
@@ -140,7 +140,7 @@
         <div class="search-bar m-0 mb-2 p-0 position-relative">
           <input type="text" class="search-input form-control w-100 pe-5" placeholder="Search" style="border-radius: 10px; width: 100%;">
           <span class="search-icon position-absolute" style="top: 50%; right: 0; transform: translateY(-50%); padding: 0; padding-right: 12px">
-            <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill=""><path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="http://www.w3.org/2000/svg" width="20px" fill=""><path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>
           </span>
           <span class="loader d-none"></span>
         </div>
@@ -254,5 +254,5 @@
     </div>
 
   </div>
-      
+
 </section>
