@@ -529,13 +529,16 @@ if ($action === 'add_cell_member') {
   }
 
   // Check if the email already exists
-  $query = $conn->prepare("
-      SELECT id FROM cell_members WHERE email = ? 
-  ");
-  $query->execute([clean_input($email)]);
-  if ($query->fetchColumn()) {
-    echo "Email address taken! Please use another email.";
-    exit;
+  if ($email !== '') {
+    // compare case-insensitively
+    $q = $conn->prepare("SELECT id FROM cell_members WHERE LOWER(email) = LOWER(?) LIMIT 1");
+    $q->execute([clean_input($email)]);
+    $foundId = $q->fetchColumn();
+
+    if ($foundId) {
+      echo "Email address taken! Please use another email.";
+      exit;
+    }
   }
 
   // Insert cell member
