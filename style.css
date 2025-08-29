@@ -267,11 +267,11 @@ button.check-btn svg {
 }
 
 .action-modal .action-panel .header .title-bar {
-  width: 75%;
+  width: 88%;
 }
 
 .action-modal .action-panel .header .title-bar .title {
-  max-width: 85%;
+  max-width: 90%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
