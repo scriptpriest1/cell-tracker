@@ -497,6 +497,15 @@ button.check-btn svg {
 
 /* Screen */
 
+#screen {
+  height: 100vh;
+  overflow-y: auto;
+  /* Prevent parent containers from growing beyond viewport */
+  max-height: 100vh;
+  /* Optional: Prevent horizontal scroll if not needed */
+  overflow-x: hidden;
+}
+
 #screen header {
   min-height: 50px;
   height: 50px;
@@ -529,7 +538,8 @@ button.check-btn svg {
 }
 
 #screen .body {
-  overflow-y: auto;
+  max-height: 100%;
+  overflow-y: visible;
 }
 
 /* Dashboard page */
@@ -572,6 +582,16 @@ button.check-btn svg {
 
 .cell-table-section .search-bar .search-icon svg {
   fill: var(--text-secondary) !important;
+}
+
+.search-loading {
+  animation: search-rotate 1s linear infinite;
+}
+
+@keyframes search-rotate {
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @media screen and (max-width: 767px) {
@@ -756,14 +776,4 @@ button.check-btn svg {
 .report-draft .publish-btn:hover,
 .report-draft .view-btn:hover {
   text-decoration: underline;
-}
-
-.search-loading {
-  animation: search-rotate 1s linear infinite;
-}
-
-@keyframes search-rotate {
-  100% {
-    transform: rotate(360deg);
-  }
 }
