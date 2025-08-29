@@ -730,7 +730,8 @@ if ($action === 'generate_report_draft') {
   if ($day > 0 && $day < 8) $week = 1;
   if ($day > 7 && $day < 15) $week = 2;
   if ($day > 14 && $day < 22) $week = 3;
-  if ($day > 21 && $day < 32) $week = 4;
+  if ($day > 21 && $day < 29) $week = 4;
+  if ($day > 28) $week = 5;
 
   if ($week === 1) {
     $draft['description'] = 'Prayer and Planning';
