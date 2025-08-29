@@ -85,7 +85,7 @@ $(document).ready(function () {
   window.toggleActionModalSidePanel = toggleActionModalSidePanel;
 
   // Toggle Action Modal Side Panel when action modal cancel btn is clicked
-  $(document).on('click', '#action-modal .action-modal-form .cancel-btn', function() {
+  $(document).on('click', '#action-modal .action-modal-form .cancel-btn', function () {
     toggleActionModalSidePanel();
     $("#action-modal .panel-body").addClass("h-100");
     $("#action-modal .panel-body").css("height", "");
@@ -121,12 +121,24 @@ $(document).ready(function () {
     }
 
     // Reports filter logic
-    if (page === "reports" && filter) {
+    if (page === "reports") {
+      // Always reset filters
       $(".filter").removeClass("active");
-      $(`#${filter}`).addClass("active");
-      // Optionally, filter report drafts here
-      // $(".report-draft").hide();
-      // $(".report-draft[data-report-type='" + filter + "']").show();
+      if (filter) {
+        $(`#${filter}`).addClass("active");
+      } else {
+        $("#all").addClass("active");
+      }
+      // Filter report drafts by type
+      if (!filter || filter === "all") {
+        $(".report-draft").show();
+      } else if (filter === "meetings") {
+        $(".report-draft").hide();
+        $(".report-draft[data-report-type='meeting']").show();
+      } else if (filter === "outreached" || filter === "outreaches") {
+        $(".report-draft").hide();
+        $(".report-draft[data-report-type='outreach']").show();
+      }
     }
   }
 

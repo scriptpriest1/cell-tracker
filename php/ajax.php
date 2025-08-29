@@ -719,44 +719,66 @@ if ($action === 'generate_report_draft') {
 
   $type = in_array(clean_input($_POST['type'] ?? 'meeting'), ['meeting', 'outreach']) ? clean_input($_POST['type']) : 'meeting';
 
-  // Compute week-of-month (weeks start on Sunday)
-  // day = day of month (1..31)
-  // offset = weekday index of first day of month (0 = Sunday .. 6 = Saturday)
-  // week = floor((day + offset - 1) / 7) + 1
-  $today = new DateTime();                       // uses server date/time (when draft is generated)
-  $day = (int) $today->format('j');
-  $firstOfMonth = new DateTime($today->format('Y-m-01'));
-  $offset = (int) $firstOfMonth->format('w');   // 0 (Sun) .. 6 (Sat)
-  if ($day > 0 && $day < 8) $week = 1;
-  if ($day > 7 && $day < 15) $week = 2;
-  if ($day > 14 && $day < 22) $week = 3;
-  if ($day > 21 && $day < 29) $week = 4;
-  if ($day > 28) $week = 5;
+  // Refactored week calculation: week 1 starts on first Sunday of the month
+  $today = new DateTime();
+  $year = (int)$today->format('Y');
+  $month = (int)$today->format('m');
+  $day = (int)$today->format('j');
 
-  if ($week === 1) {
-    $draft['description'] = 'Prayer and Planning';
-  } else if ($week === 2) {
-    $draft['description'] = 'Bible Study Class 1';
-  } else if ($week === 3) {
-    $draft['description'] = 'Bible Study Class 2';
+  // Find first Sunday of the month
+  $firstOfMonth = new DateTime("$year-$month-01");
+  $firstSunday = clone $firstOfMonth;
+  $dow = (int)$firstOfMonth->format('w'); // 0=Sun, 6=Sat
+  if ($dow !== 0) {
+    $firstSunday->modify('next Sunday');
+  }
+  $firstSundayDay = (int)$firstSunday->format('j');
+
+  // Calculate week number (week 1 starts on first Sunday, next weeks start on following Sundays)
+  if ($day < $firstSundayDay) {
+    $week = 0; // before first Sunday, not a reporting week
   } else {
-    $draft['description'] = 'Cell Outreach';
+    $week = 1 + floor(($day - $firstSundayDay) / 7);
   }
 
-  $description = $draft['description'];
+  // If not a reporting week, do not generate draft
+  if ($week < 1 || $week > 5) {
+    echo json_encode(['status' => 'error', 'message' => 'Not a reporting week']);
+    exit;
+  }
+
+  // Set expiry_date: Saturday 23:59:59 of the reporting week
+  $draftSunday = clone $firstSunday;
+  $draftSunday->modify('+' . ($week - 1) * 7 . ' days');
+  $expiryDate = clone $draftSunday;
+  $expiryDate->modify('next Saturday');
+  $expiryDate->setTime(23, 59, 59);
+
+  // Set description
+  if ($week === 1) {
+    $description = 'Prayer and Planning';
+  } else if ($week === 2) {
+    $description = 'Bible Study Class 1';
+  } else if ($week === 3) {
+    $description = 'Bible Study Class 2';
+  } else if ($week === 4) {
+    $description = 'Cell Outreach';
+  } else {
+    $description = 'Cell Meeting';
+  }
 
   try {
     $stmt = $conn->prepare("
-      INSERT INTO cell_report_drafts (type, week, description, status, date_generated, cell_id)
-      VALUES (?, ?, ?, 'pending', NOW(), ?)
+      INSERT INTO cell_report_drafts (type, week, description, status, date_generated, expiry_date, cell_id)
+      VALUES (?, ?, ?, 'pending', NOW(), ?, ?)
     ");
-    $stmt->execute([$type, $week, $description, clean_input($cell_id)]);
+    $stmt->execute([$type, $week, $description, $expiryDate->format('Y-m-d H:i:s'), clean_input($cell_id)]);
 
     $lastId = $conn->lastInsertId();
 
     if ($lastId) {
       // return the newly created row
-      $sel = $conn->prepare("SELECT id, type, week, description, status, DATE_FORMAT(date_generated, '%Y-%m-%d %H:%i:%s') AS date_generated, cell_id FROM cell_report_drafts WHERE id = ? LIMIT 1");
+      $sel = $conn->prepare("SELECT id, type, week, description, status, DATE_FORMAT(date_generated, '%Y-%m-%d %H:%i:%s') AS date_generated, expiry_date, cell_id FROM cell_report_drafts WHERE id = ? LIMIT 1");
       $sel->execute([clean_input($lastId)]);
       $draft = $sel->fetch(PDO::FETCH_ASSOC);
 

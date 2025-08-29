@@ -893,4 +893,103 @@ if (isset($_POST['content-type'])) {
     echo $html;
     exit;
   }
+
+  if ($content_type === 'cell-report-form') {
+    $draftId = clean_input($_POST['draft-id'] ?? '');
+    $week = clean_input($_POST['week'] ?? '');
+    $description = clean_input($_POST['description'] ?? '');
+    $status = clean_input($_POST['status'] ?? '');
+    $reportType = clean_input($_POST['report-type'] ?? '');
+    $mode = clean_input($_POST['mode'] ?? 'publish'); // 'publish' or 'view'
+
+    // Fetch draft info
+    $stmt = $conn->prepare("SELECT * FROM cell_report_drafts WHERE id = ?");
+    $stmt->execute([$draftId]);
+    $draft = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // If viewing, fetch published report data
+    $report = null;
+    if ($mode === 'view' && $draft) {
+      $stmt = $conn->prepare("SELECT * FROM cell_reports WHERE cell_report_draft_id = ?");
+      $stmt->execute([$draftId]);
+      $report = $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // Fetch cell members for dropdowns
+    $cellId = $draft['cell_id'];
+    $membersStmt = $conn->prepare("SELECT id, first_name, last_name FROM cell_members WHERE cell_id = ?");
+    $membersStmt->execute([$cellId]);
+    $members = $membersStmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Render form (simplified, you can style further)
+    ?>
+    <form id="cell-report-form" class="action-modal-form position-relative">
+      <input type="hidden" name="draft_id" value="<?= htmlspecialchars($draftId) ?>">
+      <input type="hidden" name="cell_id" value="<?= htmlspecialchars($cellId) ?>">
+      <input type="hidden" name="week" value="<?= htmlspecialchars($week) ?>">
+      <input type="hidden" name="report_type" value="<?= htmlspecialchars($reportType) ?>">
+      <input type="hidden" name="mode" value="<?= htmlspecialchars($mode) ?>">
+      <div class="body px-4 pt-2">
+        <div class="form-group">
+          <label for="attendance">Attendance:</label>
+          <div class="dropdown attendance-dropdown">
+            <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown">
+              Select attendees (<span class="attendance-count">0</span>)
+            </button>
+            <div class="dropdown-menu p-2" style="max-height:250px;overflow-y:auto;">
+              <input type="text" class="form-control mb-2 attendance-search" placeholder="Search members...">
+              <div class="attendance-list">
+                <?php foreach ($members as $m): ?>
+                  <div>
+                    <label>
+                      <input type="checkbox" name="attendance[]" value="<?= $m['id'] ?>"
+                        <?= ($report && in_array($m['id'], explode(',', $report['attendance_ids'] ?? ''))) ? 'checked' : '' ?>
+                        <?= ($mode === 'view') ? 'disabled' : '' ?>
+                      >
+                      <?= htmlspecialchars($m['first_name'] . ' ' . $m['last_name']) ?>
+                    </label>
+                  </div>
+                <?php endforeach; ?>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Repeat similar for first-timers and new converts, filtering from attendance -->
+        <!-- ...existing code for other fields, use $report values if $mode === 'view' ... -->
+        <div class="form-group">
+          <label for="venue">Venue:</label>
+          <input type="text" name="venue" id="venue" class="form-control"
+            value="<?= $report ? htmlspecialchars($report['venue']) : '' ?>"
+            <?= ($mode === 'view') ? 'disabled' : '' ?>>
+        </div>
+        <div class="form-group">
+          <label for="date">Date:</label>
+          <input type="date" name="date" id="date" class="form-control"
+            value="<?= $report ? htmlspecialchars($report['date']) : '' ?>"
+            <?= ($mode === 'view') ? 'disabled' : '' ?>>
+        </div>
+        <div class="form-group">
+          <label for="time">Time:</label>
+          <input type="time" name="time" id="time" class="form-control"
+            value="<?= $report ? htmlspecialchars($report['time']) : '' ?>"
+            <?= ($mode === 'view') ? 'disabled' : '' ?>>
+        </div>
+        <div class="form-group">
+          <label for="offering">Offering (in naira):</label>
+          <input type="number" name="offering" id="offering" class="form-control"
+            value="<?= $report ? htmlspecialchars($report['offering']) : '' ?>"
+            <?= ($mode === 'view') ? 'disabled' : '' ?>>
+        </div>
+      </div>
+      <footer class="position-absolute bottom-0 py-3 px-4 w-100 d-flex align-items-center gap-2">
+        <?php if ($mode === 'view'): ?>
+          <button type="button" class="edit-btn w-100">Edit</button>
+        <?php else: ?>
+          <button type="submit" class="submit-btn w-100">Publish</button>
+        <?php endif; ?>
+      </footer>
+    </form>
+    <?php
+    exit;
+  }
 }

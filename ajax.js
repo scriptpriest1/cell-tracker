@@ -386,6 +386,21 @@ $(document).ready(() => {
           );
           $("#action-modal .content-container").html(res);
           toggleActionModal();
+        } else if (typeof contentType !== "undefined" && contentType.startsWith("report-")) {
+          // For report forms
+          const mode = contentType === "report-publish" ? "publish" : "view";
+          const reportType = contentType.split("-")[1]; // e.g. "meeting" or "outreach"
+          const week = $("#action-modal .report-week").val(); // Get week from the hidden input
+          const description = $("#action-modal .report-description").val(); // Get description
+          loadDynamicContentfunction.call(this, {
+            type: "report-form",
+            draftId: cellId, // Reuse cellId for draftId
+            week,
+            description,
+            status: "pending", // Default to pending
+            reportType,
+            mode
+          });
         } else return;
       },
     });
@@ -954,18 +969,27 @@ $(document).ready(() => {
       generateReportDraft("meeting");
     });
 
-  // Delegated click handlers for publish/view buttons (placeholders)
-  $(document).on("click", ".publish-btn", (e) => {
-    const $btn = $(e.currentTarget);
-    const draftId = $btn.closest(".report-draft").data("id");
-    // TODO: open publish modal/form — left as placeholder
-    console.log("Publish clicked for draft", draftId);
-  });
+  // Delegated click handlers for publish/view buttons
+  $(document).on("click", ".publish-btn, .view-btn", function (e) {
+    e.preventDefault();
+    const $btn = $(this);
+    const $draftDiv = $btn.closest(".report-draft");
+    const draftId = $draftDiv.data("id");
+    const week = $draftDiv.data("week");
+    const description = $draftDiv.find(".description").text();
+    const status = $draftDiv.data("report-status");
+    const type = $draftDiv.data("report-type");
 
-  $(document).on("click", ".view-btn", (e) => {
-    const draftId = $(e.currentTarget).closest(".report-draft").data("id");
-    console.log("View clicked for draft", draftId);
-    // TODO: open a view modal
+    // Load the report form into the action modal
+    loadDynamicContentfunction.call(this, {
+      type: "report-form",
+      draftId,
+      week,
+      description,
+      status,
+      reportType: type,
+      mode: $btn.hasClass("publish-btn") ? "publish" : "view"
+    });
   });
 
   // Close ready() function
