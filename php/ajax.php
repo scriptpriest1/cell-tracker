@@ -927,3 +927,21 @@ if ($action === 'search_cell_members') {
   exit;
 }
 
+/*=======================================
+   Fetch total cell members for church dashboard stats
+=======================================*/
+if ($action === 'fetch_church_cell_member_count') {
+  $churchId = clean_input($_SESSION['entity_id']);
+  $stmt = $conn->prepare("
+    SELECT COUNT(cm.id) AS count
+    FROM cell_members cm
+    INNER JOIN cells c ON cm.cell_id = c.id
+    WHERE c.church_id = :church_id
+  ");
+  $stmt->bindValue(':church_id', $churchId, PDO::PARAM_INT);
+  $stmt->execute();
+  $count = $stmt->fetchColumn();
+  echo json_encode(['count' => intval($count)]);
+  exit;
+}
+

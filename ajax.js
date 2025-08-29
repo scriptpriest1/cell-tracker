@@ -4,6 +4,11 @@ $(document).ready(() => {
   // Load Cell Members into the Cell Members Table
   fetchAllCellMembers();
 
+  // If church admin, fetch total cell members for dashboard stats
+  if ($("body").hasClass("church-admin") || $("#dashboard-page .cell-count").length) {
+    fetchChurchCellMemberCount();
+  }
+
   // Feedback alerts
   const successMsg = $("#success-msg");
   const errMsg = $("#err-msg");
@@ -1166,3 +1171,20 @@ $(function () {
     urlParam: "members_search"
   });
 });
+
+/*********************************************
+      Fetch total cell members for church dashboard stats
+*********************************************/
+function fetchChurchCellMemberCount() {
+  $.ajax({
+    url: "../php/ajax.php",
+    method: "POST",
+    data: { action: "fetch_church_cell_member_count" },
+    dataType: "json",
+    success: function (res) {
+      if (res && typeof res.count !== "undefined") {
+        $("#dashboard-page .stat .value").eq(1).text(res.count); // 2nd stat block: Total cell members
+      }
+    }
+  });
+}
