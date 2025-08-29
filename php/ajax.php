@@ -800,3 +800,130 @@ if ($action === 'fetch_report_drafts') {
   }
 }
 
+/*=======================================
+      Search Cells Functionality
+=======================================*/
+if ($action === 'search_cells') {
+  $keyword = clean_input($_POST['keyword'] ?? '');
+  $churchId = clean_input($_SESSION['entity_id']);
+  if ($keyword === '') {
+    // fallback to all
+    $stmt = $conn->prepare("
+      SELECT 
+        cells.id, 
+        cells.cell_name, 
+        DATE_FORMAT(cells.date_created, '%d/%m/%Y') AS date_created,
+        CONCAT(users.first_name, ' ', users.last_name) AS cell_leader_name,
+        (
+          SELECT COUNT(*) 
+          FROM cell_members 
+          WHERE cell_members.cell_id = cells.id
+        ) AS cell_members_count
+      FROM cells
+      LEFT JOIN users 
+        ON users.cell_id = cells.id 
+        AND users.cell_role = 'leader'
+      WHERE cells.church_id = :church_id
+    ");
+    $stmt->bindValue(':church_id', $churchId, PDO::PARAM_INT);
+    $stmt->execute();
+    $cells = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    echo json_encode($cells);
+    exit;
+  }
+  $stmt = $conn->prepare("
+    SELECT 
+      cells.id, 
+      cells.cell_name, 
+      DATE_FORMAT(cells.date_created, '%d/%m/%Y') AS date_created,
+      CONCAT(users.first_name, ' ', users.last_name) AS cell_leader_name,
+      (
+        SELECT COUNT(*) 
+        FROM cell_members 
+        WHERE cell_members.cell_id = cells.id
+      ) AS cell_members_count
+    FROM cells
+    LEFT JOIN users 
+      ON users.cell_id = cells.id 
+      AND users.cell_role = 'leader'
+    WHERE cells.church_id = :church_id
+      AND cells.cell_name LIKE :keyword
+  ");
+  $stmt->bindValue(':church_id', $churchId, PDO::PARAM_INT);
+  $stmt->bindValue(':keyword', '%' . $keyword . '%', PDO::PARAM_STR);
+  $stmt->execute();
+  $cells = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  echo json_encode($cells);
+  exit;
+}
+
+/*=======================================
+      Search Cell Members Functionality
+=======================================*/
+if ($action === 'search_cell_members') {
+  $keyword = clean_input($_POST['keyword'] ?? '');
+  $cellId = clean_input($_SESSION['entity_id']);
+  if ($keyword === '') {
+    // fallback to all
+    $stmt = $conn->prepare("
+      SELECT 
+        id,
+        CONCAT(UPPER(LEFT(title, 1)), SUBSTRING(title, 2)) AS title,
+        first_name,
+        last_name,
+        phone_number,
+        email,
+        CONCAT(UPPER(LEFT(dob_month, 1)), SUBSTRING(dob_month, 2)) AS dob_month,
+        dob_day,
+        occupation,
+        residential_address,
+        CONCAT(UPPER(LEFT(foundation_sch_status, 1)), SUBSTRING(foundation_sch_status, 2)) AS foundation_sch_status,
+        delg_in_cell,
+        dept_in_church,
+        date_joined_ministry,
+        DATE_FORMAT(date_added, '%d/%m/%Y') AS date_added,
+        cell_id
+      FROM cell_members
+      WHERE cell_id = :cell_id
+    ");
+    $stmt->bindValue(':cell_id', $cellId, PDO::PARAM_INT);
+    $stmt->execute();
+    $members = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    echo json_encode($members);
+    exit;
+  }
+  $stmt = $conn->prepare("
+    SELECT 
+      id,
+      CONCAT(UPPER(LEFT(title, 1)), SUBSTRING(title, 2)) AS title,
+      first_name,
+      last_name,
+      phone_number,
+      email,
+      CONCAT(UPPER(LEFT(dob_month, 1)), SUBSTRING(dob_month, 2)) AS dob_month,
+      dob_day,
+      occupation,
+      residential_address,
+      CONCAT(UPPER(LEFT(foundation_sch_status, 1)), SUBSTRING(foundation_sch_status, 2)) AS foundation_sch_status,
+      delg_in_cell,
+      dept_in_church,
+      date_joined_ministry,
+      DATE_FORMAT(date_added, '%d/%m/%Y') AS date_added,
+      cell_id
+    FROM cell_members
+    WHERE cell_id = :cell_id
+      AND (
+        first_name LIKE :keyword
+        OR last_name LIKE :keyword
+        OR phone_number LIKE :keyword
+        OR email LIKE :keyword
+      )
+  ");
+  $stmt->bindValue(':cell_id', $cellId, PDO::PARAM_INT);
+  $stmt->bindValue(':keyword', '%' . $keyword . '%', PDO::PARAM_STR);
+  $stmt->execute();
+  $members = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  echo json_encode($members);
+  exit;
+}
+

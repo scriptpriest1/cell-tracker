@@ -254,13 +254,10 @@ $(document).ready(() => {
             <td>${cell.date_created}</td>
             <td>${cell.cell_leader_name || ""}</td>
             <td>${cell.cell_members_count}</td>
-            <td class="d-flex align-items-center gap-2"><button type="button" class="load-action-modal-dyn-content view-cell-details-btn action-btn px-3 py-1" data-content-type="view-cell-details" data-cell-name="${
-              cell.cell_name
-            }" data-cell-id="${
-            cell.id
-          }">View</button> <button type="button" class="load-action-modal-dyn-content assign-cell-admin-btn action-btn px-3 py-1" data-content-type="assign-cell-admin" data-cell-name="${
-            cell.cell_name
-          }" data-cell-id="${cell.id}">Assign admin</button></td>
+            <td class="d-flex align-items-center gap-2"><button type="button" class="load-action-modal-dyn-content view-cell-details-btn action-btn px-3 py-1" data-content-type="view-cell-details" data-cell-name="${cell.cell_name
+            }" data-cell-id="${cell.id
+            }">View</button> <button type="button" class="load-action-modal-dyn-content assign-cell-admin-btn action-btn px-3 py-1" data-content-type="assign-cell-admin" data-cell-name="${cell.cell_name
+            }" data-cell-id="${cell.id}">Assign admin</button></td>
           </tr>`;
           tbody.append(row);
         });
@@ -288,10 +285,11 @@ $(document).ready(() => {
         });
     });
   }
+  window.updateTableSN = updateTableSN;
 
   /*********************************************
-      Load content dynamically into html
-                  - Function
+    Load content dynamically into html
+                - Function
   *********************************************/
 
   // Action Modal
@@ -621,13 +619,10 @@ $(document).ready(() => {
           <td>${member.dept_in_church || ""}</td>
           <td>${member.date_joined_ministry || ""}</td>
           <td>${member.date_added || ""}</td>
-          <td class="d-flex align-items-center gap-2"><button class="px-3 py-1 action-btn edit--member-btn load-action-modal-dyn-content" data-content-type="edit-cell-member-details" data-member-name="${
-            member.first_name + " " + member.last_name
-          }" data-member-id="${
-            member.id
-          }">Edit</button> <button class="px-3 py-1 action-btn delete-member-btn" data-member-id="${
-            member.id
-          }">Delete</button></td>
+          <td class="d-flex align-items-center gap-2"><button class="px-3 py-1 action-btn edit--member-btn load-action-modal-dyn-content" data-content-type="edit-cell-member-details" data-member-name="${member.first_name + " " + member.last_name
+            }" data-member-id="${member.id
+            }">Edit</button> <button class="px-3 py-1 action-btn delete-member-btn" data-member-id="${member.id
+            }">Delete</button></td>
         </tr>`;
           tbody.append(row);
         });
@@ -760,11 +755,9 @@ $(document).ready(() => {
 
       <div class="action-bar d-flex align-items-center justify-content-between gap-2">
         <span class="label">${status === "published" ? "published" : ""}</span>
-        <button class="${
-          status === "published" ? "view-btn" : "publish-btn"
-        } m-0 p-0" data-cell-id="${draft.cell_id}">${
-      status === "published" ? "View" : "Publish"
-    }</button>
+        <button class="${status === "published" ? "view-btn" : "publish-btn"
+      } m-0 p-0" data-cell-id="${draft.cell_id}">${status === "published" ? "View" : "Publish"
+      }</button>
       </div>
     </div>
   `);
@@ -971,4 +964,205 @@ $(document).ready(() => {
   });
 
   // Close ready() function
+});
+
+class SearchBar {
+  constructor(options) {
+    this.inputSelector = options.inputSelector;
+    this.iconSelector = options.iconSelector;
+    this.tableSelector = options.tableSelector;
+    this.infoBlockSelector = options.infoBlockSelector;
+    // Use static SVG and rotate via CSS class
+    this.loaderSvg = `<svg class="search-icon search-loading" xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 0 50 50" width="20px"><circle cx="25" cy="25" r="20" stroke="#0d6efd" stroke-width="5" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/></svg>`;
+    this.defaultSvg = `<svg class="search-icon" xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill=""><path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>`;
+    this.delay = options.delay || 350;
+    this.timer = null;
+    this.searchType = options.searchType; // 'cells' or 'members'
+    this.fetchAllFn = options.fetchAllFn;
+    this.renderFn = options.renderFn;
+    this.urlParam = options.urlParam;
+    this.init();
+  }
+
+  setLoading(isLoading) {
+    const $iconSpan = $(this.iconSelector);
+    if (isLoading) {
+      $iconSpan.html(this.loaderSvg);
+    } else {
+      $iconSpan.html(this.defaultSvg);
+    }
+  }
+
+  updateURL(query) {
+    const params = new URLSearchParams(window.location.search);
+    if (query) {
+      params.set(this.urlParam, query);
+    } else {
+      params.delete(this.urlParam);
+    }
+    history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+  }
+
+  handleSearch(query) {
+    this.setLoading(true);
+    this.updateURL(query);
+    if (!query) {
+      this.setLoading(false);
+      this.fetchAllFn();
+      return;
+    }
+    $.ajax({
+      url: "../php/ajax.php",
+      method: "POST",
+      dataType: "json",
+      data: {
+        action: this.searchType === "cells" ? "search_cells" : "search_cell_members",
+        keyword: query
+      },
+      success: (results) => {
+        this.setLoading(false);
+        this.renderFn(results, query);
+      },
+      error: () => {
+        this.setLoading(false);
+        $(this.infoBlockSelector).text("Error searching.");
+        $(this.tableSelector + " tbody").empty();
+      }
+    });
+  }
+
+  init() {
+    const $input = $(this.inputSelector);
+    $input.on("input change", (e) => {
+      clearTimeout(this.timer);
+      this.setLoading(true);
+      const val = $input.val().trim();
+      this.timer = setTimeout(() => {
+        this.handleSearch(val);
+      }, this.delay);
+    });
+  }
+}
+
+// Cells search rendering
+function renderCellsTable(cells, query) {
+  const tbody = $("#cells-table tbody");
+  tbody.empty();
+  if (!cells || cells.length === 0) {
+    $("#cells-table-info-block .info").text(query ? "No cells matched your search" : "No data found!");
+  } else {
+    $("#cells-table-info-block .info").text("");
+    cells.forEach(function (cell, index) {
+      const row = `
+        <tr>
+          <td class="sn-col"></td>
+          <td>${cell.cell_name + " Cell"}</td>
+          <td>${cell.date_created}</td>
+          <td>${cell.cell_leader_name || ""}</td>
+          <td>${cell.cell_members_count}</td>
+          <td class="d-flex align-items-center gap-2">
+            <button type="button" class="load-action-modal-dyn-content view-cell-details-btn action-btn px-3 py-1" data-content-type="view-cell-details" data-cell-name="${cell.cell_name}" data-cell-id="${cell.id}">View</button>
+            <button type="button" class="load-action-modal-dyn-content assign-cell-admin-btn action-btn px-3 py-1" data-content-type="assign-cell-admin" data-cell-name="${cell.cell_name}" data-cell-id="${cell.id}">Assign admin</button>
+          </td>
+        </tr>`;
+      tbody.append(row);
+    });
+  }
+  updateTableSN(); // Always call, even if empty
+}
+
+// Cell members search rendering
+function renderCellMembersTable(members, query) {
+  const tbody = $("#cell-members-table tbody");
+  tbody.empty();
+  if (!members || members.length === 0) {
+    $("#cell-members-table-info-block .info").text(query ? "No cell members matched your search" : "No data found!");
+  } else {
+    $("#cell-members-table-info-block .info").text("");
+    members.forEach(function (member, index) {
+      const row = `
+        <tr>
+          <td class="sn-col"></td>
+          <td>${member.title || ""}</td>
+          <td>${member.first_name}</td>
+          <td>${member.last_name}</td>
+          <td>${member.phone_number || ""}</td>
+          <td>${member.email || ""}</td>
+          <td>${member.dob_month + " " + member.dob_day || ""}</td>
+          <td>${member.occupation || ""}</td>
+          <td>${member.residential_address || ""}</td>
+          <td>${member.foundation_sch_status || ""}</td>
+          <td>${member.delg_in_cell || ""}</td>
+          <td>${member.dept_in_church || ""}</td>
+          <td>${member.date_joined_ministry || ""}</td>
+          <td>${member.date_added || ""}</td>
+          <td class="d-flex align-items-center gap-2">
+            <button class="px-3 py-1 action-btn edit--member-btn load-action-modal-dyn-content" data-content-type="edit-cell-member-details" data-member-name="${member.first_name + " " + member.last_name}" data-member-id="${member.id}">Edit</button>
+            <button class="px-3 py-1 action-btn delete-member-btn" data-member-id="${member.id}">Delete</button>
+          </td>
+        </tr>`;
+      tbody.append(row);
+    });
+  }
+  updateTableSN(); // Always call, even if empty
+}
+
+// Override fetchAllCells and fetchAllCellMembers to be used by search
+window.fetchAllCells = function () {
+  $.ajax({
+    url: "../php/ajax.php",
+    method: "POST",
+    data: { action: "fetch_all_cells" },
+    dataType: "json",
+    success: function (cells) {
+      renderCellsTable(cells, "");
+    },
+    error: () => {
+      $("#cells-table-info-block .info").text("Error loading cells.");
+      $("#cells-table tbody").empty();
+    }
+  });
+};
+
+window.fetchAllCellMembers = function () {
+  $.ajax({
+    url: "../php/ajax.php",
+    method: "POST",
+    data: { action: "fetch_all_cell_members" },
+    dataType: "json",
+    success: function (members) {
+      renderCellMembersTable(members, "");
+    },
+    error: () => {
+      $("#cell-members-table-info-block .info").text("Error loading members.");
+      $("#cell-members-table tbody").empty();
+    }
+  });
+};
+
+// Initialize search bars after DOM ready
+$(function () {
+  // Cells page search
+  new SearchBar({
+    inputSelector: "#cells-page .search-bar .search-input",
+    iconSelector: "#cells-page .search-bar .search-icon",
+    tableSelector: "#cells-table",
+    infoBlockSelector: "#cells-table-info-block .info",
+    searchType: "cells",
+    fetchAllFn: window.fetchAllCells,
+    renderFn: renderCellsTable,
+    urlParam: "cells_search"
+  });
+
+  // Cell members page search
+  new SearchBar({
+    inputSelector: "#cell-members-page .search-bar .search-input",
+    iconSelector: "#cell-members-page .search-bar .search-icon",
+    tableSelector: "#cell-members-table",
+    infoBlockSelector: "#cell-members-table-info-block .info",
+    searchType: "members",
+    fetchAllFn: window.fetchAllCellMembers,
+    renderFn: renderCellMembersTable,
+    urlParam: "members_search"
+  });
 });

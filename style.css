@@ -103,6 +103,7 @@ a,
   box-shadow: none !important;
   border-radius: 10px;
 }
+
 input::placeholder,
 textarea::placeholder {
   color: var(--text-secondary) !important;
@@ -158,9 +159,11 @@ button.check-btn svg {
   padding: 4px 12px;
   border-radius: 50px;
 }
+
 .filter-bar .filter:hover {
   background-color: var(--primary-lighter);
 }
+
 .filter-bar .filter.active {
   background-color: var(--primary-light);
 }
@@ -177,9 +180,11 @@ button.check-btn svg {
   border-radius: 10px;
   box-shadow: var(--box-shadow);
 }
+
 .dropdown-menu .dropdown-item {
   font-size: 15px !important;
 }
+
 .dropdown-menu .dropdown-item:hover {
   background-color: var(--hover-on-bg) !important;
 }
@@ -198,6 +203,7 @@ button.check-btn svg {
 .dropdown-menu.switch-profile .dropdown-item * {
   color: var(--text-secondary-on-tertiary);
 }
+
 .dropdown-menu.switch-profile .dropdown-item span.entity-name {
   flex-basis: 90% !important;
   overflow: hidden;
@@ -209,6 +215,7 @@ button.check-btn svg {
   background-color: var(--tertiary-lighter) !important;
   color: var(--text-secondary-on-tertiary) !important;
 }
+
 .dropdown-menu.switch-profile .dropdown-item.active * {
   color: #00ff7f !important;
   /* font-weight: bold !important; */
@@ -253,6 +260,7 @@ button.check-btn svg {
   background-color: inherit;
   z-index: 2;
 }
+
 .action-modal .action-panel .footer {
   background-color: inherit;
   z-index: 2;
@@ -266,6 +274,7 @@ button.check-btn svg {
   z-index: 1;
   height: fit-content;
 }
+
 .action-modal .action-panel .panel-body .side-panel.reveal {
   display: block;
 }
@@ -283,11 +292,7 @@ button.check-btn svg {
   display: flex;
 }
 
-.action-modal
-  .action-panel
-  .header
-  .edit-title-bar
-  .form-control.edit-title-input {
+.action-modal .action-panel .header .edit-title-bar .form-control.edit-title-input {
   box-shadow: var(--box-shadow) !important;
   width: 200px;
 }
@@ -403,6 +408,7 @@ button.check-btn svg {
   border: 1px solid var(--border-on-tertiary);
   border-radius: 10px;
 }
+
 #sidebar header .switch-profile-btn:hover {
   background-color: var(--tertiary-lighter);
 }
@@ -434,15 +440,19 @@ button.check-btn svg {
   width: 100%;
   margin-top: 12px;
 }
+
 #sidebar .nav li .text {
   color: var(--text-secondary-on-tertiary);
 }
+
 #sidebar .nav li:hover {
   background-color: var(--tertiary-lighter);
 }
+
 #sidebar .nav li.active {
   background-color: var(--tertiary-lighter);
 }
+
 #sidebar .nav li .icon svg {
   fill: var(--text-secondary-on-tertiary);
 }
@@ -464,6 +474,7 @@ button.check-btn svg {
   width: 100%;
   border: none;
 }
+
 #sidebar footer .logout-btn:hover {
   background-color: var(--tertiary-lighter);
 }
@@ -471,6 +482,7 @@ button.check-btn svg {
 #sidebar footer .logout-btn .icon svg {
   fill: var(--text-secondary-on-tertiary);
 }
+
 #sidebar footer .logout-btn .text {
   color: var(--text-secondary-on-tertiary);
 }
@@ -511,6 +523,7 @@ button.check-btn svg {
 #screen header .menu-btn {
   border: none;
 }
+
 #screen header .menu-btn svg {
   fill: var(--text-primary);
 }
@@ -575,6 +588,7 @@ button.check-btn svg {
   margin-left: auto;
   color: var(--text-tertiary);
 }
+
 .cell-table-section .add-cell-btn:hover,
 .cell-table-section .add-member-btn:hover {
   background-color: var(--hover-on-primary);
@@ -613,6 +627,7 @@ button.check-btn svg {
   border: 1px solid var(--tertiary);
   border-radius: 10px;
 }
+
 .cells-table-container table tr .action-btn:hover {
   background-color: var(--hover-on-bg);
 }
@@ -621,6 +636,7 @@ button.check-btn svg {
   border-color: var(--error);
   color: var(--error);
 }
+
 .cells-table-container table tr .delete-member-btn:hover {
   background-color: var(--error-hover);
 }
@@ -649,6 +665,7 @@ button.check-btn svg {
   background-color: var(--primary);
   color: var(--text-tertiary);
 }
+
 .action-modal-form .submit-btn:hover {
   background-color: var(--hover-on-primary);
 }
@@ -657,6 +674,7 @@ button.check-btn svg {
   background-color: var(--bg);
   border: 1px solid var(--border);
 }
+
 .action-modal-form .cancel-btn:hover {
   background-color: var(--hover-on-bg);
 }
@@ -664,6 +682,7 @@ button.check-btn svg {
 #action-modal .cell-admins-list-container .cell-admins-list li {
   margin-bottom: 7px;
 }
+
 #action-modal .cell-admins-list-container .cell-admins-list li:last-child {
   margin-bottom: 0;
 }
@@ -677,6 +696,7 @@ button.check-btn svg {
 .dropdown-item.edit-admin-btn {
   color: var(--primary) !important;
 }
+
 .dropdown-item.unassign-admin-btn {
   color: var(--error) !important;
 }
@@ -693,13 +713,15 @@ button.check-btn svg {
   white-space: nowrap;
 }
 
-.report-status.published .span-box{
+.report-status.published .span-box {
   background-color: var(--success-light);
 }
-.report-status.pending .span-box{
+
+.report-status.pending .span-box {
   background-color: var(--warning-light);
 }
-.report-status.unpublished .span-box{
+
+.report-status.unpublished .span-box {
   background-color: var(--error-light);
 }
 
@@ -710,6 +732,7 @@ button.check-btn svg {
   border-radius: 10px;
   margin-top: 10px;
 }
+
 .report-draft:first-child {
   margin: 0;
 }
@@ -725,9 +748,22 @@ button.check-btn svg {
   margin-right: 20px;
 }
 
-.report-draft .publish-btn, .report-draft .view-btn {
+.report-draft .publish-btn,
+.report-draft .view-btn {
   color: var(--primary);
 }
-.report-draft .publish-btn:hover, .report-draft .view-btn:hover {
+
+.report-draft .publish-btn:hover,
+.report-draft .view-btn:hover {
   text-decoration: underline;
+}
+
+.search-loading {
+  animation: search-rotate 1s linear infinite;
+}
+
+@keyframes search-rotate {
+  100% {
+    transform: rotate(360deg);
+  }
 }
