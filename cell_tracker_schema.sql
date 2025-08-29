@@ -1,9 +1,9 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.2
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost
--- Generation Time: Aug 27, 2025 at 11:53 AM
+-- Host: 127.0.0.1
+-- Generation Time: Aug 29, 2025 at 02:46 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -56,7 +56,7 @@ INSERT INTO `cells` (`id`, `cell_name`, `date_created`, `church_id`) VALUES
 (1, 'Zion', '2025-07-29 06:11:10', 2),
 (8, 'Heaven', '2025-07-31 10:52:48', 2),
 (10, 'Auxano', '2025-07-31 11:12:45', 2),
-(11, 'Dynamic', '2025-07-31 11:14:25', 1),
+(11, 'Dunamis', '2025-07-31 11:14:25', 1),
 (28, 'The Way', '2025-08-01 16:37:11', 2),
 (31, 'Marvelous', '2025-08-01 19:48:31', 2),
 (32, 'Youths', '2025-08-01 19:55:54', 1),
@@ -81,7 +81,8 @@ INSERT INTO `cells` (`id`, `cell_name`, `date_created`, `church_id`) VALUES
 (63, 'Favour', '2025-08-09 14:57:06', 2),
 (64, 'Pace Setters', '2025-08-10 06:09:04', 2),
 (65, 'Miracle', '2025-08-11 19:39:02', 2),
-(66, 'Haven', '2025-08-14 05:09:05', 1);
+(66, 'Haven', '2025-08-14 05:09:05', 1),
+(67, 'Miva', '2025-08-29 09:07:34', 2);
 
 -- --------------------------------------------------------
 
@@ -115,10 +116,10 @@ CREATE TABLE `cell_members` (
 INSERT INTO `cell_members` (`id`, `title`, `first_name`, `last_name`, `phone_number`, `email`, `dob_month`, `dob_day`, `occupation`, `residential_address`, `foundation_sch_status`, `delg_in_cell`, `dept_in_church`, `date_joined_ministry`, `date_added`, `cell_id`) VALUES
 (19, 'sister', 'Joy', 'Obisike', '08167484342', 'joychidera97@gmail.com', 'dec', '4', 'Student', 'First bus-stop, Irete, Imo, Nigeria.', 'graduated', 'Secretary', 'Media', '', '2025-08-15 09:30:35', 28),
 (20, 'brother', 'Michael', 'Chimereze', '08109085121', 'official.michaelchimereze@gmail.com', 'jul', '3', 'Web developer', 'Ubah, Orogwe, Owerri-west', 'graduated', 'Cell leader', 'Choir, Media', '', '2025-08-15 09:31:28', 28),
-(21, 'sister', 'Grace', 'Nduchi', '09078246177', 'gracendu@gmail.com', 'aug', '14', 'Seamstress', 'Orogwe', 'graduated', 'Bible study class teacher', 'Ushering', '2018-06-01', '2025-08-15 09:34:29', 32),
-(22, 'sister', 'Chinwendu', 'Chimereze', '07040332022', 'chinwenduchimereze@gmail.com', 'feb', '7', 'Church staff', 'Ubah, Orogwe, Owerri-west', 'graduated', 'Cell leader', 'Choir', '2020-04-15', '2025-08-15 09:37:36', 32),
 (23, 'brother', 'Sampson', 'Ejiogu', '09154567876', '', 'feb', '2', 'Taxi driver', '', 'not-enrolled', '', '', '', '2025-08-15 15:40:36', 11),
-(24, 'pastor', 'Saviour', 'Ndubuisi', '09078246177', 'pnd@gmail.com', 'jan', '20', 'Painter', 'Ihiagwa', 'graduated', 'Cell leader', 'PCF', '', '2024-06-15 14:45:16', 35);
+(24, 'pastor', 'Saviour', 'Ndubuisi', '09078246177', 'pnd@gmail.com', 'jan', '20', 'Painter', 'Ihiagwa', 'graduated', 'Cell leader', 'PCF', '', '2024-06-15 14:45:16', 35),
+(26, 'sister', 'Favour', 'Uyork', '09128958294', 'favouruyork@gmail.com', 'jul', '9', 'Church staff', 'Irete', 'graduated', '', 'Choir', '', '2025-08-29 00:30:57', 28),
+(27, 'sister', 'Chinwendu', 'Chimereze', '08165515314', '', 'feb', '7', 'Church staff', 'Orogwe', 'graduated', 'Cell leader', 'Choir', '', '2025-08-29 00:59:19', 32);
 
 -- --------------------------------------------------------
 
@@ -135,6 +136,7 @@ CREATE TABLE `cell_reports` (
   `time` time NOT NULL,
   `offering` decimal(10,0) NOT NULL,
   `date_generated` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `expiry_date` timestamp NULL DEFAULT NULL,
   `date_reported` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `editable` tinyint(1) NOT NULL,
   `cell_report_draft_id` bigint(20) DEFAULT NULL,
@@ -177,6 +179,7 @@ CREATE TABLE `cell_report_drafts` (
   `description` varchar(100) NOT NULL,
   `status` varchar(50) NOT NULL,
   `date_generated` timestamp NOT NULL DEFAULT current_timestamp(),
+  `expiry_date` timestamp NULL DEFAULT NULL,
   `cell_id` bigint(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -184,16 +187,12 @@ CREATE TABLE `cell_report_drafts` (
 -- Dumping data for table `cell_report_drafts`
 --
 
-INSERT INTO `cell_report_drafts` (`id`, `type`, `week`, `description`, `status`, `date_generated`, `cell_id`) VALUES
-(143, 'meeting', 2, 'Bible Study Class 1', 'pending', '2024-07-08 03:09:03', 32),
-(144, 'meeting', 1, 'Prayer and Planning', 'pending', '2024-07-01 03:15:12', 32),
-(145, 'meeting', 3, 'Bible Study Class 2', 'pending', '2024-07-17 03:15:24', 32),
-(146, 'meeting', 4, 'Cell Outreach', 'pending', '2024-07-31 03:15:32', 32),
-(147, 'meeting', 1, 'Prayer and Planning', 'pending', '2024-08-01 03:15:49', 32),
-(148, 'meeting', 4, 'Cell Outreach', 'pending', '2025-08-23 20:39:33', 32),
-(149, 'meeting', 4, 'Cell Outreach', 'pending', '2025-08-23 20:41:13', 35),
-(150, 'meeting', 4, 'Cell Outreach', 'pending', '2025-08-24 20:52:21', 35),
-(151, 'meeting', 4, 'Cell Outreach', 'pending', '2025-08-26 13:58:09', 32);
+INSERT INTO `cell_report_drafts` (`id`, `type`, `week`, `description`, `status`, `date_generated`, `expiry_date`, `cell_id`) VALUES
+(153, 'meeting', 4, 'Cell Outreach', 'pending', '2025-08-28 20:43:14', NULL, 32),
+(154, 'meeting', 4, 'Cell Outreach', 'pending', '2025-08-29 11:57:44', NULL, 28),
+(155, 'meeting', 4, 'Cell Outreach', 'pending', '2025-08-29 11:57:57', NULL, 28),
+(156, 'meeting', 4, 'Cell Outreach', 'pending', '2025-08-29 11:58:40', NULL, 28),
+(157, 'meeting', 4, 'Cell Outreach', 'pending', '2025-08-29 11:59:42', NULL, 28);
 
 -- --------------------------------------------------------
 
@@ -274,7 +273,7 @@ CREATE TABLE `users` (
   `first_name` varchar(50) NOT NULL,
   `last_name` varchar(50) NOT NULL,
   `user_login` varchar(50) NOT NULL,
-  `password` varchar(255) NOT NULL, -- Store only password hashes using password_hash()
+  `password` varchar(255) NOT NULL,
   `phone_number` varchar(50) NOT NULL,
   `date_created` timestamp NOT NULL DEFAULT current_timestamp(),
   `cell_id` bigint(20) DEFAULT NULL,
@@ -285,22 +284,20 @@ CREATE TABLE `users` (
   `group_role` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Note: When inserting/updating users, always use password_hash() in PHP.
-
 --
 -- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `first_name`, `last_name`, `user_login`, `password`, `phone_number`, `date_created`, `cell_id`, `church_id`, `group_id`, `cell_role`, `church_role`, `group_role`) VALUES
-(2, 'Chinwendu', 'Chimereze', 'me@wendy.com', 'password', '', '2025-07-25 15:53:41', 32, 1, NULL, 'leader', 'pfcc', ''),
-(4, 'Michael', 'King', 'sparrowdeck@gmail.com', 'sparrow', '', '2025-07-30 11:21:30', 28, 2, NULL, 'leader', '', ''),
-(8, 'Ugo', 'Amadi', 'ugoamadi@gmail.com', 'password', '', '2025-07-31 12:20:33', 35, 3, NULL, 'executive', '', ''),
+(2, 'Chinwendu', 'Chimereze', 'me@wendy.com', '$2y$10$yiFsgAhpWbuRPNldLRpB3eAUWhUY43gi3Ds1mh9sB7VUzoeABB08G', '', '2025-07-25 15:53:41', 32, 1, NULL, 'leader', 'pfcc', ''),
+(4, 'Michael', 'King', 'sparrowdeck@gmail.com', '$2y$10$Zd1JPi/dwP9CR6RclIkqeulkj/ZxvruaspS8izSRo9MCA0voToZwS', '', '2025-07-30 11:21:30', 28, 2, NULL, 'leader', '', ''),
+(8, 'Ugo', 'Amadi', 'ugoamadi@gmail.com', '$2y$10$yiFsgAhpWbuRPNldLRpB3eAUWhUY43gi3Ds1mh9sB7VUzoeABB08G', '', '2025-07-31 12:20:33', 35, 3, NULL, 'executive', '', ''),
 (19, 'Saviour', 'Ndubuisi', 'pnd@gmail.com', '$2y$10$hJCgtuBJH78ztX597sTmceQSOU.mm9rV/1jRAX.esOK', '09077656776', '2025-08-05 02:16:13', 35, NULL, NULL, 'leader', '', ''),
-(20, 'Hezel', 'Macauley', 'hezelm@gmail.com', 'password', '09077656776', '2025-08-05 23:18:02', 59, NULL, NULL, 'leader', '', ''),
-(22, 'Favour', 'Dominic', 'favdominic@gmail.com', 'password', '08045828913', '2025-08-07 15:16:50', 61, NULL, NULL, 'executive', '', ''),
-(24, 'Grace', 'Nduchi', 'gracendu@gmail.com', '$2y$10$CGBbzCeZ0eet/oFQIdBYXeVZgySLMJbW0mI7AD/X3e0', '09078246177', '2025-08-08 15:37:48', 32, NULL, NULL, 'executive', '', ''),
+(20, 'Hezel', 'Macauley', 'hezelm@gmail.com', '$2y$10$yiFsgAhpWbuRPNldLRpB3eAUWhUY43gi3Ds1mh9sB7VUzoeABB08G', '09077656776', '2025-08-05 23:18:02', 59, NULL, NULL, 'leader', '', ''),
+(22, 'Favour', 'Dominic', 'favdominic@gmail.com', '$2y$10$yiFsgAhpWbuRPNldLRpB3eAUWhUY43gi3Ds1mh9sB7VUzoeABB08G', '08045828913', '2025-08-07 15:16:50', 61, NULL, NULL, 'executive', '', ''),
 (25, 'Favour', 'Nwoko', 'favenwoko@gmail', '$2y$10$XcTq3RAjWrNgruYMLseOfek1zMOErNU8dp/AZRTYmYi', '09078246177', '2025-08-10 06:13:31', 1, NULL, NULL, 'executive', '', ''),
-(27, 'Ugochukwu', 'Kingsley', 'ugokingsley@gmail.com', '$2y$10$zbQ9jT07bFC70/x7rtjXvunPbdtkQtWiSfevBk0bnS6', '09085275325', '2025-08-15 15:35:28', 11, NULL, NULL, 'leader', '', '');
+(28, 'Ugochukwu', 'Kingsley', 'ugo@gmail.com', '$2y$10$3h8.0fwtZvtIbUo2r5WO/.sLaRQ9hX03HDqmkOnDkkJ2qMmXCRrom', '09078364277', '2025-08-28 17:07:49', 11, NULL, NULL, 'leader', '', ''),
+(29, 'David', 'Israel', 'davidisrael@gmail.com', '$2y$10$UPInMGC0vcuywv/sLLlLU.1GJ6q4IJ1mkqI/jfLYAo6ZefbaRXLsK', '09032331337', '2025-08-28 23:58:04', 33, NULL, NULL, 'leader', '', '');
 
 --
 -- Indexes for dumped tables
@@ -397,13 +394,13 @@ ALTER TABLE `announcements`
 -- AUTO_INCREMENT for table `cells`
 --
 ALTER TABLE `cells`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
 
 --
 -- AUTO_INCREMENT for table `cell_members`
 --
 ALTER TABLE `cell_members`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `cell_reports`
@@ -421,7 +418,7 @@ ALTER TABLE `cell_report_attendees`
 -- AUTO_INCREMENT for table `cell_report_drafts`
 --
 ALTER TABLE `cell_report_drafts`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=152;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=158;
 
 --
 -- AUTO_INCREMENT for table `churches`
@@ -451,7 +448,7 @@ ALTER TABLE `notifications`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- Constraints for dumped tables
