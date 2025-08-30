@@ -806,7 +806,7 @@ button.check-btn svg {
   overflow-y: auto;
   width: 100%;
   padding: 10px;
-  box-shadow: var(--box-shadow);
+  box-shadow: var(--box-shadow-heavy);
   margin-top: 5px;
 }
 

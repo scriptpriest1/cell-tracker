@@ -717,8 +717,6 @@ if ($action === 'generate_report_draft') {
     exit;
   }
 
-  $type = in_array(clean_input($_POST['type'] ?? 'meeting'), ['meeting', 'outreach']) ? clean_input($_POST['type']) : 'meeting';
-
   // Week calculation: week 1 starts on first Monday of the month
   $today = new DateTime();
   $year = (int)$today->format('Y');
@@ -757,6 +755,9 @@ if ($action === 'generate_report_draft') {
   // Set description using helper
   $description = getMeetingDescription($week);
 
+  // Set type based on week
+  $type = getReportTypeByWeek($week);
+
   try {
     $stmt = $conn->prepare("
       INSERT INTO cell_report_drafts (type, week, description, status, date_generated, expiry_date, cell_id)
@@ -786,7 +787,6 @@ if ($action === 'generate_report_draft') {
   }
 }
 
-
 /*=======================================
         Fetch Cell Report Draft 
           - Functionality
@@ -807,9 +807,10 @@ if ($action === 'fetch_report_drafts') {
     ");
     $q->execute([clean_input($cell_id)]);
     $rows = $q->fetchAll(PDO::FETCH_ASSOC);
-    // Ensure description is set correctly for each draft
+    // Ensure description and type are set correctly for each draft
     foreach ($rows as &$row) {
       $row['description'] = getMeetingDescription($row['week']);
+      $row['type'] = getReportTypeByWeek($row['week']);
     }
     echo json_encode(['status' => 'success', 'data' => $rows]);
     exit;
@@ -972,5 +973,12 @@ function getMeetingDescription($week) {
   if ($week == 3) return 'Bible Study Class 2';
   if ($week == 4) return 'Cell Outreach';
   return 'Cell Fellowship';
+}
+
+// Helper function for report type by week
+function getReportTypeByWeek($week) {
+  if ($week == 4) return 'outreach';
+  // week 1,2,3,5 are 'meeting'
+  return 'meeting';
 }
 
