@@ -765,7 +765,7 @@ if (isset($_POST['content-type'])) {
 
         <div class="form-group">
           <label for="phone">Phone number:</label>
-          <input type="phone" name="phone_number" id="phone" class="form-control" value="<?=$phone_number?>" />
+          <input type="phone" name="phone" id="phone" class="form-control" value="<?=$phone_number?>" />
         </div>
 
         <div class="form-group">
@@ -941,6 +941,35 @@ if (isset($_POST['content-type'])) {
     // Ensure description is set correctly
     $description = getMeetingDescription($week);
 
+    // Prepare attendee data when viewing a report: lists and counts come from cell_report_attendees
+    $attendance_ids = [];
+    $first_timers_ids = [];
+    $new_converts_ids = [];
+    $attendance_count = 0;
+    $first_timers_count = 0;
+    $new_converts_count = 0;
+    if ($report) {
+      $cell_report_id = (int)($report['id'] ?? 0);
+      if ($cell_report_id) {
+        $attQ = $conn->prepare("SELECT cell_member_id, first_timer, new_convert FROM cell_report_attendees WHERE cell_report_id = ?");
+        $attQ->execute([$cell_report_id]);
+        $attRows = $attQ->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($attRows as $ar) {
+          $mid = (int)$ar['cell_member_id'];
+          $attendance_ids[] = $mid;
+          if (!empty($ar['first_timer'])) {
+            $first_timers_ids[] = $mid;
+          }
+          if (!empty($ar['new_convert'])) {
+            $new_converts_ids[] = $mid;
+          }
+        }
+        $attendance_count = count($attendance_ids);
+        $first_timers_count = count($first_timers_ids);
+        $new_converts_count = count($new_converts_ids);
+      }
+    }
+
     ?>
     <form id="cell-report-form" class="action-modal-form position-relative">
       <input type="hidden" name="draft_id" value="<?= htmlspecialchars($draftId) ?>">
@@ -959,12 +988,6 @@ if (isset($_POST['content-type'])) {
               <?= ($mode === 'view') ? 'disabled' : '' ?>>
           </div>
           <div class="form-group">
-            <label for="first-timers">First timers:</label>
-            <input type="number" name="first_timers" id="first-timers" class="form-control" required
-              value="<?= $report ? htmlspecialchars($report['first_timers']) : '' ?>"
-              <?= ($mode === 'view') ? 'disabled' : '' ?>>
-          </div>
-          <div class="form-group">
             <label for="new-converts">New converts:</label>
             <input type="number" name="new_converts" id="new-converts" class="form-control" required
               value="<?= $report ? htmlspecialchars($report['new_converts']) : '' ?>"
@@ -974,24 +997,27 @@ if (isset($_POST['content-type'])) {
           <div class="form-group" style="position:relative;">
             <label for="attendance">Attendance:</label>
             <button type="button" class="form-select form-control attendance-select text-start" id="attendance-select" tabindex="0">
-              (<span class="attendance-count">0</span>)
+              (<span class="attendance-count"><?= ($mode === 'view') ? $attendance_count : 0 ?></span>)
             </button>
             <div class="custom-dropdown attendance-dropdown">
               <input type="text" class="form-control mb-2 attendance-search" placeholder="Search members...">
               <div class="attendance-list">
                 <div class="dropdown-option">
                   <label>
-                    <input type="checkbox" class="form-check-input me-2 select-all-attendance select-all-options">
+                    <input type="checkbox" class="form-check-input me-2 select-all-attendance select-all-options" <?= ($mode === 'view') ? 'disabled' : '' ?>>
                     <span>Select all</span>
                   </label>
                 </div>
-                <?php foreach ($members as $m): ?>
+                <?php foreach ($members as $m): 
+                  $mid = (int)$m['id'];
+                  $checked = in_array($mid, $attendance_ids) ? 'checked' : '';
+                  $disabled = ($mode === 'view') ? 'disabled' : '';
+                ?>
                   <div class="dropdown-option">
                     <label>
-                      <input type="checkbox" class="form-check-input me-2" name="attendance[]" value="<?= $m['id'] ?>"
-                        <?= ($report && in_array($m['id'], explode(',', $report['attendance_ids'] ?? ''))) ? 'checked' : '' ?>
-                        <?= ($mode === 'view') ? 'disabled' : '' ?>
-                        required
+                      <input type="checkbox" class="form-check-input me-2" name="attendance[]" value="<?= $mid ?>"
+                        <?= $checked ?> <?= $disabled ?>
+                        <?= ($mode === 'view') ? '' : 'required' ?>
                       >
                       <?= htmlspecialchars($m['first_name'] . ' ' . $m['last_name']) ?>
                     </label>
@@ -1000,43 +1026,89 @@ if (isset($_POST['content-type'])) {
               </div>
             </div>
           </div>
+
           <div class="form-group" style="position:relative;">
             <label for="first-timers">First timers:</label>
             <button type="button" class="form-select form-control first-timers-select text-start" id="first-timers-select" tabindex="0">
-              (<span class="first-timers-count">0</span>)
+              (<span class="first-timers-count"><?= ($mode === 'view') ? $first_timers_count : 0 ?></span>)
             </button>
             <div class="custom-dropdown first-timers-dropdown">
               <input type="text" class="form-control mb-2 first-timers-search" placeholder="Search members...">
               <div class="first-timers-list">
                 <div class="dropdown-option">
                   <label>
-                    <input type="checkbox" class="form-check-input me-2 select-all-first-timers select-all-options">
+                    <input type="checkbox" class="form-check-input me-2 select-all-first-timers select-all-options" <?= ($mode === 'view') ? 'disabled' : '' ?>>
                     <span>Select all</span>
                   </label>
                 </div>
-                <!-- The member options will be dynamically populated by JS based on attendance selection -->
+
+                <?php
+                // For view mode we populate from attendees (only those who attended)
+                if ($mode === 'view' && !empty($attendance_ids)):
+                  foreach ($attendance_ids as $mid):
+                    // find name from $members array
+                    $name = '';
+                    foreach ($members as $m) {
+                      if ((int)$m['id'] === (int)$mid) { $name = htmlspecialchars($m['first_name'] . ' ' . $m['last_name']); break; }
+                    }
+                    $checked = in_array($mid, $first_timers_ids) ? 'checked' : '';
+                    $disabled = 'disabled';
+                ?>
+                  <div class="dropdown-option">
+                    <label>
+                      <input type="checkbox" class="form-check-input me-2" name="first_timers[]" value="<?= $mid ?>" <?= $checked ?> <?= $disabled ?>>
+                      <?= $name ?>
+                    </label>
+                  </div>
+                <?php
+                  endforeach;
+                endif;
+                ?>
               </div>
             </div>
           </div>
+
           <div class="form-group" style="position:relative;">
             <label for="new-converts">New converts:</label>
             <button type="button" class="form-select form-control new-converts-select text-start" id="new-converts-select" tabindex="0">
-              (<span class="new-converts-count">0</span>)
+              (<span class="new-converts-count"><?= ($mode === 'view') ? $new_converts_count : 0 ?></span>)
             </button>
             <div class="custom-dropdown new-converts-dropdown">
               <input type="text" class="form-control mb-2 new-converts-search" placeholder="Search members...">
               <div class="new-converts-list">
                 <div class="dropdown-option">
                   <label>
-                    <input type="checkbox" class="form-check-input me-2 select-all-new-converts select-all-options">
+                    <input type="checkbox" class="form-check-input me-2 select-all-new-converts select-all-options" <?= ($mode === 'view') ? 'disabled' : '' ?>>
                     <span>Select all</span>
                   </label>
                 </div>
-                <!-- The member options will be dynamically populated by JS based on attendance selection -->
+
+                <?php
+                // For view mode populate from attendees
+                if ($mode === 'view' && !empty($attendance_ids)):
+                  foreach ($attendance_ids as $mid):
+                    $name = '';
+                    foreach ($members as $m) {
+                      if ((int)$m['id'] === (int)$mid) { $name = htmlspecialchars($m['first_name'] . ' ' . $m['last_name']); break; }
+                    }
+                    $checked = in_array($mid, $new_converts_ids) ? 'checked' : '';
+                    $disabled = 'disabled';
+                ?>
+                  <div class="dropdown-option">
+                    <label>
+                      <input type="checkbox" class="form-check-input me-2" name="new_converts[]" value="<?= $mid ?>" <?= $checked ?> <?= $disabled ?>>
+                      <?= $name ?>
+                    </label>
+                  </div>
+                <?php
+                  endforeach;
+                endif;
+                ?>
               </div>
             </div>
           </div>
         <?php endif; ?>
+
         <?php if ($reportType === 'outreach'): ?>
           <div class="form-group">
             <label for="outreach-kind">What kind of Outreach is this?</label>
@@ -1045,6 +1117,7 @@ if (isset($_POST['content-type'])) {
               <?= ($mode === 'view') ? 'disabled' : '' ?>>
           </div>
         <?php endif; ?>
+
         <div class="form-group">
           <label for="venue">Venue:</label>
           <input type="text" name="venue" id="venue" class="form-control" required

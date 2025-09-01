@@ -1029,20 +1029,51 @@ $(document).ready(() => {
   // Report form validation logic
   function validateReportForm() {
     const $form = $("#cell-report-form");
+    if ($form.length === 0) return;
     let valid = true;
+    const reportType = $form.find("input[name='report_type']").val();
 
-    // Check all required fields
+    // Specific checks per report type
+    if (reportType === "outreach") {
+      // outreach: attendance (number), new_converts (number), outreach-kind required
+      const attendanceVal = $.trim($form.find("input[name='attendance']").val() || "");
+      const newConvertsVal = $.trim($form.find("input[name='new_converts']").val() || "");
+      const outreachKindVal = $.trim($form.find("input[name='outreach-kind']").val() || "");
+      if (attendanceVal === "" || newConvertsVal === "" || outreachKindVal === "") {
+        valid = false;
+      }
+    } else {
+      // meeting: require at least one attendance checkbox selected; first_timers/new_converts optional
+      const attendanceChecked = $form.find("input[name='attendance[]']:checked").length;
+      if (!attendanceChecked) {
+        valid = false;
+      }
+    }
+
+    // Generic required elements check, but skip first_timers and new_converts (they are conditionally optional)
     $form.find("[required]").each(function () {
+      if (!valid) return false; // short-circuit if already invalid
+      const name = $(this).attr("name") || "";
+      // Skip conditional fields (they were handled above)
+      if (name.indexOf("first_timers") !== -1 || name.indexOf("new_converts") !== -1) {
+        return true; // continue
+      }
+      // For checkbox groups, handled above for attendance; skip checkbox group names containing "attendance" to avoid duplicate check
+      if (name.indexOf("attendance") !== -1 && reportType !== "outreach") {
+        return true;
+      }
       if ($(this).is(":checkbox")) {
-        // For checkboxes, at least one must be checked
-        const name = $(this).attr("name");
-        if ($form.find(`[name='${name}']:checked`).length === 0) {
+        const chkName = $(this).attr("name");
+        // If it's a direct required checkbox (rare), ensure at least one in that group is checked
+        if ($form.find(`[name='${chkName}']:checked`).length === 0) {
           valid = false;
           return false;
         }
-      } else if ($.trim($(this).val()) === "") {
-        valid = false;
-        return false;
+      } else {
+        if ($.trim($(this).val()) === "") {
+          valid = false;
+          return false;
+        }
       }
     });
 
@@ -1057,6 +1088,58 @@ $(document).ready(() => {
 
   // Initial validation when form loads
   $(document).on("ready", "#cell-report-form", validateReportForm);
+
+  // Cell Report Form Submission (publish)
+  $(document).on("submit", "#cell-report-form", function (e) {
+    e.preventDefault(); // Prevent default form submission
+
+    const $form = $(this);
+    const $btn = $form.find(".submit-btn");
+    $btn.prop("disabled", true).text("Publishing…");
+
+    // Serialize form data
+    const formData = $form.serialize();
+
+    $.ajax({
+      url: "../php/ajax.php?action=submit_cell_report",
+      method: "POST",
+      data: formData,
+      // NOTE: do NOT force dataType: "json" here — parse safely below so PHP warnings/HTML don't trigger a silent parseerror
+      success: function (rawRes, textStatus, xhr) {
+        let res = null;
+        // Try to parse JSON safely. If server returned non-JSON (warnings, HTML), surface it to the user for debugging.
+        try {
+          if (typeof rawRes === "object") {
+            res = rawRes;
+          } else {
+            res = JSON.parse(rawRes);
+          }
+        } catch (err) {
+          // Show raw server response so you can see the PHP warning / SQL error causing the failure
+          const preview = String(rawRes).trim();
+          alert("Server returned unexpected response:\n\n" + (preview || "[empty response]"));
+          $btn.prop("disabled", false).text("Publish");
+          return;
+        }
+
+        if (res && res.status === "success") {
+          alert("Report published successfully!");
+          toggleActionModal();
+          // Immediately fetch updated report drafts
+          fetchReportDrafts();
+        } else {
+          alert((res && res.message) || "Failed to submit report.");
+          $btn.prop("disabled", false).text("Publish");
+        }
+      },
+      error: function (xhr, status, err) {
+        // Provide the server response text (if any) to help diagnose the cause
+        const serverText = (xhr && xhr.responseText) ? xhr.responseText : status;
+        alert("Server error!\n\n" + serverText);
+        $btn.prop("disabled", false).text("Publish");
+      }
+    });
+  });
 });
 
 class SearchBar {
@@ -1235,29 +1318,42 @@ window.fetchAllCellMembers = function () {
 
 // Initialize search bars after DOM ready
 $(function () {
-  // Cells page search
-  new SearchBar({
-    inputSelector: "#cells-page .search-bar .search-input",
-    iconSelector: "#cells-page .search-bar .search-icon",
-    tableSelector: "#cells-table",
-    infoBlockSelector: "#cells-table-info-block .info",
-    searchType: "cells",
-    fetchAllFn: window.fetchAllCells,
-    renderFn: renderCellsTable,
-    urlParam: "cells_search"
-  });
+  // Cells page search - only initialize when the input exists on the page
+  if ($("#cells-page .search-bar .search-input").length) {
+    new SearchBar({
+      inputSelector: "#cells-page .search-bar .search-input",
+      iconSelector: "#cells-page .search-bar .search-icon",
+      tableSelector: "#cells-table",
+      infoBlockSelector: "#cells-table-info-block .info",
+      searchType: "cells",
+      fetchAllFn: window.fetchAllCells,
+      renderFn: renderCellsTable,
+      urlParam: "cells_search"
+    });
+  }
 
-  // Cell members page search
-  new SearchBar({
-    inputSelector: "#cell-members-page .search-bar .search-input",
-    iconSelector: "#cell-members-page .search-bar .search-icon",
-    tableSelector: "#cell-members-table",
-    infoBlockSelector: "#cell-members-table-info-block .info",
-    searchType: "members",
-    fetchAllFn: window.fetchAllCellMembers,
-    renderFn: renderCellMembersTable,
-    urlParam: "members_search"
-  });
+  // Cell members page search - support renamed id 'members-page' and fallback to legacy 'cell-members-page'
+  let membersInputSelector = "";
+  if ($("#members-page .search-bar .search-input").length) {
+    membersInputSelector = "#members-page .search-bar .search-input";
+  } else if ($("#cell-members-page .search-bar .search-input").length) {
+    membersInputSelector = "#cell-members-page .search-bar .search-input";
+  }
+
+  if (membersInputSelector) {
+    // derive icon selector by replacing input with icon in the same page block
+    const membersIconSelector = membersInputSelector.replace(".search-input", ".search-icon").replace("#members-page", "#members-page").replace("#cell-members-page", "#cell-members-page");
+    new SearchBar({
+      inputSelector: membersInputSelector,
+      iconSelector: membersIconSelector,
+      tableSelector: "#cell-members-table",
+      infoBlockSelector: "#cell-members-table-info-block .info",
+      searchType: "members",
+      fetchAllFn: window.fetchAllCellMembers,
+      renderFn: renderCellMembersTable,
+      urlParam: "members_search"
+    });
+  }
 });
 
 /*********************************************
@@ -1415,11 +1511,23 @@ function initDropdownCheckboxLogic() {
     $dropdownList.empty();
     $dropdownList.append($selectAllOption);
 
+    // Determine proper input name based on which list we are populating
+    let inputName = '';
+    if (selectAllClass.indexOf('first-timers') !== -1) {
+      inputName = 'first_timers[]';
+    } else if (selectAllClass.indexOf('new-converts') !== -1) {
+      inputName = 'new_converts[]';
+    } else {
+      inputName = ''; // fallback (attendance list is handled elsewhere)
+    }
+
     members.forEach(member => {
+      // include the correct name so the checkbox is submitted with the form
+      const nameAttr = inputName ? ` name="${inputName}"` : '';
       $dropdownList.append(
         `<div class="dropdown-option">
           <label>
-            <input type="checkbox" class="form-check-input me-2" value="${member.id}">
+            <input type="checkbox" class="form-check-input me-2"${nameAttr} value="${member.id}">
             ${member.name}
           </label>
         </div>`

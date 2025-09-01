@@ -982,84 +982,113 @@ if ($action === 'submit_cell_report') {
       $missing[] = $field;
     }
   }
-  // For outreach, attendance, first_timers, new_converts required
-  if ($_POST['report_type'] === 'outreach') {
-    foreach (['attendance', 'first_timers', 'new_converts', 'outreach-kind'] as $field) {
-      if (empty($_POST[$field])) {
+
+  $reportType = $_POST['report_type'] ?? '';
+
+  if ($reportType === 'outreach') {
+    // outreach requires numeric attendance count, new_converts and outreach-kind
+    foreach (['attendance', 'new_converts', 'outreach-kind'] as $field) {
+      if (empty($_POST[$field]) && $field !== 'first_timers') {
         $missing[] = $field;
       }
     }
   } else {
-    // For meeting, attendance[] required
+    // For meeting: attendance[] required (must have at least one checked).
     if (empty($_POST['attendance']) || !is_array($_POST['attendance']) || count($_POST['attendance']) === 0) {
       $missing[] = 'attendance';
     }
-    // first_timers[] and new_converts[] required
-    if (empty($_POST['first_timers']) || !is_array($_POST['first_timers']) || count($_POST['first_timers']) === 0) {
-      $missing[] = 'first_timers';
-    }
-    if (empty($_POST['new_converts']) || !is_array($_POST['new_converts']) || count($_POST['new_converts']) === 0) {
-      $missing[] = 'new_converts';
-    }
+    // NOTE: first_timers and new_converts are optional for meetings (do not mark missing)
   }
+
   if (!empty($missing)) {
     echo json_encode(['status' => 'error', 'message' => 'Missing fields: ' . implode(', ', $missing)]);
     exit;
   }
 
-  // Prepare values for insertion
-  $type = clean_input($_POST['report_type']);
-  $week = clean_input($_POST['week']);
+  // Fetch draft info for values
+  $draft_id = clean_input($_POST['draft_id']);
+  $stmt = $conn->prepare("SELECT * FROM cell_report_drafts WHERE id = ?");
+  $stmt->execute([$draft_id]);
+  $draft = $stmt->fetch(PDO::FETCH_ASSOC);
+  if (!$draft) {
+    echo json_encode(['status' => 'error', 'message' => 'Draft not found']);
+    exit;
+  }
+
+  $cell_id = clean_input($_POST['cell_id']);
+  $week = $draft['week'];
+  $type = $draft['type'];
+  $description = $draft['description'];
+  $date_generated = $draft['date_generated'];
+  $expiry_date = $draft['expiry_date'];
+
   $venue = clean_input($_POST['venue']);
   $date = clean_input($_POST['date']);
   $time = clean_input($_POST['time']);
   $offering = clean_input($_POST['offering']);
-  $description = clean_input($_POST['description']);
-  $cell_id = clean_input($_POST['cell_id']);
-  $draft_id = clean_input($_POST['draft_id']);
 
-  // Outreach-specific fields
-  $outreach_kind = isset($_POST['outreach-kind']) ? clean_input($_POST['outreach-kind']) : null;
-  $attendance = null;
-  $first_timers = null;
-  $new_converts = null;
-
-  if ($type === 'outreach') {
+  // Conditional logic by report type
+  if ($reportType === 'outreach') {
     $attendance = intval($_POST['attendance']);
-    $first_timers = intval($_POST['first_timers']);
     $new_converts = intval($_POST['new_converts']);
+    $outreach_kind = clean_input($_POST['outreach-kind']);
+    // Insert into cell_reports (first_timers NULL for outreach)
+    $ins = $conn->prepare("
+      INSERT INTO cell_reports (
+        type, week, description, attendance, first_timers, new_converts, outreach_kind, venue, date, time, offering, date_generated, expiry_date, date_reported, cell_report_draft_id, cell_id
+      ) VALUES (?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)
+    ");
+    $success = $ins->execute([
+      $type, $week, $description, $attendance, $new_converts, $outreach_kind, $venue, $date, $time, $offering,
+      $date_generated, $expiry_date, $draft_id, $cell_id
+    ]);
   } else {
-    // For meetings, store arrays as comma-separated values
-    $attendance = implode(',', array_map('clean_input', $_POST['attendance']));
-    $first_timers = implode(',', array_map('clean_input', $_POST['first_timers']));
-    $new_converts = implode(',', array_map('clean_input', $_POST['new_converts']));
+    // meeting: attendance members inserted into attendees table; cell_reports keeps attendance-related fields NULL
+    $ins = $conn->prepare("
+      INSERT INTO cell_reports (
+        type, week, description, attendance, first_timers, new_converts, outreach_kind, venue, date, time, offering, date_generated, expiry_date, date_reported, cell_report_draft_id, cell_id
+      ) VALUES (?, ?, ?, NULL, NULL, NULL, NULL, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)
+    ");
+    $success = $ins->execute([
+      $type, $week, $description, $venue, $date, $time, $offering,
+      $date_generated, $expiry_date, $draft_id, $cell_id
+    ]);
+
+    // Insert attendees into cell_report_attendees if any attendance members were provided
+    if ($success) {
+      $cell_report_id = $conn->lastInsertId();
+      $attendanceArr = isset($_POST['attendance']) && is_array($_POST['attendance']) ? $_POST['attendance'] : [];
+      $firstTimersArr = isset($_POST['first_timers']) && is_array($_POST['first_timers']) ? $_POST['first_timers'] : [];
+      $newConvertsArr = isset($_POST['new_converts']) && is_array($_POST['new_converts']) ? $_POST['new_converts'] : [];
+
+      foreach ($attendanceArr as $memberId) {
+        $memberId = clean_input($memberId);
+        $first_timer = in_array($memberId, $firstTimersArr) ? 1 : 0;
+        $new_convert = in_array($memberId, $newConvertsArr) ? 1 : 0;
+        // Get member name for record (safe lookup)
+        $memStmt = $conn->prepare("SELECT first_name, last_name FROM cell_members WHERE id = ?");
+        $memStmt->execute([$memberId]);
+        $mem = $memStmt->fetch(PDO::FETCH_ASSOC);
+        $name = $mem ? ($mem['first_name'] . ' ' . $mem['last_name']) : '';
+        $attStmt = $conn->prepare("
+          INSERT INTO cell_report_attendees (name, first_timer, new_convert, cell_member_id, cell_report_id)
+          VALUES (?, ?, ?, ?, ?)
+        ");
+        $attStmt->execute([$name, $first_timer, $new_convert, $memberId, $cell_report_id]);
+      }
+    }
   }
 
-  // Insert into cell_reports table (matches schema)
-  $stmt = $conn->prepare("
-    INSERT INTO cell_reports (
-      type, week, venue, date, time, offering, date_generated, expiry_date, date_reported, editable, cell_report_draft_id, cell_id
-    ) VALUES (?, ?, ?, ?, ?, ?, NOW(), NULL, NOW(), 1, ?, ?)
-  ");
-  $success = $stmt->execute([
-    $type,
-    $week,
-    $venue,
-    $date,
-    $time,
-    $offering,
-    $draft_id,
-    $cell_id
-  ]);
-
+  // If insert succeeded, update draft status to published
   if ($success) {
-    // Optionally, insert attendees into cell_report_attendees table if needed
-    // ...existing code for attendees if required...
-    echo json_encode(['status' => 'success', 'message' => 'Report submitted successfully']);
+    $upd = $conn->prepare("UPDATE cell_report_drafts SET status = 'published' WHERE id = ?");
+    $upd->execute([$draft_id]);
+    echo json_encode(['status' => 'success', 'message' => 'Report submitted and published']);
+    exit;
   } else {
     echo json_encode(['status' => 'error', 'message' => 'Failed to submit report']);
+    exit;
   }
-  exit;
 }
 
 // Helper function for meeting description

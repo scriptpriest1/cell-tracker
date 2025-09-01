@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 01, 2025 at 12:59 PM
+-- Generation Time: Sep 01, 2025 at 04:37 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -135,6 +135,11 @@ CREATE TABLE `cell_reports` (
   `id` bigint(20) NOT NULL,
   `type` varchar(50) NOT NULL,
   `week` int(11) DEFAULT NULL,
+  `description` varchar(100) NOT NULL,
+  `attendance` int(11) DEFAULT NULL,
+  `first_timers` int(11) DEFAULT NULL,
+  `new_converts` int(11) DEFAULT NULL,
+  `outreach_kind` int(11) DEFAULT NULL,
   `venue` varchar(100) NOT NULL,
   `date` date NOT NULL,
   `time` time NOT NULL,
@@ -142,7 +147,6 @@ CREATE TABLE `cell_reports` (
   `date_generated` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `expiry_date` timestamp NULL DEFAULT NULL,
   `date_reported` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `editable` tinyint(1) NOT NULL,
   `cell_report_draft_id` bigint(20) DEFAULT NULL,
   `cell_id` bigint(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -161,14 +165,6 @@ CREATE TABLE `cell_report_attendees` (
   `cell_member_id` bigint(20) DEFAULT NULL,
   `cell_report_id` bigint(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `cell_report_attendees`
---
-
-INSERT INTO `cell_report_attendees` (`id`, `name`, `first_timer`, `new_convert`, `cell_member_id`, `cell_report_id`) VALUES
-(5, 'Favour', 1, 0, NULL, NULL),
-(6, 'John', 0, 0, NULL, NULL);
 
 -- --------------------------------------------------------
 
