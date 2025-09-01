@@ -762,7 +762,7 @@ button.check-btn svg {
 
 .report-draft {
   background-color: var(--hover-on-bg);
-  border: 1px dashed var(--hover-on-bg-heavy);
+  border: 1px dashed var(--tertiary);
   min-height: 50px;
   border-radius: 10px;
   margin-top: 10px;
@@ -770,6 +770,11 @@ button.check-btn svg {
 
 .report-draft:first-child {
   margin: 0;
+}
+
+.report-draft[data-report-status="published"] {
+  border: 1px dashed var(--success);
+  background-color: var(--success-hover);
 }
 
 .report-draft .description {
@@ -780,7 +785,10 @@ button.check-btn svg {
 .report-draft .label {
   color: var(--text-secondary);
   font-style: italic;
-  margin-right: 20px;
+  margin-right: 10px;
+}
+[data-report-status="published"] .label {
+  /* color: var(--success); */
 }
 
 .report-draft .publish-btn,
