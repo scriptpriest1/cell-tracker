@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 29, 2025 at 02:46 PM
+-- Generation Time: Sep 01, 2025 at 12:59 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -119,7 +119,11 @@ INSERT INTO `cell_members` (`id`, `title`, `first_name`, `last_name`, `phone_num
 (23, 'brother', 'Sampson', 'Ejiogu', '09154567876', '', 'feb', '2', 'Taxi driver', '', 'not-enrolled', '', '', '', '2025-08-15 15:40:36', 11),
 (24, 'pastor', 'Saviour', 'Ndubuisi', '09078246177', 'pnd@gmail.com', 'jan', '20', 'Painter', 'Ihiagwa', 'graduated', 'Cell leader', 'PCF', '', '2024-06-15 14:45:16', 35),
 (26, 'sister', 'Favour', 'Uyork', '09128958294', 'favouruyork@gmail.com', 'jul', '9', 'Church staff', 'Irete', 'graduated', '', 'Choir', '', '2025-08-29 00:30:57', 28),
-(27, 'sister', 'Chinwendu', 'Chimereze', '08165515314', '', 'feb', '7', 'Church staff', 'Orogwe', 'graduated', 'Cell leader', 'Choir', '', '2025-08-29 00:59:19', 32);
+(27, 'sister', 'Chinwendu', 'Chimereze', '08165515314', '', 'feb', '7', 'Church staff', 'Orogwe', 'graduated', 'Cell leader', 'Choir', '', '2025-08-29 00:59:19', 32),
+(28, 'brother', 'David', 'Israel', '09032331337', 'davidisrael@gmail.com', '', '', '', 'Irete', 'not-enrolled', '', '', '', '2025-08-29 16:04:32', 28),
+(29, 'brother', 'Elijah', 'Davidson', '07063812100', '', '', '', '', 'Ohii', 'not-enrolled', '', '', '', '2025-08-29 16:04:45', 28),
+(30, 'brother', 'Steven', 'Richard', '', '', '', '', '', 'Ohii', 'not-enrolled', '', '', '', '2025-08-29 16:05:06', 28),
+(31, 'brother', 'Kelly', 'Amzo', '', '', '', '', '', 'Orogwe', 'not-enrolled', '', '', '', '2025-08-29 16:05:18', 28);
 
 -- --------------------------------------------------------
 
@@ -188,11 +192,12 @@ CREATE TABLE `cell_report_drafts` (
 --
 
 INSERT INTO `cell_report_drafts` (`id`, `type`, `week`, `description`, `status`, `date_generated`, `expiry_date`, `cell_id`) VALUES
-(153, 'meeting', 4, 'Cell Outreach', 'pending', '2025-08-28 20:43:14', NULL, 32),
-(154, 'meeting', 4, 'Cell Outreach', 'pending', '2025-08-29 11:57:44', NULL, 28),
-(155, 'meeting', 4, 'Cell Outreach', 'pending', '2025-08-29 11:57:57', NULL, 28),
-(156, 'meeting', 4, 'Cell Outreach', 'pending', '2025-08-29 11:58:40', NULL, 28),
-(157, 'meeting', 4, 'Cell Outreach', 'pending', '2025-08-29 11:59:42', NULL, 28);
+(177, 'meeting', 1, 'Prayer and Planning', 'pending', '2025-09-01 16:46:11', '2025-09-07 22:59:59', 28),
+(178, 'meeting', 1, 'Prayer and Planning', 'pending', '2025-10-06 13:23:31', '2025-10-12 22:59:59', 28),
+(179, 'meeting', 2, 'Bible Study Class 1', 'pending', '2025-09-08 16:59:11', '2025-09-14 22:59:59', 28),
+(182, 'outreach', 4, 'Cell Outreach', 'pending', '2025-08-30 18:46:12', '2025-08-31 22:59:59', 28),
+(183, 'outreach', 4, 'Cell Outreach', 'pending', '2025-08-30 19:04:20', '2025-08-31 22:59:59', 32),
+(184, 'meeting', 1, 'Prayer and Planning', 'pending', '2025-09-01 10:36:23', '2025-09-07 22:59:59', 32);
 
 -- --------------------------------------------------------
 
@@ -293,7 +298,6 @@ INSERT INTO `users` (`id`, `first_name`, `last_name`, `user_login`, `password`, 
 (4, 'Michael', 'King', 'sparrowdeck@gmail.com', '$2y$10$Zd1JPi/dwP9CR6RclIkqeulkj/ZxvruaspS8izSRo9MCA0voToZwS', '', '2025-07-30 11:21:30', 28, 2, NULL, 'leader', '', ''),
 (8, 'Ugo', 'Amadi', 'ugoamadi@gmail.com', '$2y$10$yiFsgAhpWbuRPNldLRpB3eAUWhUY43gi3Ds1mh9sB7VUzoeABB08G', '', '2025-07-31 12:20:33', 35, 3, NULL, 'executive', '', ''),
 (19, 'Saviour', 'Ndubuisi', 'pnd@gmail.com', '$2y$10$hJCgtuBJH78ztX597sTmceQSOU.mm9rV/1jRAX.esOK', '09077656776', '2025-08-05 02:16:13', 35, NULL, NULL, 'leader', '', ''),
-(20, 'Hezel', 'Macauley', 'hezelm@gmail.com', '$2y$10$yiFsgAhpWbuRPNldLRpB3eAUWhUY43gi3Ds1mh9sB7VUzoeABB08G', '09077656776', '2025-08-05 23:18:02', 59, NULL, NULL, 'leader', '', ''),
 (22, 'Favour', 'Dominic', 'favdominic@gmail.com', '$2y$10$yiFsgAhpWbuRPNldLRpB3eAUWhUY43gi3Ds1mh9sB7VUzoeABB08G', '08045828913', '2025-08-07 15:16:50', 61, NULL, NULL, 'executive', '', ''),
 (25, 'Favour', 'Nwoko', 'favenwoko@gmail', '$2y$10$XcTq3RAjWrNgruYMLseOfek1zMOErNU8dp/AZRTYmYi', '09078246177', '2025-08-10 06:13:31', 1, NULL, NULL, 'executive', '', ''),
 (28, 'Ugochukwu', 'Kingsley', 'ugo@gmail.com', '$2y$10$3h8.0fwtZvtIbUo2r5WO/.sLaRQ9hX03HDqmkOnDkkJ2qMmXCRrom', '09078364277', '2025-08-28 17:07:49', 11, NULL, NULL, 'leader', '', ''),
@@ -400,7 +404,7 @@ ALTER TABLE `cells`
 -- AUTO_INCREMENT for table `cell_members`
 --
 ALTER TABLE `cell_members`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `cell_reports`
@@ -418,7 +422,7 @@ ALTER TABLE `cell_report_attendees`
 -- AUTO_INCREMENT for table `cell_report_drafts`
 --
 ALTER TABLE `cell_report_drafts`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=158;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=185;
 
 --
 -- AUTO_INCREMENT for table `churches`

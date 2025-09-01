@@ -966,6 +966,102 @@ if ($action === 'fetch_church_cell_member_count') {
   exit;
 }
 
+/*=======================================
+      Submit Cell Report Form 
+          - Functionality
+=======================================*/
+if ($action === 'submit_cell_report') {
+  // Backend validation for report form
+  $requiredFields = [
+    'draft_id', 'cell_id', 'week', 'report_type', 'description',
+    'venue', 'date', 'time', 'offering'
+  ];
+  $missing = [];
+  foreach ($requiredFields as $field) {
+    if (empty($_POST[$field])) {
+      $missing[] = $field;
+    }
+  }
+  // For outreach, attendance, first_timers, new_converts required
+  if ($_POST['report_type'] === 'outreach') {
+    foreach (['attendance', 'first_timers', 'new_converts', 'outreach-kind'] as $field) {
+      if (empty($_POST[$field])) {
+        $missing[] = $field;
+      }
+    }
+  } else {
+    // For meeting, attendance[] required
+    if (empty($_POST['attendance']) || !is_array($_POST['attendance']) || count($_POST['attendance']) === 0) {
+      $missing[] = 'attendance';
+    }
+    // first_timers[] and new_converts[] required
+    if (empty($_POST['first_timers']) || !is_array($_POST['first_timers']) || count($_POST['first_timers']) === 0) {
+      $missing[] = 'first_timers';
+    }
+    if (empty($_POST['new_converts']) || !is_array($_POST['new_converts']) || count($_POST['new_converts']) === 0) {
+      $missing[] = 'new_converts';
+    }
+  }
+  if (!empty($missing)) {
+    echo json_encode(['status' => 'error', 'message' => 'Missing fields: ' . implode(', ', $missing)]);
+    exit;
+  }
+
+  // Prepare values for insertion
+  $type = clean_input($_POST['report_type']);
+  $week = clean_input($_POST['week']);
+  $venue = clean_input($_POST['venue']);
+  $date = clean_input($_POST['date']);
+  $time = clean_input($_POST['time']);
+  $offering = clean_input($_POST['offering']);
+  $description = clean_input($_POST['description']);
+  $cell_id = clean_input($_POST['cell_id']);
+  $draft_id = clean_input($_POST['draft_id']);
+
+  // Outreach-specific fields
+  $outreach_kind = isset($_POST['outreach-kind']) ? clean_input($_POST['outreach-kind']) : null;
+  $attendance = null;
+  $first_timers = null;
+  $new_converts = null;
+
+  if ($type === 'outreach') {
+    $attendance = intval($_POST['attendance']);
+    $first_timers = intval($_POST['first_timers']);
+    $new_converts = intval($_POST['new_converts']);
+  } else {
+    // For meetings, store arrays as comma-separated values
+    $attendance = implode(',', array_map('clean_input', $_POST['attendance']));
+    $first_timers = implode(',', array_map('clean_input', $_POST['first_timers']));
+    $new_converts = implode(',', array_map('clean_input', $_POST['new_converts']));
+  }
+
+  // Insert into cell_reports table (matches schema)
+  $stmt = $conn->prepare("
+    INSERT INTO cell_reports (
+      type, week, venue, date, time, offering, date_generated, expiry_date, date_reported, editable, cell_report_draft_id, cell_id
+    ) VALUES (?, ?, ?, ?, ?, ?, NOW(), NULL, NOW(), 1, ?, ?)
+  ");
+  $success = $stmt->execute([
+    $type,
+    $week,
+    $venue,
+    $date,
+    $time,
+    $offering,
+    $draft_id,
+    $cell_id
+  ]);
+
+  if ($success) {
+    // Optionally, insert attendees into cell_report_attendees table if needed
+    // ...existing code for attendees if required...
+    echo json_encode(['status' => 'success', 'message' => 'Report submitted successfully']);
+  } else {
+    echo json_encode(['status' => 'error', 'message' => 'Failed to submit report']);
+  }
+  exit;
+}
+
 // Helper function for meeting description
 function getMeetingDescription($week) {
   if ($week == 1) return 'Prayer and Planning';

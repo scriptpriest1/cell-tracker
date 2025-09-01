@@ -949,23 +949,24 @@ if (isset($_POST['content-type'])) {
       <input type="hidden" name="report_type" value="<?= htmlspecialchars($reportType) ?>">
       <input type="hidden" name="mode" value="<?= htmlspecialchars($mode) ?>">
       <input type="hidden" name="description" value="<?= htmlspecialchars($description) ?>">
+      <input type="hidden" name="validate" value="1">
       <div class="body px-4 pt-2">
         <?php if ($reportType === 'outreach'): ?>
           <div class="form-group">
             <label for="attendance">Attendance:</label>
-            <input type="number" name="attendance" id="attendance" class="form-control"
+            <input type="number" name="attendance" id="attendance" class="form-control" required
               value="<?= $report ? htmlspecialchars($report['attendance']) : '' ?>"
               <?= ($mode === 'view') ? 'disabled' : '' ?>>
           </div>
           <div class="form-group">
             <label for="first-timers">First timers:</label>
-            <input type="number" name="first_timers" id="first-timers" class="form-control"
+            <input type="number" name="first_timers" id="first-timers" class="form-control" required
               value="<?= $report ? htmlspecialchars($report['first_timers']) : '' ?>"
               <?= ($mode === 'view') ? 'disabled' : '' ?>>
           </div>
           <div class="form-group">
             <label for="new-converts">New converts:</label>
-            <input type="number" name="new_converts" id="new-converts" class="form-control"
+            <input type="number" name="new_converts" id="new-converts" class="form-control" required
               value="<?= $report ? htmlspecialchars($report['new_converts']) : '' ?>"
               <?= ($mode === 'view') ? 'disabled' : '' ?>>
           </div>
@@ -990,6 +991,7 @@ if (isset($_POST['content-type'])) {
                       <input type="checkbox" class="form-check-input me-2" name="attendance[]" value="<?= $m['id'] ?>"
                         <?= ($report && in_array($m['id'], explode(',', $report['attendance_ids'] ?? ''))) ? 'checked' : '' ?>
                         <?= ($mode === 'view') ? 'disabled' : '' ?>
+                        required
                       >
                       <?= htmlspecialchars($m['first_name'] . ' ' . $m['last_name']) ?>
                     </label>
@@ -1038,32 +1040,32 @@ if (isset($_POST['content-type'])) {
         <?php if ($reportType === 'outreach'): ?>
           <div class="form-group">
             <label for="outreach-kind">What kind of Outreach is this?</label>
-            <input type="text" name="outreach-kind" id="outreach-kind" class="form-control" placeholder="e.g: Hospital outreach, etc."
+            <input type="text" name="outreach-kind" id="outreach-kind" class="form-control" required placeholder="e.g: Hospital outreach, etc."
               value="<?= $report ? htmlspecialchars($report['outreach_kind']) : '' ?>"
               <?= ($mode === 'view') ? 'disabled' : '' ?>>
           </div>
         <?php endif; ?>
         <div class="form-group">
           <label for="venue">Venue:</label>
-          <input type="text" name="venue" id="venue" class="form-control"
+          <input type="text" name="venue" id="venue" class="form-control" required
             value="<?= $report ? htmlspecialchars($report['venue']) : '' ?>"
             <?= ($mode === 'view') ? 'disabled' : '' ?>>
         </div>
         <div class="form-group">
           <label for="date">Date:</label>
-          <input type="date" name="date" id="date" class="form-control"
+          <input type="date" name="date" id="date" class="form-control" required
             value="<?= $report ? htmlspecialchars($report['date']) : '' ?>"
             <?= ($mode === 'view') ? 'disabled' : '' ?>>
         </div>
         <div class="form-group">
           <label for="time">Time:</label>
-          <input type="time" name="time" id="time" class="form-control"
+          <input type="time" name="time" id="time" class="form-control" required
             value="<?= $report ? htmlspecialchars($report['time']) : '' ?>"
             <?= ($mode === 'view') ? 'disabled' : '' ?>>
         </div>
         <div class="form-group">
           <label for="offering">Offering (in naira):</label>
-          <input type="number" name="offering" id="offering" class="form-control"
+          <input type="number" name="offering" id="offering" class="form-control" required
             value="<?= $report ? htmlspecialchars($report['offering']) : '' ?>"
             <?= ($mode === 'view') ? 'disabled' : '' ?>>
         </div>
@@ -1072,7 +1074,7 @@ if (isset($_POST['content-type'])) {
         <?php if ($mode === 'view'): ?>
           <button type="button" class="edit-btn w-100">Edit</button>
         <?php else: ?>
-          <button type="submit" class="submit-btn w-100">Publish</button>
+          <button type="submit" class="submit-btn w-100" disabled>Publish</button>
         <?php endif; ?>
       </footer>
     </form>
