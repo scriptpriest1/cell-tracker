@@ -12,43 +12,44 @@
             <label for="attendance">Attendance:</label>
             <!-- A custom select dropdown here -->
             <!-- 
-                - The dropdown options should be populated from the backend with the list of all cell members of that cell with checkboxes beside them.
-                - When a member is selected, the value of the dropdown's custom span(countiong element) for that dropdown should increment by 1 showing just the number of members that have been checked as the attendance. It should also decrement as the options are unchecked.
-                - The select-all-options checkbox should select all the members in the list when checked and uncheck all the members when unchecked.
-                - The search functionality in the dropdown should be implemented to search for members by name. The search should filter through the list of members in the dropdown not fetching them from the backend. If the search input is cleared/empty the list of all the members should be restored.
-                - The dropdown should be scrollable. Max height of the dropdown should be 250px.
-                - The attendees will be saved in the cell_report_attendees table in the database as rows. Read the sql file (cell_tracker_schema.sql) to see the structure and relation view of the cell_report_attendees table.
-             -->
+          - The dropdown options should be populated from the backend with the list of all cell members of that cell with checkboxes beside them.
+          - When a member is selected, the value of the dropdown's custom span(countiong element) for that dropdown should increment by 1 showing just the number of members that have been checked as the attendance. It should also decrement as the options are unchecked.
+          - The select-all-options checkbox should select all the members in the list when checked and uncheck all the members when unchecked.
+          - The search functionality in the dropdown should be implemented to search for members by name. The search should filter through the list of members in the dropdown not fetching them from the backend. If the search input is cleared/empty the list of all the members should be restored.
+          - The dropdown should be scrollable. Max height of the dropdown should be 250px.
+          - The attendees will be saved in the cell_report_attendees table in the database as rows. Read the sql file (cell_tracker_schema.sql) to see the structure and relation view of the cell_report_attendees table.
+       -->
         </div>
 
         <div class="form-group">
             <label for="first-timers">First timers:</label>
             <!-- A custom select dropdown here -->
             <!-- 
-                - The dropdown options should be populated from the list of all cell members that were in attendance (from the selected list of members in the select dropdown above) with checkboxes beside them.
-                - When a member is selected, the value of the dropdown's custom span(countiong element) for that dropdown should increment by 1 showing just the number of members that have been checked as the first timers. It should also decrement as the options are unchecked.
-                - The select-all-options checkbox should select all the members in the list when checked and uncheck all the members when unchecked.
-                - The search functionality in the dropdown should be implemented to search for members by name. The search should filter through the list of members in the dropdown not fetching them from the backend. If the search input is cleared/empty the list of all the members should be restored.
-                - The dropdown should be scrollable. Max height of the dropdown should be 250px.
-             -->
+          - The dropdown options should be populated from the list of all cell members that were in attendance (from the selected list of members in the select dropdown above) with checkboxes beside them.
+          - When a member is selected, the value of the dropdown's custom span(countiong element) for that dropdown should increment by 1 showing just the number of members that have been checked as the first timers. It should also decrement as the options are unchecked.
+          - The select-all-options checkbox should select all the members in the list when checked and uncheck all the members when unchecked.
+          - The search functionality in the dropdown should be implemented to search for members by name. The search should filter through the list of members in the dropdown not fetching them from the backend. If the search input is cleared/empty the list of all the members should be restored.
+          - The dropdown should be scrollable. Max height of the dropdown should be 250px.
+       -->
         </div>
 
         <div class="form-group">
             <label for="new converts">New converts:</label>
             <!-- A custom select dropdown here -->
             <!-- 
-                - The dropdown options should be populated from the list of all cell members that were in attendance (from the selected list of members in the select dropdown above) with checkboxes beside them.
-                - When a member is selected, the value of the dropdown's custom span(countiong element) for that dropdown should increment by 1 showing just the number of members that have been checked as the new converts. It should also decrement as the options are unchecked.
-                - The select-all-options checkbox should select all the members in the list when checked and uncheck all the members when unchecked.
-                - The search functionality in the dropdown should be implemented to search for members by name. The search should filter through the list of members in the dropdown not fetching them from the backend. If the search input is cleared/empty the list of all the members should be restored.
-                - The dropdown should be scrollable. Max height of the dropdown should be 250px.
-             -->
+          - The dropdown options should be populated from the list of all cell members that were in attendance (from the selected list of members in the select dropdown above) with checkboxes beside them.
+          - When a member is selected, the value of the dropdown's custom span(countiong element) for that dropdown should increment by 1 showing just the number of members that have been checked as the new converts. It should also decrement as the options are unchecked.
+          - The select-all-options checkbox should select all the members in the list when checked and uncheck all the members when unchecked.
+          - The search functionality in the dropdown should be implemented to search for members by name. The search should filter through the list of members in the dropdown not fetching them from the backend. If the search input is cleared/empty the list of all the members should be restored.
+          - The dropdown should be scrollable. Max height of the dropdown should be 250px.
+       -->
         </div>
 
 
         <div class="form-group"> <!-- For Outreach report only -->
             <label for="outreach-kind">What kind of Outreach is this?</label>
-            <input type="text" name="outreach-kind" id="outreach-kind" class="form-controlt" placeholder="e.g Hospital outreacch, etc">
+            <input type="text" name="outreach-kind" id="outreach-kind" class="form-controlt"
+                placeholder="e.g Hospital outreacch, etc">
         </div>
 
         <div class="form-group">
@@ -74,17 +75,17 @@
 
     <footer class="position-absolute bottom-0 py-3 px-4 w-100 d-flex align-items-center gap-2">
         <!-- 
-            - When the edit btn is clicked, the form fields become editable and the submit btn displays.
-            - The edit btn text changes to "Cancel" and the submit btn text changes to "Save changes".
-            - When the cancel btn is clicked, the form fields become non-editable and the submit btn is hidden. The edit btn text changes back to "Edit".
-            - The submit btn is disabled until any change is made to any of the form fields.
-         -->
+        - When the edit btn is clicked, the form fields become editable and the submit btn displays.
+        - The edit btn text changes to "Cancel" and the submit btn text changes to "Save changes".
+        - When the cancel btn is clicked, the form fields become non-editable and the submit btn is hidden. The edit btn text changes back to "Edit".
+        - The submit btn is disabled until any change is made to any of the form fields.
+     -->
         <button type="button" class="edit-btn w-100">Edit</button>
         <button type="submit" class="submit-btn w-100" disabled>Publish</button>
         <!-- 
-            - When submitting, the submit btn text changes to "Saving...""
-            - After successful submission, the modal closes.
-            - When submitting, at the backend, there should be a check to see if the report is editable. If not, an error message should be returned and displayed to the user via a javascript alert.
-         -->
+        - When submitting, the submit btn text changes to "Saving...""
+        - After successful submission, the modal closes.
+        - When submitting, at the backend, there should be a check to see if the report is editable. If not, an error message should be returned and displayed to the user via a javascript alert.
+     -->
     </footer>
 </form>

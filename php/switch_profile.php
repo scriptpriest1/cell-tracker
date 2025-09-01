@@ -9,15 +9,15 @@ $entityId    = clean_input($_POST['entity_id'] ?? null);
 // Validate allowed profile types
 $allowedTypes = ['cell', 'church', 'group'];
 if (!in_array($profileType, $allowedTypes) || empty($entityId)) {
-    echo 'invalid';
-    exit;
+  echo 'invalid';
+  exit;
 }
 
 // Fetch the entity name
 $tableMap = [
-    'cell'   => ['table' => 'cells', 'id_field' => 'id', 'name_field' => 'cell_name'],
-    'church' => ['table' => 'churches', 'id_field' => 'id', 'name_field' => 'church_name'],
-    'group'  => ['table' => 'groups', 'id_field' => 'id', 'name_field' => 'group_name'],
+  'cell'   => ['table' => 'cells', 'id_field' => 'id', 'name_field' => 'cell_name'],
+  'church' => ['table' => 'churches', 'id_field' => 'id', 'name_field' => 'church_name'],
+  'group'  => ['table' => 'groups', 'id_field' => 'id', 'name_field' => 'group_name'],
 ];
 
 $tableInfo = $tableMap[$profileType];
@@ -27,8 +27,8 @@ $stmt->execute([$entityId]);
 $entity = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$entity) {
-    echo 'invalid';
-    exit;
+  echo 'invalid';
+  exit;
 }
 
 // Update the session

@@ -1038,7 +1038,7 @@ if (isset($_POST['content-type'])) {
         <?php if ($reportType === 'outreach'): ?>
           <div class="form-group">
             <label for="outreach-kind">What kind of Outreach is this?</label>
-            <input type="text" name="outreach-kind" id="outreach-kind" class="form-control"
+            <input type="text" name="outreach-kind" id="outreach-kind" class="form-control" placeholder="e.g: Hospital outreach, etc."
               value="<?= $report ? htmlspecialchars($report['outreach_kind']) : '' ?>"
               <?= ($mode === 'view') ? 'disabled' : '' ?>>
           </div>
