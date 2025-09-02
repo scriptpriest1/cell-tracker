@@ -31,6 +31,7 @@
   --text-secondary-on-tertiary: #cccccc;
   --text-tertiary: #ffffff;
 
+
   /* Tag colors */
   --success: #198754;
   --error: #dc3545;
@@ -42,6 +43,7 @@
   --error-light: #dc354540;
   --warning-hover: #ffc10320;
   --warning-light: #ffc10340;
+  --bright-green: #00ff7f;
 
   /* Others */
   --box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
@@ -222,8 +224,7 @@ button.check-btn svg {
 }
 
 .dropdown-menu.switch-profile .dropdown-item.active * {
-  color: #00ff7f !important;
-  /* font-weight: bold !important; */
+  color: var(--bright-green) !important;
 }
 
 /* Container-fluid */
@@ -762,7 +763,7 @@ button.check-btn svg {
 
 .report-draft {
   background-color: var(--hover-on-bg);
-  border: 1px dashed var(--tertiary);
+  border: 1px dashed var(--text-secondary);
   min-height: 50px;
   border-radius: 10px;
   margin-top: 10px;
@@ -782,11 +783,11 @@ button.check-btn svg {
   font-style: italic;
 }
 
-.report-draft .label {
-  color: var(--text-secondary);
-  font-style: italic;
-  margin-right: 10px;
+.report-draft .label svg {
+  fill: var(--success);
+  margin: 0 10px 1px 0;
 }
+
 [data-report-status="published"] .label {
   /* color: var(--success); */
 }
@@ -836,4 +837,23 @@ button.check-btn svg {
   margin: 0;
   width: 100%;
   cursor: pointer;
+}
+
+#cell-report-form footer .edit-btn {
+  background-color: var(--primary);
+  border: 1px solid var(--border);
+  color: var(--text-tertiary);
+}
+
+#cell-report-form footer .edit-btn:hover {
+  background-color: var(--hover-on-primary);
+}
+#cell-report-form footer .edit-btn.cancel-btn {
+  background-color: transparent;
+  border: 1px solid var(--border);
+  color: var(--primary);
+}
+
+#cell-report-form footer .edit-btn.cancel-btn:hover {
+  background-color: var(--bg);
 }

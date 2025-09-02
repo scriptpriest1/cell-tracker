@@ -26,13 +26,8 @@
       <tbody></tbody>
     </table>
   </div>
+  <div id="cells-table-info-block" class="table-info-block">
+    <p class="info p-2 m-0 text-center"></p>
+  </div>
 </div>
-<div id="cells-table-info-block" class="table-info-block">
-  <p class="info p-2 m-0 text-center"></p>
-</div>
-        </div>
-      </div>
 
-      <div id="cells-table-info-block" class="table-info-block">
-        <p class="info p-2 m-0 text-center"></p>
-      </div>

@@ -775,7 +775,7 @@ $(document).ready(() => {
       </div>
 
       <div class="action-bar d-flex align-items-center justify-content-between gap-2">
-        <span class="label">${status === "published" ? "published" : ""}</span>
+        <span class="label" title="Report is published">${status === "published" ? `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill=""><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>` : ""}</span>
         <button class="${status === "published" ? "view-btn" : "publish-btn"
       } m-0 p-0" data-cell-id="${draft.cell_id}">${status === "published" ? "View" : "Publish"
       }</button>
@@ -1089,13 +1089,18 @@ $(document).ready(() => {
   // Initial validation when form loads
   $(document).on("ready", "#cell-report-form", validateReportForm);
 
-  // Cell Report Form Submission (publish)
+  // Cell Report Form Submission (publish / update)
   $(document).on("submit", "#cell-report-form", function (e) {
     e.preventDefault(); // Prevent default form submission
 
     const $form = $(this);
+    const isEdit = !!$form.find("input[name='report_id']").val();
     const $btn = $form.find(".submit-btn");
-    $btn.prop("disabled", true).text("Publishing…");
+    if (isEdit) {
+      $btn.prop("disabled", true).text("Saving...");
+    } else {
+      $btn.prop("disabled", true).text("Publishing…");
+    }
 
     // Serialize form data
     const formData = $form.serialize();
@@ -1118,27 +1123,91 @@ $(document).ready(() => {
           // Show raw server response so you can see the PHP warning / SQL error causing the failure
           const preview = String(rawRes).trim();
           alert("Server returned unexpected response:\n\n" + (preview || "[empty response]"));
-          $btn.prop("disabled", false).text("Publish");
+          $btn.prop("disabled", false).text(isEdit ? "Save changes" : "Publish");
           return;
         }
 
         if (res && res.status === "success") {
-          alert("Report published successfully!");
+          alert(isEdit ? "Report updated successfully!" : "Report published successfully!");
           toggleActionModal();
           // Immediately fetch updated report drafts
           fetchReportDrafts();
         } else {
           alert((res && res.message) || "Failed to submit report.");
-          $btn.prop("disabled", false).text("Publish");
+          $btn.prop("disabled", false).text(isEdit ? "Save changes" : "Publish");
         }
       },
       error: function (xhr, status, err) {
         // Provide the server response text (if any) to help diagnose the cause
         const serverText = (xhr && xhr.responseText) ? xhr.responseText : status;
         alert("Server error!\n\n" + serverText);
-        $btn.prop("disabled", false).text("Publish");
+        $btn.prop("disabled", false).text(isEdit ? "Save changes" : "Publish");
       }
     });
+  });
+
+  // Enable edit-mode for report forms (toggle Edit / Cancel and show Save)
+  $(document).on("click", "#cell-report-form .edit-btn", function (e) {
+    e.preventDefault();
+    const $editBtn = $(this);
+    const $form = $("#cell-report-form");
+
+    // track editing state via data attribute
+    const editing = !!$editBtn.data("editing");
+
+    // Selectors to always keep enabled (dropdown toggles and dropdown search inputs)
+    const keepEnabledSelectors = ".attendance-select, .first-timers-select, .new-converts-select, .attendance-search, .first-timers-search, .new-converts-search";
+
+    if (!editing) {
+      // Enter edit mode: enable all inputs/selects/textareas and buttons except the keep-enabled selectors (they are already enabled)
+      $form.find("input, select, textarea, button").not(keepEnabledSelectors).prop("disabled", false);
+
+      // For meeting attendance, ensure the attendance[] checkboxes are required again
+      $form.find("input[name='attendance[]']").attr("required", "required");
+
+      // Enable checkboxes inside custom dropdowns for edit mode
+      $form.find(".custom-dropdown input[type='checkbox']").prop("disabled", false);
+
+      // Insert or show a submit button (Save changes) in the footer
+      if ($form.find(".submit-btn").length === 0) {
+        const $saveBtn = $(`<button type="submit" class="submit-btn w-100">Save changes</button>`);
+        $form.find("footer").append($saveBtn);
+      } else {
+        $form.find(".submit-btn").show().text("Save changes");
+      }
+
+      // Update button state/text
+      $editBtn.text("Cancel").data("editing", true).addClass("cancel-btn");
+
+      // Trigger validation so Save is enabled only when valid
+      if (typeof validateReportForm === "function") validateReportForm();
+
+    } else {
+      // Cancel edit:
+      // Disable all controls except dropdown toggle buttons and dropdown search inputs (keep them usable)
+      $form.find("input, select, textarea, button").not(keepEnabledSelectors).prop("disabled", true);
+
+      // Ensure the dropdown toggle buttons remain enabled
+      $form.find(".attendance-select, .first-timers-select, .new-converts-select").prop("disabled", false);
+
+      // Keep the dropdown search inputs enabled so users can search even in view mode
+      $form.find(".attendance-search, .first-timers-search, .new-converts-search").prop("disabled", false);
+
+      // Remove required from attendance checkboxes (view mode)
+      $form.find("input[name='attendance[]']").removeAttr("required");
+
+      // Disable checkboxes inside dropdowns to match view mode (user can still open and search)
+      $form.find(".custom-dropdown input[type='checkbox']").prop("disabled", true);
+
+      // Remove the save button if it was injected by edit-mode
+      $form.find(".submit-btn").remove();
+
+      // Restore Edit button text/state and re-enable it
+      $editBtn.text("Edit report").data("editing", false).prop("disabled", false).removeClass("cancel-btn");
+
+      // Re-run validation to update any state
+      if (typeof validateReportForm === "function") validateReportForm();
+    }
   });
 });
 
@@ -1504,54 +1573,74 @@ function initDropdownCheckboxLogic() {
     return members;
   }
 
-  // Helper to repopulate a dropdown list with given members
-  function repopulateDropdownList($dropdownList, members, selectAllClass) {
-    // Save select-all option
-    const $selectAllOption = $dropdownList.find(".dropdown-option:has(." + selectAllClass + ")").first().clone(true, true);
-    $dropdownList.empty();
-    $dropdownList.append($selectAllOption);
+  // Sync a dependent dropdown (first-timers or new-converts) with the currently checked attendance members.
+  // This adds new options for newly-checked attendance members and removes options for unchecked ones,
+  // preserving the rest of the dropdown DOM (no full refresh).
+  function syncDependentList($dropdownList, members, selectAllClass) {
+    if (!$dropdownList || $dropdownList.length === 0) return;
 
-    // Determine proper input name based on which list we are populating
-    let inputName = '';
-    if (selectAllClass.indexOf('first-timers') !== -1) {
-      inputName = 'first_timers[]';
-    } else if (selectAllClass.indexOf('new-converts') !== -1) {
-      inputName = 'new_converts[]';
-    } else {
-      inputName = ''; // fallback (attendance list is handled elsewhere)
+    // Determine input name and count selector for this dependent list
+    const isFirstTimers = selectAllClass.indexOf('first-timers') !== -1;
+    const isNewConverts = selectAllClass.indexOf('new-converts') !== -1;
+    const inputName = isFirstTimers ? 'first_timers[]' : (isNewConverts ? 'new_converts[]' : '');
+    const countSelector = isFirstTimers ? '.first-timers-count' : '.new-converts-count';
+
+    // Determine whether new options should be disabled (inherit select-all disabled state)
+    const $selectAll = $dropdownList.find('.dropdown-option').has(`.${selectAllClass}`).first();
+    const shouldDisable = $selectAll.find('.select-all-options').prop('disabled') || false;
+
+    // Build a map of existing member options (exclude select-all)
+    const existingMap = {};
+    $dropdownList.find('.dropdown-option').not(':has(.select-all-options)').each(function () {
+      const $opt = $(this);
+      const $inp = $opt.find("input[type='checkbox']");
+      const val = $inp.val();
+      if (val !== undefined && val !== '') existingMap[String(val)] = $opt;
+    });
+
+    // Remove any existing option that's no longer in checked attendance
+    for (const existingId in existingMap) {
+      if (!members.some(m => String(m.id) === String(existingId))) {
+        existingMap[existingId].remove();
+      }
     }
 
+    // Add any member from attendance that's missing in the dependent list
     members.forEach(member => {
-      // include the correct name so the checkbox is submitted with the form
-      const nameAttr = inputName ? ` name="${inputName}"` : '';
-      $dropdownList.append(
-        `<div class="dropdown-option">
-          <label>
-            <input type="checkbox" class="form-check-input me-2"${nameAttr} value="${member.id}">
-            ${member.name}
-          </label>
-        </div>`
-      );
+      const idStr = String(member.id);
+      if (!existingMap[idStr]) {
+        const disabledAttr = shouldDisable ? 'disabled' : '';
+        const nameAttr = inputName ? ` name="${inputName}"` : '';
+        const $newOpt = $(
+          `<div class="dropdown-option">
+             <label>
+               <input type="checkbox" class="form-check-input me-2"${nameAttr} value="${member.id}" ${disabledAttr}>
+               ${member.name}
+             </label>
+           </div>`
+        );
+        // Append after select-all option (which should remain at top)
+        if ($selectAll.length) {
+          $selectAll.after($newOpt);
+        } else {
+          $dropdownList.append($newOpt);
+        }
+      }
     });
+
+    // After sync, ensure select-all state and counts are consistent
+    updateDropdownCount($dropdownList, "input[type='checkbox']:not(.select-all-options)", countSelector);
+    syncSelectAll($dropdownList, "input[type='checkbox']:not(.select-all-options)", "." + selectAllClass);
   }
 
   // Update first-timers and new-converts dropdowns when attendance changes
   function updateDependentDropdowns() {
     const members = getCheckedAttendanceMembers();
-
-    // First-timers
+    // Sync lists instead of fully repopulating so dropdown state is preserved
     const $firstTimersList = $(".first-timers-dropdown .first-timers-list");
-    repopulateDropdownList($firstTimersList, members, "select-all-first-timers");
-
-    // New-converts
+    syncDependentList($firstTimersList, members, "select-all-first-timers");
     const $newConvertsList = $(".new-converts-dropdown .new-converts-list");
-    repopulateDropdownList($newConvertsList, members, "select-all-new-converts");
-
-    // Reset counts and select-all checkboxes
-    $(".first-timers-count").text("0");
-    $(".new-converts-count").text("0");
-    $(".select-all-first-timers.select-all-options").prop("checked", false);
-    $(".select-all-new-converts.select-all-options").prop("checked", false);
+    syncDependentList($newConvertsList, members, "select-all-new-converts");
   }
 
   // Whenever attendance selection changes, update dependent dropdowns

@@ -979,6 +979,10 @@ if (isset($_POST['content-type'])) {
       <input type="hidden" name="mode" value="<?= htmlspecialchars($mode) ?>">
       <input type="hidden" name="description" value="<?= htmlspecialchars($description) ?>">
       <input type="hidden" name="validate" value="1">
+      <!-- If viewing an existing (published) report, include its id so edits update instead of inserting -->
+      <?php if (!empty($report) && !empty($report['id'])): ?>
+        <input type="hidden" name="report_id" value="<?= htmlspecialchars($report['id']) ?>">
+      <?php endif; ?>
       <div class="body px-4 pt-2">
         <?php if ($reportType === 'outreach'): ?>
           <div class="form-group">
@@ -1145,7 +1149,7 @@ if (isset($_POST['content-type'])) {
       </div>
       <footer class="position-absolute bottom-0 py-3 px-4 w-100 d-flex align-items-center gap-2">
         <?php if ($mode === 'view'): ?>
-          <button type="button" class="edit-btn w-100">Edit</button>
+          <button type="button" class="edit-btn w-100">Edit report</button>
         <?php else: ?>
           <button type="submit" class="submit-btn w-100" disabled>Publish</button>
         <?php endif; ?>
