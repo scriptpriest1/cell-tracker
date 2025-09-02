@@ -9,8 +9,8 @@
       <h6 class="text m-0 p-0">Pending:</h6>
       <span class="count span-box">0</span>
     </div>
-    <div class="report-status unpublished d-flex align-items-center gap-2">
-      <h6 class="text m-0 p-0">Unpublished:</h6>
+    <div class="report-status expired d-flex align-items-center gap-2">
+      <h6 class="text m-0 p-0">Expired:</h6>
       <span class="count span-box">0</span>
     </div>
   </div>

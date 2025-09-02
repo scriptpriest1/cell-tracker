@@ -759,29 +759,43 @@ $(document).ready(() => {
   // Create single draft DOM element (matching your sample)
   const buildDraftElement = (draft) => {
     // draft: object with id, type, week, status, date_generated, description (optional)
-    const status = draft.status ?? "pending";
-    // Use correct description (fix: use helper, not undefined variable)
+    const status = (draft.status || "pending").toString().toLowerCase();
     const desc = getMeetingDescription(draft.week);
-    const $el = $(`
-    <div class="report-draft px-3 py-2 d-flex align-items-center justify-content-between gap-2"
-         data-report-type="${draft.type}"
-         data-week="${draft.week}"
-         data-report-status="${status}"
-         data-id="${draft.id}"
-         data-date-generated="${draft.date_generated}">
-      <div class="text-bar d-flex align-items-center gap-2">
-        <h6 class="m-0 p-0 week">Week ${draft.week}:</h6>
-        <p class="m-0 p-0 description">${$("<div>").text(desc).html()}</p>
-      </div>
 
-      <div class="action-bar d-flex align-items-center justify-content-between gap-2">
-        <span class="label" title="Report is published">${status === "published" ? `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill=""><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>` : ""}</span>
-        <button class="${status === "published" ? "view-btn" : "publish-btn"
-      } m-0 p-0" data-cell-id="${draft.cell_id}">${status === "published" ? "View" : "Publish"
-      }</button>
+    // Label and button behavior per status
+    let labelHtml = "";
+    let buttonHtml = "";
+    if (status === "published") {
+      labelHtml = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill=""><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>`;
+      buttonHtml = `<button class="view-btn m-0 p-0" data-cell-id="${draft.cell_id}">View</button>`;
+    } else if (status === "pending") {
+      // pending -> show Publish button
+      labelHtml = "";
+      buttonHtml = `<button class="publish-btn m-0 p-0" data-cell-id="${draft.cell_id}">Publish</button>`;
+    } else if (status === "expired") {
+      // expired -> show expired label and NO publish button
+      labelHtml = "expired";
+      buttonHtml = ""; // intentionally no publish button
+    }
+
+    const $el = $(`
+      <div class="report-draft px-3 py-2 d-flex align-items-center justify-content-between gap-2"
+           data-report-type="${draft.type}"
+           data-week="${draft.week}"
+           data-report-status="${status}"
+           data-id="${draft.id}"
+           data-date-generated="${draft.date_generated}">
+        <div class="text-bar d-flex align-items-center gap-2">
+          <h6 class="m-0 p-0 week">Week ${draft.week}:</h6>
+          <p class="m-0 p-0 description">${$("<div>").text(desc).html()}</p>
+        </div>
+
+        <div class="action-bar d-flex align-items-center justify-content-between gap-2">
+          <span class="label">${labelHtml}</span>
+          ${buttonHtml}
+        </div>
       </div>
-    </div>
-  `);
+    `);
 
     return $el;
   };
@@ -889,13 +903,12 @@ $(document).ready(() => {
     const $pending = $section.find(
       ".report-draft[data-report-status='pending']"
     ).length;
-    // unpublished (I assume means drafts not published yet OR some 'unpublished' state)
-    const $unpublished = $section.find(
-      ".report-draft[data-report-status!='published']"
+    const $expired = $section.find(
+      ".report-draft[data-report-status='expired']"
     ).length;
     $section.find(".report-status.published .count").text($published);
     $section.find(".report-status.pending .count").text($pending);
-    $section.find(".report-status.unpublished .count").text($unpublished);
+    $section.find(".report-status.expired .count").text($expired);
   };
 
   // Fetch all drafts for the logged-in cell and render everything (fresh)
@@ -978,8 +991,14 @@ $(document).ready(() => {
     const draftId = $draftDiv.data("id");
     const week = $draftDiv.data("week");
     const description = $draftDiv.find(".description").text();
-    const status = $draftDiv.data("report-status");
+    const status = ($draftDiv.data("report-status") || "").toString().toLowerCase();
     const type = $draftDiv.data("report-type");
+
+    // If draft is expired (server may have updated status) block action with alert
+    if (status === "expired") {
+      alert("Report is expired and cannot be published!");
+      return;
+    }
 
     // Load the report form via AJAX and show in modal
     $.ajax({
@@ -1214,6 +1233,16 @@ $(document).ready(() => {
     e.preventDefault();
     const $editBtn = $(this);
     const $form = $("#cell-report-form");
+
+    // If this is a published report and it is expired, block edit and show alert.
+    // A published report is represented by mode === 'view' or presence of report_id.
+    const isExpired = String($form.data("expired") || "").replace(/\s+/g, "") === "1";
+    const hasReportId = $form.find("input[name='report_id']").length > 0;
+    const mode = String($form.find("input[name='mode']").val() || "").toLowerCase();
+    if (isExpired && (hasReportId || mode === "view")) {
+      alert("Report expired and cannot be edited.");
+      return; // do not proceed to toggle edit-mode
+    }
 
     // track editing state via data attribute
     const editing = !!$editBtn.data("editing");
@@ -1746,19 +1775,9 @@ function buildDraftElement(draft) {
   const desc = getMeetingDescription(draft.week);
   const $el = $(`
     <div class="report-draft px-3 py-2 d-flex align-items-center justify-content-between gap-2"
-         data-report-type="${draft.type}"
-         data-week="${draft.week}"
-         data-report-status="${status}"
-         data-id="${draft.id}"
-         data-date-generated="${draft.date_generated}">
-      <div class="text-bar d-flex align-items-center gap-2">
-        <h6 class="m-0 p-0 week">Week ${draft.week}:</h6>
-        <p class="m-0 p-0 description">${$("<div>").text(desc).html()}</p>
-      </div>
-
-      <div class="action-bar d-flex align-items-center justify-content-between gap-2">
+         data
         <span class="label">${status === "published" ? "published" : ""}</span>
-        <button class="${status === "published" ? "view-btn" : "publish-btn"
+               <button class="${status === "published" ? "view-btn" : "publish-btn"
     } m-0 p-0" data-cell-id="${draft.cell_id}">${status === "published" ? "View" : "Publish"
     }</button>
       </div>

@@ -924,6 +924,13 @@ if (isset($_POST['content-type'])) {
     $stmt->execute([$draftId]);
     $draft = $stmt->fetch(PDO::FETCH_ASSOC);
 
+    // Determine expiry state
+    $expiry_date_raw = $draft['expiry_date'] ?? null;
+    $isExpired = false;
+    if (!empty($expiry_date_raw)) {
+      $isExpired = (strtotime($expiry_date_raw) < time());
+    }
+
     // If viewing, fetch published report data
     $report = null;
     if ($mode === 'view' && $draft) {
@@ -971,8 +978,9 @@ if (isset($_POST['content-type'])) {
     }
 
     ?>
-    <form id="cell-report-form" class="action-modal-form position-relative">
+    <form id="cell-report-form" class="action-modal-form position-relative" data-expired="<?= $isExpired ? '1' : '0' ?>">
       <input type="hidden" name="draft_id" value="<?= htmlspecialchars($draftId) ?>">
+      <input type="hidden" name="expiry_date" value="<?= htmlspecialchars($expiry_date_raw ?? '') ?>">
       <input type="hidden" name="cell_id" value="<?= htmlspecialchars($cellId) ?>">
       <input type="hidden" name="week" value="<?= htmlspecialchars($week) ?>">
       <input type="hidden" name="report_type" value="<?= htmlspecialchars($reportType) ?>">
@@ -983,6 +991,7 @@ if (isset($_POST['content-type'])) {
       <?php if (!empty($report) && !empty($report['id'])): ?>
         <input type="hidden" name="report_id" value="<?= htmlspecialchars($report['id']) ?>">
       <?php endif; ?>
+
       <div class="body px-4 pt-2">
         <?php if ($reportType === 'outreach'): ?>
           <div class="form-group">
@@ -1150,7 +1159,7 @@ if (isset($_POST['content-type'])) {
         <?php if ($mode === 'view'): ?>
           <button type="button" class="edit-btn w-100">Edit report</button>
         <?php else: ?>
-          <button type="submit" class="submit-btn w-100" disabled>Publish</button>
+          <button type="submit" class="submit-btn w-100" <?= $isExpired ? 'disabled' : 'disabled' /* kept disabled by validation; validation will prevent enabling if expired */ ?> >Publish</button>
         <?php endif; ?>
       </footer>
     </form>

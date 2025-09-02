@@ -799,18 +799,32 @@ if ($action === 'fetch_report_drafts') {
   }
 
   try {
+    // include expiry_date in select
     $q = $conn->prepare("
-      SELECT id, type, week, description, status, DATE_FORMAT(date_generated, '%Y-%m-%d %H:%i:%s') AS date_generated, cell_id
+      SELECT id, type, week, description, status, DATE_FORMAT(date_generated, '%Y-%m-%d %H:%i:%s') AS date_generated, expiry_date, cell_id
       FROM cell_report_drafts
       WHERE cell_id = ?
       ORDER BY date_generated ASC
     ");
     $q->execute([clean_input($cell_id)]);
     $rows = $q->fetchAll(PDO::FETCH_ASSOC);
-    // Ensure description and type are set correctly for each draft
+
+    // Expire any pending drafts whose expiry_date is in the past (server-side enforcement for pending drafts only)
     foreach ($rows as &$row) {
+      // Normalize expiry value
+      $expiry = $row['expiry_date'] ?? null;
+      if (strtolower($row['status']) === 'pending' && !empty($expiry) && strtotime($expiry) < time()) {
+        // Update DB to mark expired
+        $upd = $conn->prepare("UPDATE cell_report_drafts SET status = 'expired' WHERE id = ?");
+        $upd->execute([clean_input($row['id'])]);
+        // Reflect change in returned data
+        $row['status'] = 'expired';
+      }
+      // Ensure description/type correct
       $row['description'] = getMeetingDescription($row['week']);
       $row['type'] = getReportTypeByWeek($row['week']);
+      // Optionally format expiry_date for frontend (keep raw DB format)
+      // $row['expiry_date'] = $row['expiry_date'];
     }
     echo json_encode(['status' => 'success', 'data' => $rows]);
     exit;
@@ -1032,6 +1046,12 @@ if ($action === 'submit_cell_report') {
   $draft = $stmt->fetch(PDO::FETCH_ASSOC);
   if (!$draft) {
     echo json_encode(['status' => 'error', 'message' => 'Draft not found']);
+    exit;
+  }
+
+  // Server-side expiry enforcement: do not allow publish/edit after expiry
+  if (!empty($draft['expiry_date']) && strtotime($draft['expiry_date']) < time()) {
+    echo json_encode(['status' => 'error', 'message' => 'Report expired and cannot be edited.']);
     exit;
   }
 
