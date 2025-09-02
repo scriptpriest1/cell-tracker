@@ -778,23 +778,33 @@ button.check-btn svg {
   background-color: var(--success-hover);
 }
 
+.report-draft[data-report-status="expired"] {
+  border: 1px dashed var(--error);
+  background-color: var(--error-hover);
+}
+
 .report-draft .description {
   font-size: 14px;
   font-style: italic;
 }
 
-.report-draft .label svg {
-  fill: var(--success);
-  margin: 0 10px 1px 0;
+.report-draft .label {
+  font-style: italic;
 }
 
-[data-report-status="published"] .label {
-  /* color: var(--success); */
+.report-draft[data-report-status="expired"] .label {
+  color: var(--error);
+}
+
+.report-draft[data-report-status="published"] .label svg {
+  fill: var(--success);
+  margin: 0 10px 1px 0;
 }
 
 .report-draft .publish-btn,
 .report-draft .view-btn {
   color: var(--primary);
+  text-decoration: underline;
 }
 
 .report-draft .publish-btn:hover,
@@ -848,6 +858,7 @@ button.check-btn svg {
 #cell-report-form footer .edit-btn:hover {
   background-color: var(--hover-on-primary);
 }
+
 #cell-report-form footer .edit-btn.cancel-btn {
   background-color: transparent;
   border: 1px solid var(--border);
@@ -856,4 +867,8 @@ button.check-btn svg {
 
 #cell-report-form footer .edit-btn.cancel-btn:hover {
   background-color: var(--bg);
+}
+
+#cell-report-form[data-expired="1"] footer .edit-btn {
+  opacity: 0.5;
 }
