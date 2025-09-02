@@ -1021,8 +1021,7 @@ if (isset($_POST['content-type'])) {
                     <label>
                       <input type="checkbox" class="form-check-input me-2" name="attendance[]" value="<?= $mid ?>"
                         <?= $checked ?> <?= $disabled ?>
-                        <?= ($mode === 'view') ? '' : 'required' ?>
-                      >
+                        >
                       <?= htmlspecialchars($m['first_name'] . ' ' . $m['last_name']) ?>
                     </label>
                   </div>

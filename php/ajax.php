@@ -985,16 +985,36 @@ if ($action === 'submit_cell_report') {
 
   $reportType = $_POST['report_type'] ?? '';
 
+  // Helper: normalize potentially-string-or-array fields into arrays
+  $normalizeArrayField = function ($key) {
+    if (!isset($_POST[$key])) return [];
+    $val = $_POST[$key];
+    if (is_array($val)) return $val;
+    // single scalar -> return single-element array unless empty
+    $s = trim((string)$val);
+    return $s === '' ? [] : [$s];
+  };
+
   if ($reportType === 'outreach') {
     // outreach requires numeric attendance count, new_converts and outreach-kind
     foreach (['attendance', 'new_converts', 'outreach-kind'] as $field) {
-      if (empty($_POST[$field]) && $field !== 'first_timers') {
-        $missing[] = $field;
+      if ($field === 'outreach-kind') {
+        if (empty($_POST['outreach-kind'])) $missing[] = 'outreach-kind';
+      } else {
+        // For outreach numeric fields, treat as required scalar values
+        if (!isset($_POST[$field]) || trim((string)$_POST[$field]) === '') {
+          $missing[] = $field;
+        }
       }
     }
   } else {
     // For meeting: attendance[] required (must have at least one checked).
-    if (empty($_POST['attendance']) || !is_array($_POST['attendance']) || count($_POST['attendance']) === 0) {
+    $attendanceCount = 0;
+    if (isset($_POST['attendance'])) {
+      if (is_array($_POST['attendance'])) $attendanceCount = count($_POST['attendance']);
+      else if (trim((string)$_POST['attendance']) !== '') $attendanceCount = 1;
+    }
+    if ($attendanceCount === 0) {
       $missing[] = 'attendance';
     }
     // NOTE: first_timers and new_converts are optional for meetings (do not mark missing)
@@ -1030,26 +1050,41 @@ if ($action === 'submit_cell_report') {
   // Detect edit mode: if report_id present then update existing report
   $report_id = isset($_POST['report_id']) ? intval(clean_input($_POST['report_id'])) : 0;
 
-  // Conditional logic by report type
+  // Re-check/normalize by report type using normalized arrays
   if ($reportType === 'outreach') {
     // outreach requires numeric attendance count, new_converts and outreach-kind
     foreach (['attendance', 'new_converts', 'outreach-kind'] as $field) {
-      if (empty($_POST[$field]) && $field !== 'first_timers') {
-        $missing[] = $field;
+      if ($field === 'outreach-kind') {
+        if (empty($_POST['outreach-kind'])) $missing[] = $field;
+      } else {
+        if (!isset($_POST[$field]) || trim((string)$_POST[$field]) === '') {
+          $missing[] = $field;
+        }
       }
     }
   } else {
-    // meeting: attendance[] required (must have at least one checked).
-    if (empty($_POST['attendance']) || !is_array($_POST['attendance']) || count($_POST['attendance']) === 0) {
-      $missing[] = 'attendance';
+    $attendanceCount = 0;
+    if (isset($_POST['attendance'])) {
+      if (is_array($_POST['attendance'])) $attendanceCount = count($_POST['attendance']);
+      else if (trim((string)$_POST['attendance']) !== '') $attendanceCount = 1;
     }
-    // NOTE: first_timers and new_converts are optional for meetings (do not mark missing)
+    if ($attendanceCount === 0) $missing[] = 'attendance';
   }
 
   if (!empty($missing)) {
     echo json_encode(['status' => 'error', 'message' => 'Missing fields: ' . implode(', ', $missing)]);
     exit;
   }
+
+  // Prepare normalized arrays for use later
+  $attendanceArr = $normalizeArrayField('attendance');
+  $firstTimersArr = $normalizeArrayField('first_timers');
+  $newConvertsArr = $normalizeArrayField('new_converts');
+
+  // Deduplicate arrays to avoid duplicate DB inserts if the same id appears multiple times in POST
+  $attendanceArr = array_values(array_unique($attendanceArr));
+  $firstTimersArr = array_values(array_unique($firstTimersArr));
+  $newConvertsArr = array_values(array_unique($newConvertsArr));
 
   // If editing an existing report, update instead of insert
   if ($report_id && $report_id > 0) {
@@ -1084,10 +1119,7 @@ if ($action === 'submit_cell_report') {
         $del = $conn->prepare("DELETE FROM cell_report_attendees WHERE cell_report_id = ?");
         $del->execute([$report_id]);
 
-        $attendanceArr = isset($_POST['attendance']) && is_array($_POST['attendance']) ? $_POST['attendance'] : [];
-        $firstTimersArr = isset($_POST['first_timers']) && is_array($_POST['first_timers']) ? $_POST['first_timers'] : [];
-        $newConvertsArr = isset($_POST['new_converts']) && is_array($_POST['new_converts']) ? $_POST['new_converts'] : [];
-
+        // Use normalized arrays
         foreach ($attendanceArr as $memberId) {
           $memberId = clean_input($memberId);
           $first_timer = in_array($memberId, $firstTimersArr) ? 1 : 0;
@@ -1131,7 +1163,9 @@ if ($action === 'submit_cell_report') {
       // meeting: attendance members inserted into attendees table; cell_reports keeps attendance-related fields NULL
       $ins = $conn->prepare("
         INSERT INTO cell_reports (
-          type, week, description, attendance, first_timers, new_converts, outreach_kind, venue, `date`, `time`, offering, date_generated, expiry_date, date_reported, cell_report_draft_id, cell_id
+          type, week, description, attendance, first_timers, new_converts, outreach_kind,
+          venue, `date`, `time`, offering,
+          date_generated, expiry_date, date_reported, cell_report_draft_id, cell_id
         ) VALUES (?, ?, ?, NULL, NULL, NULL, NULL, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)
       ");
       $success = $ins->execute([
@@ -1142,10 +1176,6 @@ if ($action === 'submit_cell_report') {
       // Insert attendees into cell_report_attendees if any attendance members were provided
       if ($success) {
         $cell_report_id = $conn->lastInsertId();
-        $attendanceArr = isset($_POST['attendance']) && is_array($_POST['attendance']) ? $_POST['attendance'] : [];
-        $firstTimersArr = isset($_POST['first_timers']) && is_array($_POST['first_timers']) ? $_POST['first_timers'] : [];
-        $newConvertsArr = isset($_POST['new_converts']) && is_array($_POST['new_converts']) ? $_POST['new_converts'] : [];
-
         foreach ($attendanceArr as $memberId) {
           $memberId = clean_input($memberId);
           $first_timer = in_array($memberId, $firstTimersArr) ? 1 : 0;
