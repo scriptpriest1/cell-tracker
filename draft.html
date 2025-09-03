@@ -1,7 +1,8 @@
 For the Church reports:
 - This will contain a section for viewing the reports of all the cells under that church.
-- There's a select element in the church-reports.php page. This should contain the names of all the cells in the church as options.
+- There's a select element in the church-reports.php file. This should contain the names of all the cells in the church as options.
 - When any cell is selected, the '.reports-section' for that cell is appended into the '.cells-reports' element.
 - The church admin will only be able to view reports of the selected cell and not be able to publish or edit them regardless of their status. 
 - For published reports, the church admin will be able to open and view the report but not edit it even if that report is not expired. This means the 'Edit report' button will not even be displayed in the form and the fields will always be diabled regardless of the report's status. For the dropdown buttons (in outreach reports), they will not be disabled but the checkboxes will be.
-- 
+- For pending reports, the church admin will not be able to open it at all. This means the publish button will not be rendered and the function for publishing will not be applicable.
+- All the functions for publishing and editing cell reports will not be applicable for the church admin.
