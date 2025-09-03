@@ -10,5 +10,6 @@
         </select>
       </div>
     </div>
+    <!-- Append selected cell report section here -->
   </div>
 </section>
