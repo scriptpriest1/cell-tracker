@@ -18,6 +18,7 @@ if (php_sapi_name() !== 'cli') {
 // Load environment
 require_once __DIR__ . '/connect_db.php';
 require_once __DIR__ . '/functions.php';
+require_once __DIR__ . '/cell_report_helpers.php';
 
 $dateArg = null;
 if (php_sapi_name() === 'cli') {
@@ -27,121 +28,150 @@ if (php_sapi_name() === 'cli') {
   $dateArg = isset($_GET['date']) ? $_GET['date'] : null;
 }
 
-$targetDate = $dateArg ?: date('Y-m-d');
-try {
-  $reportDate = new DateTime($targetDate);
-} catch (Exception $e) {
-  $msg = "Invalid date: {$targetDate}\n";
-  if (php_sapi_name() === 'cli') echo $msg;
-  else echo $msg;
-  exit(1);
+// --- BEGIN wrapper / locking / improved logging (small safe additions) ---
+$lockFile = sys_get_temp_dir() . '/cell_tracker_autogen.lock';
+$lockFp = @fopen($lockFile, 'c+');
+if ($lockFp === false) {
+  // Can't obtain lock file; continue anyway but log
+  error_log("auto_generate_drafts: could not open lock file {$lockFile}");
+} else {
+  if (!flock($lockFp, LOCK_EX | LOCK_NB)) {
+    // Already running
+    $msg = "Another auto-generate job is already running. Exiting.\n";
+    if (php_sapi_name() === 'cli') echo $msg; else echo nl2br(htmlspecialchars($msg));
+    exit(0);
+  }
 }
 
-// compute week based on first Monday approach
-$computeWeek = function (DateTime $d) {
-  $year = (int)$d->format('Y');
-  $month = (int)$d->format('m');
-  $day = (int)$d->format('j');
+// Ensure the script always prints JSON on fatal error
+try {
+  $targetDate = $dateArg ?: date('Y-m-d');
+  try {
+    $reportDate = new DateTime($targetDate);
+  } catch (Exception $e) {
+    $msg = "Invalid date: {$targetDate}\n";
+    error_log("auto_generate_drafts: " . $e->getMessage());
+    if (php_sapi_name() === 'cli') echo json_encode(['status'=>'error','message'=>$msg]);
+    else echo json_encode(['status'=>'error','message'=>$msg]);
+    exit(1);
+  }
 
+  // compute week based on first Monday approach
+  $computeWeek = function (DateTime $d) {
+    $year = (int)$d->format('Y');
+    $month = (int)$d->format('m');
+    $day = (int)$d->format('j');
+
+    $firstOfMonth = new DateTime("$year-$month-01 00:00:00");
+    $dow = (int)$firstOfMonth->format('N'); // 1=Mon
+    $firstMonday = clone $firstOfMonth;
+    if ($dow !== 1) $firstMonday->modify('next Monday');
+    $firstMondayDay = (int)$firstMonday->format('j');
+    if ($day < $firstMondayDay) return 0;
+    return 1 + floor(($day - $firstMondayDay) / 7);
+  };
+
+  $week = $computeWeek($reportDate);
+  if ($week < 1 || $week > 5) {
+    $out = ['status' => 'ok', 'message' => "Not a reporting week for date {$reportDate->format('Y-m-d')}. Nothing generated.", 'generated' => 0, 'skipped' => 0];
+    if (php_sapi_name() === 'cli') echo json_encode($out) . PHP_EOL; else echo json_encode($out);
+    exit(0);
+  }
+
+  // Compute draftMonday & expiry once and reuse (Monday 00:00:00)
+  $year = (int)$reportDate->format('Y');
+  $month = (int)$reportDate->format('m');
   $firstOfMonth = new DateTime("$year-$month-01 00:00:00");
-  $dow = (int)$firstOfMonth->format('N'); // 1=Mon
+  $dow = (int)$firstOfMonth->format('N');
   $firstMonday = clone $firstOfMonth;
   if ($dow !== 1) $firstMonday->modify('next Monday');
-  $firstMondayDay = (int)$firstMonday->format('j');
-  if ($day < $firstMondayDay) return 0;
-  return 1 + floor(($day - $firstMondayDay) / 7);
-};
+  $draftMonday = clone $firstMonday;
+  $draftMonday->modify('+' . ($week - 1) * 7 . ' days');
+  $draftMonday->setTime(0,0,0);
 
-$week = $computeWeek($reportDate);
-if ($week < 1 || $week > 5) {
-  $out = "Not a reporting week for date {$reportDate->format('Y-m-d')}. Nothing generated.\n";
-  if (php_sapi_name() === 'cli') echo $out; else echo nl2br($out);
-  exit(0);
-}
+  $expiry = clone $draftMonday;
+  $expiry->modify('next Sunday');
+  $expiry->setTime(23,59,59);
 
-// Compute draftMonday & expiry once and reuse (Monday 00:00:00)
-$year = (int)$reportDate->format('Y');
-$month = (int)$reportDate->format('m');
-$firstOfMonth = new DateTime("$year-$month-01 00:00:00");
-$dow = (int)$firstOfMonth->format('N');
-$firstMonday = clone $firstOfMonth;
-if ($dow !== 1) $firstMonday->modify('next Monday');
-$draftMonday = clone $firstMonday;
-$draftMonday->modify('+' . ($week - 1) * 7 . ' days');
-$draftMonday->setTime(0,0,0);
+  $draftMonth0 = (int)$draftMonday->format('m');
+  $draftYear0  = (int)$draftMonday->format('Y');
 
-$expiry = clone $draftMonday;
-$expiry->modify('next Sunday');
-$expiry->setTime(23,59,59);
+  $cellsStmt = $conn->prepare("SELECT id FROM cells");
+  $cellsStmt->execute();
+  $cells = $cellsStmt->fetchAll(PDO::FETCH_ASSOC);
 
-$draftMonth0 = (int)$draftMonday->format('m');
-$draftYear0  = (int)$draftMonday->format('Y');
+  $generated = 0;
+  $skipped = 0;
+  $errors = [];
 
-$cellsStmt = $conn->prepare("SELECT id FROM cells");
-$cellsStmt->execute();
-$cells = $cellsStmt->fetchAll(PDO::FETCH_ASSOC);
+  foreach ($cells as $c) {
+    $cellId = $c['id'];
 
-$generated = 0;
-$skipped = 0;
-$errors = [];
-
-foreach ($cells as $c) {
-  $cellId = $c['id'];
-
-  $check = $conn->prepare("
-    SELECT COUNT(*) FROM cell_report_drafts 
-    WHERE cell_id = ? AND week = ? 
-      AND MONTH(date_generated) = ? AND YEAR(date_generated) = ?
-  ");
-  $check->execute([
-    $cellId,
-    $week,
-    $draftMonth0,
-    $draftYear0
-  ]);
-  $exists = (int)$check->fetchColumn();
-  if ($exists > 0) {
-    $skipped++;
-    continue;
-  }
-
-  $description = getMeetingDescription($week);
-  $type = getReportTypeByWeek($week);
-
-  try {
-    $ins = $conn->prepare("
-      INSERT INTO cell_report_drafts (type, week, description, status, date_generated, expiry_date, cell_id)
-      VALUES (?, ?, ?, 'pending', ?, ?, ?)
+    $check = $conn->prepare("
+      SELECT COUNT(*) FROM cell_report_drafts 
+      WHERE cell_id = ? AND week = ? 
+        AND MONTH(date_generated) = ? AND YEAR(date_generated) = ?
     ");
-    $ins->execute([
-      $type,
+    $check->execute([
+      $cellId,
       $week,
-      $description,
-      $draftMonday->format('Y-m-d H:i:s'),
-      $expiry->format('Y-m-d H:i:s'),
-      $cellId
+      $draftMonth0,
+      $draftYear0
     ]);
-    $generated++;
-  } catch (PDOException $ex) {
-    error_log("auto_generate_drafts.php insert error for cell {$cellId}: " . $ex->getMessage());
-    $errors[] = "Cell {$cellId}: DB error";
+    $exists = (int)$check->fetchColumn();
+    if ($exists > 0) {
+      $skipped++;
+      continue;
+    }
+
+    $description = getMeetingDescription($week);
+    $type = getReportTypeByWeek($week);
+
+    try {
+      $ins = $conn->prepare("
+        INSERT INTO cell_report_drafts (type, week, description, status, date_generated, expiry_date, cell_id)
+        VALUES (?, ?, ?, 'pending', ?, ?, ?)
+      ");
+      $ins->execute([
+        $type,
+        $week,
+        $description,
+        $draftMonday->format('Y-m-d H:i:s'),
+        $expiry->format('Y-m-d H:i:s'),
+        $cellId
+      ]);
+      $generated++;
+    } catch (PDOException $ex) {
+      error_log("auto_generate_drafts.php insert error for cell {$cellId}: " . $ex->getMessage());
+      $errors[] = "Cell {$cellId}: DB error";
+    }
+  }
+
+  $result = ['status' => 'success', 'generated' => $generated, 'skipped' => $skipped, 'errors' => $errors];
+  if (php_sapi_name() === 'cli') {
+    echo json_encode($result) . PHP_EOL;
+  } else {
+    header('Content-Type: application/json');
+    echo json_encode($result);
+  }
+
+  // ...existing code...
+} catch (Throwable $t) {
+  error_log("auto_generate_drafts fatal: " . $t->getMessage());
+  if (php_sapi_name() === 'cli') {
+    echo json_encode(['status'=>'error','message'=>'Internal error']) . PHP_EOL;
+  } else {
+    header('Content-Type: application/json');
+    echo json_encode(['status'=>'error','message'=>'Internal error']);
+  }
+  exit(1);
+} finally {
+  // release lock
+  if (isset($lockFp) && $lockFp !== false) {
+    @flock($lockFp, LOCK_UN);
+    @fclose($lockFp);
+    // do not delete lock file to avoid races; file will be reused next run
   }
 }
-
-$out = "Auto-generate summary for date {$reportDate->format('Y-m-d')}:\nGenerated: {$generated}\nSkipped (already existed): {$skipped}\n";
-if (!empty($errors)) $out .= "Errors:\n" . implode("\n", $errors) . "\n";
-
-if (php_sapi_name() === 'cli') echo $out;
-else echo nl2br(htmlspecialchars($out));
-exit(0);
-    error_log("auto_generate_drafts.php insert error for cell {$cellId}: " . $ex->getMessage());
-    $errors[] = "Cell {$cellId}: DB error";
-  }
-}
-
-$out = "Auto-generate summary for date {$reportDate->format('Y-m-d')}:\nGenerated: {$generated}\nSkipped (already existed): {$skipped}\n";
-if (!empty($errors)) $out .= "Errors:\n" . implode("\n", $errors) . "\n";
-
-if (php_sapi_name() === 'cli') echo $out;
-else echo nl2br(htmlspecialchars($out));
+// --- END wrapper / locking / improved logging ---
 exit(0);

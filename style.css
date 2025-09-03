@@ -885,3 +885,8 @@ button.check-btn svg {
 #cell-report-form[data-expired="1"] footer .edit-btn {
   opacity: 0.5;
 }
+
+.church-reports-section .cells-reports .top-bar select {
+  cursor: pointer;
+  width: fit-content;
+}

@@ -949,6 +949,9 @@ $(document).ready(() => {
           res.data.forEach((draft) => {
             insertDraftIntoMonthContainer(draft);
           });
+
+          // Ensure status counters always reflect current (possibly empty) filtered results
+          updateStatusCounts();
         } else {
           // no drafts - clear blocks and update counts
           $(".reports-section .reports-block").remove();

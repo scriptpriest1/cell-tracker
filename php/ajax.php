@@ -2,6 +2,7 @@
 session_start();
 include 'connect_db.php';
 include 'functions.php';
+include 'cell_report_helpers.php';
 
 $action = isset($_REQUEST['action']) ? clean_input($_REQUEST['action']) : '';
 
@@ -1257,11 +1258,24 @@ if ($action === 'submit_cell_report') {
         Mondays at 00:00:00 to auto-generate drafts.
 =======================================*/
 if ($action === 'auto_generate_all_drafts') {
+  // Optional token support: if an AUTOGEN_TOKEN env var is configured on the server
+  // you may pass token via POST['token'] to secure web-triggered generation.
+  $requiredToken = getenv('AUTOGEN_TOKEN') ?: ($_ENV['AUTOGEN_TOKEN'] ?? null);
+  if ($requiredToken !== null) {
+    $provided = isset($_POST['token']) ? $_POST['token'] : null;
+    if ($provided !== $requiredToken) {
+      echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
+      http_response_code(401);
+      exit;
+    }
+  }
+
   // Optional date parameter (yyyy-mm-dd) for testing; default to today.
   $dateParam = isset($_POST['date']) ? clean_input($_POST['date']) : date('Y-m-d');
   try {
     $reportDate = new DateTime($dateParam);
   } catch (Exception $e) {
+    error_log("auto_generate_all_drafts: invalid date: {$dateParam}");
     echo json_encode(['status'=>'error','message'=>'Invalid date']);
     exit;
   }
@@ -1301,12 +1315,10 @@ if ($action === 'auto_generate_all_drafts') {
   $draftMonday->modify('+' . ($week - 1) * 7 . ' days');
   $draftMonday->setTime(0, 0, 0);
 
-  // Expiry is the Sunday 23:59:59 of that reporting week
   $expiry = clone $draftMonday;
   $expiry->modify('next Sunday');
   $expiry->setTime(23,59,59);
 
-  // Use draft's month/year for idempotency checks (fixes month-boundary bugs)
   $draftMonth = (int)$draftMonday->format('m');
   $draftYear  = (int)$draftMonday->format('Y');
 
@@ -1371,21 +1383,5 @@ if ($action === 'auto_generate_all_drafts') {
     'errors' => $errors
   ]);
   exit;
-}
-
-// Helper function for meeting description
-function getMeetingDescription($week) {
-  if ($week == 1) return 'Prayer and Planning';
-  if ($week == 2) return 'Bible Study Class 1';
-  if ($week == 3) return 'Bible Study Class 2';
-  if ($week == 4) return 'Cell Outreach';
-  return 'Cell Fellowship';
-}
-
-// Helper function for report type by week
-function getReportTypeByWeek($week) {
-  if ($week == 4) return 'outreach';
-  // week 1,2,3,5 are 'meeting'
-  return 'meeting';
 }
 
