@@ -890,3 +890,9 @@ button.check-btn svg {
   cursor: pointer;
   width: fit-content;
 }
+
+@media screen and (max-width: 767px) {
+  .church-reports-section .cells-reports .top-bar select {
+    width: 100%;
+  }
+}

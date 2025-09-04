@@ -1015,6 +1015,11 @@ $(document).ready(() => {
   // Delegated click handlers for publish/view buttons
   $(document).on("click", ".publish-btn, .view-btn", function (e) {
     e.preventDefault();
+    // If this button lives inside a church-injected section, skip the global handler.
+    // (Those sections wire their own handlers to avoid duplicate toggleActionModal calls.)
+    if ($(this).closest(".reports-section.for-church-cell").length) {
+      return;
+    }
     const $btn = $(this);
     const $draftDiv = $btn.closest(".report-draft");
     const draftId = $draftDiv.data("id");
@@ -1330,6 +1335,318 @@ $(document).ready(() => {
       if (typeof validateReportForm === "function") validateReportForm();
     }
   });
+
+  // --- Church Reports: populate cell select and load chosen cell's reports ---
+  // Called on pages where #select-cell exists (church admin page)
+  function initChurchReports() {
+    const $cellsReportsRoot = $(".cells-reports");
+    if ($cellsReportsRoot.length === 0) return;
+
+    const isChurchAdmin = String($cellsReportsRoot.data("is-church-admin") || "0") === "1";
+    const $select = $("#select-cell");
+
+    // Fill select with cells (reuse existing endpoint)
+    $.ajax({
+      url: "../php/ajax.php",
+      method: "POST",
+      dataType: "json",
+      data: { action: "fetch_all_cells" },
+      success: function (cells) {
+        // remove existing options except placeholder
+        $select.find("option:not(:first)").remove();
+        if (!cells || !cells.length) return;
+        cells.forEach(c => {
+          // append " Cell" to each option label
+          $select.append($(`<option/>`).val(c.id).text(`${c.cell_name} Cell`));
+        });
+
+        // Pre-select cell from URL if provided (?p=reports&cell-id=...)
+        const urlCellId = new URLSearchParams(window.location.search).get('cell-id');
+        if (urlCellId) {
+          // only set if option exists
+          if ($select.find(`option[value='${urlCellId}']`).length) {
+            $select.val(urlCellId).trigger('change');
+          }
+        }
+        // Optionally select first cell if you want automatic load when none in URL
+        // else { /* $select.val(cells[0].id).trigger('change'); */ }
+      },
+      error: function () {
+        console.error("Failed to load cells for church-reports.");
+      }
+    });
+
+    // When a cell is selected, fetch and render its reports
+    $select.on("change", function () {
+      const cellId = $(this).val();
+      const cellName = $(this).find("option:selected").text() || "";
+      if (!cellId) {
+        // remove appended sections if any
+        $cellsReportsRoot.find(".reports-section.for-church-cell").remove();
+        // Reset URL to canonical reports page (no duplicate params)
+        history.replaceState({}, "", "?p=reports");
+        return;
+      }
+
+      // Push cell-id into URL so selection persists on refresh
+      const params = new URLSearchParams(window.location.search);
+      params.set('cell-id', cellId);
+      const filter = params.get('filter');
+      const url = `?p=reports&cell-id=${encodeURIComponent(cellId)}${filter ? `&filter=${encodeURIComponent(filter)}` : ''}`;
+      history.replaceState({}, "", url);
+
+      loadAndRenderCellReports(cellId, cellName, isChurchAdmin);
+    });
+  }
+
+  // Fetch drafts for a cell and render a reports-section appended to .cells-reports
+  function loadAndRenderCellReports(cellId, cellName, isChurchAdmin) {
+    $.ajax({
+      url: "../php/ajax.php",
+      method: "POST",
+      dataType: "json",
+      data: { action: "fetch_reports_for_cell", cell_id: cellId },
+      success: function (res) {
+        if (!res || res.status !== "success") {
+          alert(res && res.message ? res.message : "Failed to load reports.");
+          return;
+        }
+        const drafts = res.data || [];
+
+        // Clean previous injected section for this container
+        $(".cells-reports .reports-section.for-church-cell").remove();
+
+        // Build a reports-section structure similar to cell-reports.php
+        const $section = $(`
+           <section class="reports-section for-church-cell">
+             <div class="reports-status-bar d-flex align-items-center gap-4 mt-2">
+               <div class="report-status published">
+                 <h6 class="text m-0 p-0">Published: <span class="count span-box">0</span></h6>
+               </div>
+               <div class="report-status pending">
+                 <h6 class="text m-0 p-0">Pending: <span class="count span-box">0</span></h6>
+               </div>
+               <div class="report-status unpublished">
+                 <h6 class="text m-0 p-0">Unpublished: <span class="count span-box">0</span></h6>
+               </div>
+             </div>
+            <div class="filter-bar d-flex align-items-center gap-3 mt-4">
+              <button id="all" class="filter" data-filter="all">All</button>
+              <button id="meeting" class="filter" data-filter="meeting">Meetings</button>
+              <button id="outreach" class="filter" data-filter="outreach">Outreaches</button>
+            </div>
+             <div class="reports-body mt-3"></div>
+           </section>
+         `);
+
+        // NOTE: removed visual header prepend (handled by page layout)
+        // Store drafts on the section so filter buttons can re-render using the same render function
+        $section.data('drafts', drafts);
+        // expose the selected cell id too so filter handlers can read it
+        $section.data('cell-id', String(cellId));
+
+        // Append to DOM
+        $(".cells-reports").append($section);
+
+        // Read URL filter param and set active class for buttons inside this injected section
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlFilter = urlParams.get('filter') || 'all';
+        $section.find('.filter-bar .filter').removeClass('active');
+        $section.find(`.filter-bar .filter[data-filter="${urlFilter}"]`).addClass('active');
+
+        // Apply filter from URL if present (keeps behavior consistent on refresh)
+        const filteredDrafts = (urlFilter === 'all') ? drafts : drafts.filter(d => d.type === urlFilter);
+
+        // Render drafts grouped by month inside this section (use filtered set)
+        renderDraftsIntoSection(filteredDrafts, $section, isChurchAdmin);
+
+        // Wire filter buttons (local to this section)
+        $section.find(".filter-bar .filter").on("click", function (e) {
+          // Prevent the global ".filter" click handler from also running
+          e.stopPropagation();
+          const $btn = $(this);
+          $section.find(".filter-bar .filter").removeClass("active");
+          $btn.addClass("active");
+          const filter = $btn.data("filter") || 'all';
+
+          // Use the stored drafts and re-render via the existing function (keeps logic DRY)
+          const allDrafts = $section.data('drafts') || [];
+          const filtered = (filter === 'all') ? allDrafts : allDrafts.filter(d => d.type === filter);
+          renderDraftsIntoSection(filtered, $section, isChurchAdmin);
+
+          // Update URL to include both cell-id and filter so state persists on refresh
+          const cellParam = $section.data('cell-id') || cellId;
+          const newUrl = `?p=reports&cell-id=${encodeURIComponent(cellParam)}&filter=${encodeURIComponent(filter)}`;
+          history.replaceState({}, "", newUrl);
+        });
+      },
+      error: function () {
+        alert("Error loading reports for the selected cell.");
+      }
+    });
+  }
+
+  // Render drafts grouped by month into a given section
+  function renderDraftsIntoSection(drafts, $section, isChurchAdmin) {
+    const $body = $section.find(".reports-body");
+    $body.empty();
+
+    // Helper to format month-year from date_generated
+    const monthKey = d => {
+      if (!d || !d.date_generated) return "Unknown";
+      const iso = d.date_generated.replace(" ", "T");
+      const dt = new Date(iso);
+      return dt.toLocaleString(undefined, { month: "short", year: "numeric" });
+    };
+    const group = {};
+    drafts.forEach(d => {
+      const key = monthKey(d);
+      group[key] = group[key] || [];
+      group[key].push(d);
+    });
+
+    // Insert months in descending order by parsed date (newest first)
+    const months = Object.keys(group).sort((a, b) => {
+      // parse first draft date in group
+      const da = new Date((group[a][0].date_generated || "").replace(" ", "T"));
+      const db = new Date((group[b][0].date_generated || "").replace(" ", "T"));
+      return db - da;
+    });
+
+    months.forEach(month => {
+      const $block = $(`
+        <div class="reports-block mt-4">
+          <div class="date-bar"><h5 class="date">${month}</h5></div>
+          <div class="reports-container mt-2"></div>
+        </div>
+      `);
+      const $container = $block.find(".reports-container");
+
+      // Sort drafts in this month by date_generated desc
+      group[month].sort((a, b) => new Date(b.date_generated.replace(" ", "T")) - new Date(a.date_generated.replace(" ", "T")));
+
+      group[month].forEach(draft => {
+        const status = (draft.status || "pending").toLowerCase();
+        const desc = $('<div>').text(draft.description || getMeetingDescription(draft.week)).html();
+
+        // Build label HTML for statuses
+        let labelHtml = "";
+        if (status === "published") {
+          labelHtml = `<span class="label published-label">published</span>`;
+        } else if (status === "pending") {
+          labelHtml = `<span class="label pending-label">pending</span>`;
+        } else if (status === "expired") {
+          labelHtml = `<span class="label text-muted">expired</span>`;
+        }
+
+        // Choose allowed actions for church admin:
+        // - Church admin: only view for published; no publish for pending/expired
+        let $actionBtn = $();
+        if (status === "published") {
+          $actionBtn = $(`<button class="view-btn m-0 p-0" data-draft-id="${draft.id}" data-cell-id="${draft.cell_id}">View</button>`);
+        } else if (status === "pending") {
+          if (!isChurchAdmin) {
+            $actionBtn = $(`<button class="publish-btn m-0 p-0" data-draft-id="${draft.id}" data-cell-id="${draft.cell_id}">Publish</button>`);
+          }
+        } // expired -> no action button
+
+        const $draftEl = $(`<div class="report-item report-draft px-3 py-2 d-flex align-items-center justify-content-between gap-2"
+               data-report-type="${draft.type}" data-week="${draft.week}" data-report-status="${status}" data-id="${draft.id}" data-date-generated="${draft.date_generated}">
+            <div class="text-bar d-flex align-items-center gap-2">
+              <h6 class="m-0 p-0 week">W${draft.week}:</h6>
+              <p class="m-0 p-0 description">${desc}</p>
+            </div>
+            <div class="action-bar d-flex align-items-center justify-content-between gap-2">
+              ${labelHtml}
+            </div>
+          </div>`);
+        // attach action (if any)
+        if ($actionBtn && $actionBtn.length) {
+          $draftEl.find(".action-bar").append($actionBtn);
+        }
+
+        $container.append($draftEl);
+      });
+
+      $body.append($block);
+    });
+
+    // Update status counters for this section
+    updateSectionStatusCounts($section);
+
+    // Wire view/publish buttons inside this injected section
+    $section.off("click", ".view-btn").on("click", ".view-btn", function (e) {
+      e.preventDefault();
+      const $btn = $(this);
+      const draftId = $btn.data("draft-id");
+      const status = $btn.closest(".report-item").data("report-status");
+      // Prevent opening pending/expired drafts for church admins: they shouldn't be rendered, but double-guard
+      if (String(status) !== "published") {
+        alert("You cannot open this draft.");
+        return;
+      }
+      // Open read-only view via existing load_dynamic_content flow
+      $.ajax({
+        url: "../php/load_dynamic_content.php",
+        method: "POST",
+        data: {
+          "content-type": "cell-report-form",
+          "draft-id": draftId,
+          "mode": "view"
+        },
+        success: function (res) {
+          $("#action-modal header .title").text("View Report");
+          $("#action-modal .content-container").html(res);
+          // Ensure all fields are disabled in the returned form (server also enforces)
+          $("#action-modal #cell-report-form input, #action-modal #cell-report-form select, #action-modal #cell-report-form textarea").prop("disabled", true);
+          // For outreach forms keep dropdown buttons enabled but disable checkboxes inside them
+          $("#action-modal .custom-dropdown input[type='checkbox']").prop("disabled", true);
+          toggleActionModal();
+        }
+      });
+    });
+
+    // publish buttons should work only for non-church-admins; they exist only for non-church-admins
+    $section.off("click", ".publish-btn").on("click", ".publish-btn", function (e) {
+      e.preventDefault();
+      if (isChurchAdmin) {
+        alert("Publishing is not allowed for Church admins.");
+        return;
+      }
+      const $btn = $(this);
+      const draftId = $btn.data("draft-id");
+      // reuse existing publish flow if available; here simply open publish form (mode publish)
+      $.ajax({
+        url: "../php/load_dynamic_content.php",
+        method: "POST",
+        data: {
+          "content-type": "cell-report-form",
+          "draft-id": draftId,
+          "mode": "publish"
+        },
+        success: function (res) {
+          $("#action-modal header .title").text("Publish Report");
+          $("#action-modal .content-container").html(res);
+          toggleActionModal();
+        }
+      });
+    });
+  }
+
+  // update status counters in a specific injected section
+  function updateSectionStatusCounts($section) {
+    const published = $section.find(".report-item[data-report-status='published']").length;
+    const pending = $section.find(".report-item[data-report-status='pending']").length;
+    const unpublished = $section.find(".report-item").length - published; // includes pending & expired
+    $section.find(".report-status.published .count").text(published);
+    $section.find(".report-status.pending .count").text(pending);
+    $section.find(".report-status.unpublished .count").text(unpublished);
+  }
+
+  // initialize church reports on DOM ready (run only on pages with #select-cell)
+  $(document).ready(function () {
+    try { initChurchReports(); } catch (e) { /* ignore if not on page */ }
+  });
 });
 
 class SearchBar {
@@ -1463,8 +1780,10 @@ function renderCellMembersTable(members, query) {
           <td>${member.date_joined_ministry || ""}</td>
           <td>${member.date_added || ""}</td>
           <td class="d-flex align-items-center gap-2">
-            <button class="px-3 py-1 action-btn edit--member-btn load-action-modal-dyn-content" data-content-type="edit-cell-member-details" data-member-name="${member.first_name + " " + member.last_name}" data-member-id="${member.id}">Edit</button>
-            <button class="px-3 py-1 action-btn delete-member-btn" data-member-id="${member.id}">Delete</button>
+            <button class="px-3 py-1 action-btn edit--member-btn load-action-modal-dyn-content" data-content-type="edit-cell-member-details" data-member-name="${member.first_name + " " + member.last_name
+            }" data-member-id="${member.id
+            }">Edit</button> <button class="px-3 py-1 action-btn delete-member-btn" data-member-id="${member.id
+            }">Delete</button>
           </td>
         </tr>`;
       tbody.append(row);
@@ -1511,6 +1830,7 @@ $(function () {
   // Cells page search - only initialize when the input exists on the page
   if ($("#cells-page .search-bar .search-input").length) {
     new SearchBar({
+
       inputSelector: "#cells-page .search-bar .search-input",
       iconSelector: "#cells-page .search-bar .search-icon",
       tableSelector: "#cells-table",
@@ -1804,14 +2124,25 @@ function buildDraftElement(draft) {
   const desc = getMeetingDescription(draft.week);
   const $el = $(`
     <div class="report-draft px-3 py-2 d-flex align-items-center justify-content-between gap-2"
-         data
-        <span class="label">${status === "published" ? "published" : ""}</span>
-               <button class="${status === "published" ? "view-btn" : "publish-btn"
+         data-report-type="${draft.type}"
+         data-week="${draft.week}"
+         data-report-status="${status}"
+         data-id="${draft.id}"
+         data-date-generated="${draft.date_generated}">
+        <div class="text-bar d-flex align-items-center gap-2">
+          <h6 class="m-0 p-0 week">W${draft.week}:</h6>
+          <p class="m-0 p-0 description">${$("<div>").text(desc).html()}</p>
+        </div>
+        <div class="action-bar d-flex align-items-center justify-content-between gap-2">
+          <span class="label">${status === "published" ? "published" : ""}</span>
+          <button class="${status === "published" ? "view-btn" : "publish-btn"
     } m-0 p-0" data-cell-id="${draft.cell_id}">${status === "published" ? "View" : "Publish"
     }</button>
       </div>
     </div>
   `);
 
+  return $el;
+};
   return $el;
 };

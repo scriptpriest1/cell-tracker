@@ -1,8 +1,39 @@
-For the Church reports:
-- This will contain a section for viewing the reports of all the cells under that church.
-- There's a select element in the church-reports.php file. This should contain the names of all the cells in the church as options.
-- When any cell is selected, the '.reports-section' for that cell is appended into the '.cells-reports' element.
-- The church admin will only be able to view reports of the selected cell and not be able to publish or edit them regardless of their status. 
-- For published reports, the church admin will be able to open and view the report but not edit it even if that report is not expired. This means the 'Edit report' button will not even be displayed in the form and the fields will always be diabled regardless of the report's status. For the dropdown buttons (in outreach reports), they will not be disabled but the checkboxes will be.
-- For pending reports, the church admin will not be able to open it at all. This means the publish button will not be rendered and the function for publishing will not be applicable.
-- All the functions for publishing and editing cell reports will not be applicable for the church admin.
+#codebase  
+
+**Feature: Church Reports Page**  
+
+**Requirements:**  
+1. **View reports of all cells under a church**  
+   - In `church-reports.php`, there is a `<select>` element.  
+   - Populate this `<select>` dynamically with the names of all cells in the church as `<option>` values.  
+
+2. **Appending reports**  
+   - When a cell is selected, append that cell’s `.reports-section` (same format as in `cells-reports.php`) into the `.cells-reports` element inside `church-reports.php`.  
+
+3. **Church admin permissions**  
+   - The church admin can **only view** reports of the selected cell.  
+   - **Publishing and editing** are **not allowed** for church admins.  
+
+4. **Published reports**  
+   - Church admin can open/view the report (the "View" button should be visible and functional).  
+   - The "Edit report" button should **not** be displayed.  
+   - All fields inside the report form should always be **disabled**, regardless of the report’s status.  
+   - For outreach reports: dropdown buttons should remain enabled, but the checkboxes inside them should be disabled.  
+
+5. **Pending reports**  
+   - Church admin should **not be able to open pending reports**.  
+   - The "Publish" button should not be rendered at all.  
+   - Publishing functions should not be applicable.  
+
+6. **General restriction**  
+   - All functions for publishing and editing **cell** reports should not be applicable for church admins.  
+
+**Task:**  
+- Read the `church-reports.php` file first to understand the structure of the church reports section that already exists.  
+- Place/append the new functionality in the correct parts of this file accordingly.  
+
+**Possible files to modify:**  
+- `church-reports.php` (may not require much or any modification at all)  
+- `cells-reports.php` (for reference on the report format. May also not require modification)
+- `ajax.php`
+- `ajax.js`

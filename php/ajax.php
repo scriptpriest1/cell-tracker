@@ -859,6 +859,52 @@ if ($action === 'fetch_report_drafts') {
 }
 
 /*=======================================
+   Fetch Reports For A Specific Cell
+     (used by church-reports page)
+=======================================*/
+if ($action === 'fetch_reports_for_cell') {
+  $cell_id = isset($_POST['cell_id']) ? clean_input($_POST['cell_id']) : null;
+  if (!$cell_id) {
+    echo json_encode(['status' => 'error', 'message' => 'Missing cell_id']);
+    exit;
+  }
+
+  try {
+    $sql = "
+      SELECT id, type, week, description, status, 
+             DATE_FORMAT(date_generated, '%Y-%m-%d %H:%i:%s') AS date_generated, 
+             expiry_date, cell_id
+      FROM cell_report_drafts
+      WHERE cell_id = ?
+      ORDER BY date_generated DESC
+    ";
+    $q = $conn->prepare($sql);
+    $q->execute([clean_input($cell_id)]);
+    $rows = $q->fetchAll(PDO::FETCH_ASSOC);
+
+    // Expire any pending drafts whose expiry_date is in the past (server-side enforcement)
+    foreach ($rows as &$row) {
+      $expiry = $row['expiry_date'] ?? null;
+      if (strtolower($row['status']) === 'pending' && !empty($expiry) && strtotime($expiry) < time()) {
+        $upd = $conn->prepare("UPDATE cell_report_drafts SET status = 'expired' WHERE id = ? AND status = 'pending'");
+        $upd->execute([clean_input($row['id'])]);
+        $row['status'] = 'expired';
+      }
+      // Ensure description/type reflect computed values
+      $row['description'] = getMeetingDescription($row['week']);
+      $row['type'] = getReportTypeByWeek($row['week']);
+    }
+
+    echo json_encode(['status' => 'success', 'data' => $rows]);
+    exit;
+  } catch (PDOException $ex) {
+    error_log("fetch_reports_for_cell error: " . $ex->getMessage());
+    echo json_encode(['status' => 'error', 'message' => 'Database error']);
+    exit;
+  }
+}
+
+/*=======================================
       Search Cells Functionality
 =======================================*/
 if ($action === 'search_cells') {

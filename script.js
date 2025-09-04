@@ -164,10 +164,27 @@ $(document).ready(function () {
 
   // Reports filter navigation: update URL and show filtered reports
   $(document).on("click", ".filter", function () {
-    let filterId = $(this).attr("id");
-    let params = new URLSearchParams(window.location.search);
-    params.set("filter", filterId);
-    history.pushState({}, "", `?p=reports&filter=${filterId}`);
+    // prefer data-filter (used by church-reports created buttons), fallback to id (used by cell-reports)
+    let filterId = $(this).data("filter") || $(this).attr("id") || "all";
+
+    // determine current cell-id: prefer explicit URL param, fallback to #select-cell value if present
+    const params = new URLSearchParams(window.location.search);
+    let cellId = params.get('cell-id') || null;
+    const $selectCell = $("#select-cell");
+    if (!cellId && $selectCell.length) {
+      const sel = $selectCell.val();
+      if (sel) cellId = sel;
+    }
+
+    // Build URL including cell-id if we have one
+    let url = "";
+    if (cellId) {
+      url = `?p=reports&cell-id=${encodeURIComponent(cellId)}&filter=${encodeURIComponent(filterId)}`;
+    } else {
+      url = `?p=reports&filter=${encodeURIComponent(filterId)}`;
+    }
+
+    history.pushState({}, "", url);
     showPageFromURL();
   });
 
