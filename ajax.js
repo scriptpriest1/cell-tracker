@@ -1015,11 +1015,6 @@ $(document).ready(() => {
   // Delegated click handlers for publish/view buttons
   $(document).on("click", ".publish-btn, .view-btn", function (e) {
     e.preventDefault();
-    // If this button lives inside a church-injected section, skip the global handler.
-    // (Those sections wire their own handlers to avoid duplicate toggleActionModal calls.)
-    if ($(this).closest(".reports-section.for-church-cell").length) {
-      return;
-    }
     const $btn = $(this);
     const $draftDiv = $btn.closest(".report-draft");
     const draftId = $draftDiv.data("id");
@@ -1529,38 +1524,49 @@ $(document).ready(() => {
         const status = (draft.status || "pending").toLowerCase();
         const desc = $('<div>').text(draft.description || getMeetingDescription(draft.week)).html();
 
-        // Build label HTML for statuses
+        // Build status label HTML for visibility in the action-bar
         let labelHtml = "";
         if (status === "published") {
-          labelHtml = `<span class="label published-label">published</span>`;
+          labelHtml = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill=""><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>`;
         } else if (status === "pending") {
-          labelHtml = `<span class="label pending-label">pending</span>`;
+          labelHtml = `<span class="label"></span>`;
         } else if (status === "expired") {
-          labelHtml = `<span class="label text-muted">expired</span>`;
+          labelHtml = `<span class="label">expired</span>`;
         }
 
         // Choose allowed actions for church admin:
-        // - Church admin: only view for published; no publish for pending/expired
+        // - If church admin: do not show Publish or Edit buttons.
+        // - If published: show View button.
+        // - If pending or expired and user is church admin: do not render View/Publish.
         let $actionBtn = $();
         if (status === "published") {
+          // published -> show View (allowed to church admin)
           $actionBtn = $(`<button class="view-btn m-0 p-0" data-draft-id="${draft.id}" data-cell-id="${draft.cell_id}">View</button>`);
         } else if (status === "pending") {
+          // pending -> only show Publish to non-church-admins
           if (!isChurchAdmin) {
             $actionBtn = $(`<button class="publish-btn m-0 p-0" data-draft-id="${draft.id}" data-cell-id="${draft.cell_id}">Publish</button>`);
+          } else {
+            $actionBtn = $(); // no button for church admin
           }
-        } // expired -> no action button
+        } else if (status === "expired") {
+          $actionBtn = $(); // no action for expired
+        }
 
-        const $draftEl = $(`<div class="report-item report-draft px-3 py-2 d-flex align-items-center justify-content-between gap-2"
+        const $draftEl = $(`
+          <div class="report-item report-draft px-3 py-2 d-flex align-items-center justify-content-between gap-2"
                data-report-type="${draft.type}" data-week="${draft.week}" data-report-status="${status}" data-id="${draft.id}" data-date-generated="${draft.date_generated}">
             <div class="text-bar d-flex align-items-center gap-2">
               <h6 class="m-0 p-0 week">W${draft.week}:</h6>
               <p class="m-0 p-0 description">${desc}</p>
             </div>
             <div class="action-bar d-flex align-items-center justify-content-between gap-2">
-              ${labelHtml}
+              <span class="label">${labelHtml}</span>
             </div>
-          </div>`);
-        // attach action (if any)
+          </div>
+        `);
+
+        // attach action (if any) after label so both appear
         if ($actionBtn && $actionBtn.length) {
           $draftEl.find(".action-bar").append($actionBtn);
         }
@@ -1576,7 +1582,11 @@ $(document).ready(() => {
 
     // Wire view/publish buttons inside this injected section
     $section.off("click", ".view-btn").on("click", ".view-btn", function (e) {
+      // Prevent document-level handlers from also running (they toggle the modal too)
       e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
       const $btn = $(this);
       const draftId = $btn.data("draft-id");
       const status = $btn.closest(".report-item").data("report-status");
@@ -1608,7 +1618,10 @@ $(document).ready(() => {
 
     // publish buttons should work only for non-church-admins; they exist only for non-church-admins
     $section.off("click", ".publish-btn").on("click", ".publish-btn", function (e) {
+      // Prevent document-level handlers from also running
       e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
       if (isChurchAdmin) {
         alert("Publishing is not allowed for Church admins.");
         return;
@@ -1781,9 +1794,10 @@ function renderCellMembersTable(members, query) {
           <td>${member.date_added || ""}</td>
           <td class="d-flex align-items-center gap-2">
             <button class="px-3 py-1 action-btn edit--member-btn load-action-modal-dyn-content" data-content-type="edit-cell-member-details" data-member-name="${member.first_name + " " + member.last_name
-            }" data-member-id="${member.id
-            }">Edit</button> <button class="px-3 py-1 action-btn delete-member-btn" data-member-id="${member.id
-            }">Delete</button>
+        }" data-member-id="${member.id
+        }">Edit</button>
+            <button class="px-3 py-1 action-btn delete-member-btn" data-member-id="${member.id
+        }">Delete</button>
           </td>
         </tr>`;
       tbody.append(row);
@@ -2143,6 +2157,4 @@ function buildDraftElement(draft) {
   `);
 
   return $el;
-};
-  return $el;
-};
+}
