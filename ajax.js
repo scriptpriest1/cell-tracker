@@ -1045,6 +1045,10 @@ $(document).ready(() => {
       success: function (res) {
         $("#action-modal header .title").text(`Week ${week}: ${description}`);
         $("#action-modal .content-container").html(res);
+
+        // If we're on the church-reports page (church admin), enforce view-only restrictions
+        try { applyChurchAdminModalRestrictions(); } catch (err) { /* noop */ }
+
         toggleActionModal();
       }
     });
@@ -1534,23 +1538,21 @@ $(document).ready(() => {
           labelHtml = `<span class="label">expired</span>`;
         }
 
-        // Choose allowed actions for church admin:
-        // - If church admin: do not show Publish or Edit buttons.
-        // - If published: show View button.
-        // - If pending or expired and user is church admin: do not render View/Publish.
+        // Choose allowed actions taking church-admin into account:
+        // - Published: always show View button.
+        // - Pending: show Publish ONLY to non-church-admins (church admins see no action).
+        // - Expired: no action.
         let $actionBtn = $();
         if (status === "published") {
-          // published -> show View (allowed to church admin)
           $actionBtn = $(`<button class="view-btn m-0 p-0" data-draft-id="${draft.id}" data-cell-id="${draft.cell_id}">View</button>`);
         } else if (status === "pending") {
-          // pending -> only show Publish to non-church-admins
           if (!isChurchAdmin) {
             $actionBtn = $(`<button class="publish-btn m-0 p-0" data-draft-id="${draft.id}" data-cell-id="${draft.cell_id}">Publish</button>`);
           } else {
-            $actionBtn = $(); // no button for church admin
+            $actionBtn = $(); // church admin: do not render publish or view for pending
           }
-        } else if (status === "expired") {
-          $actionBtn = $(); // no action for expired
+        } else {
+          $actionBtn = $(); // expired -> no action
         }
 
         const $draftEl = $(`
@@ -1589,12 +1591,19 @@ $(document).ready(() => {
 
       const $btn = $(this);
       const draftId = $btn.data("draft-id");
-      const status = $btn.closest(".report-item").data("report-status");
+      const $draftItem = $btn.closest(".report-item");
+      const status = String($draftItem.data("report-status") || "").toLowerCase();
+
       // Prevent opening pending/expired drafts for church admins: they shouldn't be rendered, but double-guard
-      if (String(status) !== "published") {
+      if (status !== "published") {
         alert("You cannot open this draft.");
         return;
       }
+
+      // Read week and description from the DOM so we can set the exact modal title
+      const week = $draftItem.data("week");
+      const description = $draftItem.find(".description").text().trim();
+
       // Open read-only view via existing load_dynamic_content flow
       $.ajax({
         url: "../php/load_dynamic_content.php",
@@ -1605,12 +1614,16 @@ $(document).ready(() => {
           "mode": "view"
         },
         success: function (res) {
-          $("#action-modal header .title").text("View Report");
+          // Use same title format as cell-admin/global handler
+          $("#action-modal header .title").text(`Week ${week}: ${description}`);
           $("#action-modal .content-container").html(res);
-          // Ensure all fields are disabled in the returned form (server also enforces)
+
+          // ensure fields and checkboxes are disabled (defensive) and remove edit controls for church admins
           $("#action-modal #cell-report-form input, #action-modal #cell-report-form select, #action-modal #cell-report-form textarea").prop("disabled", true);
-          // For outreach forms keep dropdown buttons enabled but disable checkboxes inside them
           $("#action-modal .custom-dropdown input[type='checkbox']").prop("disabled", true);
+
+          try { applyChurchAdminModalRestrictions(); } catch (err) { /* noop */ }
+
           toggleActionModal();
         }
       });
@@ -1759,8 +1772,7 @@ function renderCellsTable(cells, query) {
           <td class="d-flex align-items-center gap-2">
             <button type="button" class="load-action-modal-dyn-content view-cell-details-btn action-btn px-3 py-1" data-content-type="view-cell-details" data-cell-name="${cell.cell_name}" data-cell-id="${cell.id}">View</button>
             <button type="button" class="load-action-modal-dyn-content assign-cell-admin-btn action-btn px-3 py-1" data-content-type="assign-cell-admin" data-cell-name="${cell.cell_name}" data-cell-id="${cell.id}">Assign admin</button>
-          </td>
-        </tr>`;
+          </td        </tr>`;
       tbody.append(row);
     });
   }
@@ -2158,3 +2170,34 @@ function buildDraftElement(draft) {
 
   return $el;
 }
+
+// Add helper to enforce church-admin view-only behavior for reports loaded into the modal
+function applyChurchAdminModalRestrictions() {
+  // detect church-admin context: the church-reports container sets data-is-church-admin="1" on church pages
+  const isChurchAdmin = String($(".cells-reports").data("is-church-admin") || "0") === "1";
+  if (!isChurchAdmin) return;
+
+  // target the report form inside the action modal (if present)
+  const $form = $("#action-modal #cell-report-form");
+  if ($form.length === 0) return;
+
+  // Disable all form inputs, selects, textareas to make it view-only
+  $form.find("input, select, textarea, button").prop("disabled", true);
+
+  // Keep the dropdown toggle buttons enabled so church admin can open dropdowns (per requirement)
+  $(".attendance-select, .first-timers-select, .new-converts-select").prop("disabled", false);
+
+  // Also keep the dropdown search inputs enabled so church admins can search within dropdowns
+  // (these are plain text inputs inside the dropdown; enabling them allows typing/searching)
+  $("#action-modal .attendance-search, #action-modal .first-timers-search, #action-modal .new-converts-search").prop("disabled", false);
+
+  // Disable checkboxes inside custom-dropdowns (they should be visible but not interactive)
+  $("#action-modal .custom-dropdown input[type='checkbox']").prop("disabled", true);
+
+  // Remove any edit/publish/submit controls from the modal to prevent editing/publishing
+  $form.find(".edit-btn, .cancel-btn, .submit-btn, .publish-btn").remove();
+
+  // Also remove any inline "Edit report" controls that might be outside #cell-report-form
+  $("#action-modal .edit-btn, #action-modal .publish-btn, #action-modal .submit-btn").remove();
+}
+window.applyChurchAdminModalRestrictions = applyChurchAdminModalRestrictions;

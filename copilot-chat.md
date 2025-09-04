@@ -1,8 +1,8 @@
-protonscriptpriest: I want to revamp my entire code base for this project; make it more modular and object-oriented. I will send you an overview of my project so far then I will send you the necessary prompts. You will rewrite my entire project inside the empty 'revamped' folder I have just created.
+celestialscriptpriest: I want to revamp my entire code base for this project; make it more modular and object-oriented. I will send you an overview of my project so far then I will send you the necessary prompts. You will rewrite my entire project inside the empty 'revamped' folder I have just created.
 
 GitHub Copilot: Understood. Please send your project overview and any specific requirements or prompts you have. I will wait for your instructions before proceeding with the modular and object-oriented rewrite inside `c:\xampp\htdocs\cell-tracker\revamped`.
 
-protonscriptpriest: This is the overview:
+celestialscriptpriest: This is the overview:
 
 Project: Cell Tracker (refactor + reporting)
 
@@ -110,12 +110,12 @@ GitHub Copilot: Thank you for the detailed overview and instructions. Here’s m
 
 I will now create the initial files for the DB layer, autoloader, config, and validation utilities inside `/revamped`. Let me know if you want to adjust the structure or proceed.
 
-protonscriptpriest: First of all, read through all my files and entire codebase. Understand the flow. The project is a church growth management web app. I want you to rewrite my entire codebase, everything, inside the 'revamped' folder (which should be a revamped duplicate of the original project) using your proposed structure. Use all the instructions inside the overview I sent you. Make the new codebase very modular and object-oriented. Take as much time as you can to understand everything first before editing.
+celestialscriptpriest: First of all, read through all my files and entire codebase. Understand the flow. The project is a church growth management web app. I want you to rewrite my entire codebase, everything, inside the 'revamped' folder (which should be a revamped duplicate of the original project) using your proposed structure. Use all the instructions inside the overview I sent you. Make the new codebase very modular and object-oriented. Take as much time as you can to understand everything first before editing.
 You may Proceed...
 
 GitHub Copilot: Please add the files to be modified to the working set, or use `#codebase` in your request to automatically discover working set files.
 
-protonscriptpriest: #codebase 
+celestialscriptpriest: #codebase 
 
 GitHub Copilot: ### [switch_profile.php](file:///c%3A/xampp/htdocs/cell-tracker/php/switch_profile.php)
 
@@ -516,13 +516,13 @@ Let me know if you want the full implementation of the new classes and files, or
 
 Made changes.
 
-protonscriptpriest: I want full implementation of new classes and files
+celestialscriptpriest: I want full implementation of new classes and files
 
 GitHub Copilot: Understood. I will provide full implementations for new classes and files, following your directory structure and requirements. Each code block will start with a comment containing the filepath. I will avoid repeating unchanged code and use `...existing code...` where appropriate for existing files. 
 
 Please confirm if you want me to start with the foundational files (autoload, config, DB class, validation utilities, and base models), or if you want to specify a particular feature or module to begin with.
 
-protonscriptpriest: Don't use '...existing code...'. Just write it all over again. Every thing you're doing should be only inside the 'revamped' folder. Proceed
+celestialscriptpriest: Don't use '...existing code...'. Just write it all over again. Every thing you're doing should be only inside the 'revamped' folder. Proceed
 
 GitHub Copilot: Thank you for clarifying. I will write all new code from scratch, placing everything inside `c:\xampp\htdocs\cell-tracker\revamped` as per your requirements. Here is the step-by-step plan for the initial foundational files:
 
@@ -881,11 +881,11 @@ Let me know if you want to proceed with controllers, services, views, or specifi
 
 Made changes.
 
-protonscriptpriest: Proceed
+celestialscriptpriest: Proceed
 
 GitHub Copilot: Please add the files to be modified to the working set, or use `#codebase` in your request to automatically discover working set files.
 
-protonscriptpriest: Phase 1 Task: Full repo refactor to modular + OOP
+celestialscriptpriest: Phase 1 Task: Full repo refactor to modular + OOP
 
 Requirements:
 - Read `cell_tracker_schema.sql` and the repository to map DB tables to models.
@@ -908,7 +908,7 @@ Acceptance tests:
 
 GitHub Copilot: Please add the files to be modified to the working set, or use `#codebase` in your request to automatically discover working set files.
 
-protonscriptpriest: Phase 2 Task: Switch Profile immediate update (no reload)
+celestialscriptpriest: Phase 2 Task: Switch Profile immediate update (no reload)
 
 Context:
 - When a user assigns themself to another cell, session `entity_id` (or similar) must update and the UI should reflect the new cell immediately without a full browser reload.
@@ -1111,7 +1111,7 @@ Let me know if you need further implementation or want to proceed to the next ph
 
 Made changes.
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 
 Issue:  
 - When the attendance dropdown is edited (an option is checked or unchecked), the form becomes unable to submit.  
@@ -1286,7 +1286,7 @@ If you want I can also harden the server-side submit handler to accept attendanc
 
 Made changes.
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 
 Issue:  
 - When the attendance dropdown is edited (an option is checked or unchecked), the form becomes unable to submit.  
@@ -1680,7 +1680,7 @@ If you'd like, I can also:
 
 Made changes.
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 
 Critical Issue:  
 - The form is still not submitting after the attendance dropdown is edited.  
@@ -1802,7 +1802,7 @@ If you'd like, I can also:
 
 Made changes.
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 
 Issue:  
 - When trying to publish a 'meeting' report, the browser shows this error:  
@@ -1883,7 +1883,7 @@ Notes:
 
 Made changes.
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 
 Issue:  
 - The insertion of attendees into the database is duplicating somewhere in my code.  
@@ -2007,7 +2007,7 @@ If you want, I can also:
 
 Made changes.
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 
 Feature: CELL REPORT EXPIRATION  
 
@@ -2259,7 +2259,7 @@ Made changes.
 
 Made changes.
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 
 Requirement:  
 - Do not add any message inside the report form.  
@@ -2390,21 +2390,21 @@ Notes:
 
 Made changes.
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 
 - For expired reports, the normal function of the "Edit report" button (changing its text to "Cancel" and revealing the "Save changes" button) should no longer work. Instead, only the alert should appear.  
 
 
 GitHub Copilot: Copilot failed to get ready. Please ensure you are signed in to GitHub and that the extension `GitHub.copilot-chat` is installed and enabled.
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 
 - For expired reports, the normal function of the "Edit report" button (changing its text to "Cancel" and revealing the "Save changes" button) should no longer work. Instead, only the alert should appear.  
 
 
 GitHub Copilot: 
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 
 - For expired reports, the normal function of the "Edit report" button (changing its text to "Cancel" and revealing the "Save changes" button) should no longer work. Instead, only the alert should appear.  
 
@@ -2412,11 +2412,11 @@ protonscriptpriest: #codebase
 GitHub Copilot: Permission Request
 [object Object]
 
-protonscriptpriest: @GitHubCopilot Grant: "Permission Request"
+celestialscriptpriest: @GitHubCopilot Grant: "Permission Request"
 
 GitHub Copilot: 
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 
 - For expired reports, the normal function of the "Edit report" button (changing its text to "Cancel" and revealing the "Save changes" button) should no longer work. Instead, only the alert should appear.  Also reduce the opacity of the edit report button to 0.5
 
@@ -2502,7 +2502,7 @@ Notes:
 
 Made changes.
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 
 Feature: CELL REPORT DRAFT EXPIRATION  (for pending drafts only)
 
@@ -2725,7 +2725,7 @@ Notes:
 
 Made changes.
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 
 Feature: CELL REPORT DRAFT EXPIRATION  (for pending drafts only)
 
@@ -2747,7 +2747,7 @@ Task:
 
 GitHub Copilot: Copilot failed to get ready. Please ensure you are signed in to GitHub and that the extension `GitHub.copilot-chat` is installed and enabled.
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 
 Feature: CELL REPORT DRAFT EXPIRATION  (for pending drafts only)
 
@@ -2966,7 +2966,7 @@ Notes:
 
 Made changes.
 
-protonscriptpriest: There's a bug in this file. Find and fix it
+celestialscriptpriest: There's a bug in this file. Find and fix it
 
 GitHub Copilot: Solution (steps):
 1. Identify the JavaScript syntax error at the end of ajax.js caused by accidental HTML/text injection and a duplicated buildDraftElement helper.
@@ -3001,7 +3001,7 @@ Notes:
 
 Made changes.
 
-protonscriptpriest: Another bug has issued at the end of the file. Find ou what the problem is and fix it
+celestialscriptpriest: Another bug has issued at the end of the file. Find ou what the problem is and fix it
 
 GitHub Copilot: Solution (brief):
 1. The file ended with a malformed/truncated fragment (broken HTML and duplicated function) that causes a JS syntax error.
@@ -3029,7 +3029,7 @@ function getMeetingDescription(week) {
 
 Made changes.
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 
 Feature: CELL REPORT DRAFT EXPIRATION  (for pending drafts only)
 
@@ -3248,7 +3248,7 @@ Notes:
 
 Made changes.
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 FOR PUBLISHED REPORTS ONLY:
 
 - For expired published reports (only), the normal function of the "Edit report" button (changing its text to "Cancel" and revealing the "Save changes" button) should no longer work. Instead,  the alert with the error message: 'Report expired and cannot be edited.' should appear.  
@@ -3306,7 +3306,7 @@ Add an early guard in the edit-button handler to block edit-mode for expired pub
 
 Made changes.
 
-protonscriptpriest: #codebase 
+celestialscriptpriest: #codebase 
 Something in my codebase may be preventing this styling to work in style.css:
 
 .report-status.published .span-box {
@@ -3376,7 +3376,7 @@ GitHub Copilot: ```javascript
 
 Made changes.
 
-protonscriptpriest: There is no 'unpublished' report status anymore
+celestialscriptpriest: There is no 'unpublished' report status anymore
 
 GitHub Copilot: Solution (steps):
 1. Remove the broken duplicate buildDraftElement at the end of ajax.js (it breaks parsing).
@@ -3486,7 +3486,7 @@ Notes:
 
 Made changes.
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 
 Feature: REPORT FILTERS  
 
@@ -3704,7 +3704,7 @@ If you want, I can also:
 
 Made changes.
 
-protonscriptpriest: - Change the filter names on the url from 'meetings' and 'outreached' to 'meeting' and 'outreach' respectively. 
+celestialscriptpriest: - Change the filter names on the url from 'meetings' and 'outreached' to 'meeting' and 'outreach' respectively. 
 - Redo the filter logic with this update
 
 GitHub Copilot: Solution (steps):
@@ -3889,7 +3889,7 @@ Notes:
 
 Made changes.
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 
 Feature: REPORT FILTERS (URL Handling)  
 
@@ -3944,7 +3944,7 @@ Notes:
 
 Made changes.
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 
 Feature: REPORT RENDERING ORDER  
 
@@ -4135,7 +4135,7 @@ Made changes.
 
 Made changes.
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 
 Feature: CREATE DRAFTS BUTTON  
 
@@ -4220,7 +4220,7 @@ Notes:
 
 Made changes.
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 
 Feature: AUTO-GENERATION OF REPORT DRAFTS  
 
@@ -4525,7 +4525,7 @@ If you want, I can:
 
 Made changes.
 
-protonscriptpriest: #codebase 
+celestialscriptpriest: #codebase 
 The cell report drafts should be auto- every Mondays by 00:00:00 not Sundays. Redo the logic with this update
 
 GitHub Copilot: GitHub Copilot
@@ -4827,7 +4827,7 @@ If you want, I can:
 
 Made changes.
 
-protonscriptpriest: The auto-generation is not working. Find the possible issues and fix it
+celestialscriptpriest: The auto-generation is not working. Find the possible issues and fix it
 
 GitHub Copilot: GitHub Copilot
 
@@ -5088,7 +5088,7 @@ Notes:
 
 Made changes.
 
-protonscriptpriest: #codebase 
+celestialscriptpriest: #codebase 
 The auto-generation is still not working. Find the possible issues and fix it
 
 GitHub Copilot: Solution — steps:
@@ -5490,7 +5490,7 @@ If you want, I can also:
 
 Made changes.
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 
 Instruction:
 - Scan my codebase carefully.  
@@ -5530,7 +5530,7 @@ If you'd like, I can:
 
 No files modified.
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 
 Feature: AUTO-GENERATION OF REPORT DRAFTS  
 
@@ -5883,7 +5883,7 @@ If you want, I can:
 
 Made changes.
 
-protonscriptpriest: #codebase
+celestialscriptpriest: #codebase
 
 **Issue:**
 - After setting up the auto-generation logic, a bug is preventing the functions for fetching **cells** and **cell members** from working.  
@@ -5919,7 +5919,7 @@ include 'cell_report_helpers.php'; // <-- added missing semicolon
 // ...existing code...
 ```
 
-protonscriptpriest: #codebase  
+celestialscriptpriest: #codebase  
 
 **Feature: Report Drafts Filtering - Status Counts**  
 
@@ -6027,3 +6027,1236 @@ Add calls to updateStatusCounts() after processing fetchReportDrafts results, an
 ````
 
 Made changes.
+
+celestialscriptpriest: #codebase  
+
+**Feature: Church Reports Page**  
+
+**Requirements:**  
+1. **View reports of all cells under a church**  
+   - In `church-reports.php`, there is a `<select>` element.  
+   - Populate this `<select>` dynamically with the names of all cells in the church as `<option>` values.  
+
+2. **Appending reports**  
+   - When a cell is selected, append that cell’s `.reports-section` (same format as in `cells-reports.php`) into the `.cells-reports` element inside `church-reports.php`.  
+
+3. **Church admin permissions**  
+   - The church admin can **only view** reports of the selected cell.  
+   - **Publishing and editing** are **not allowed** for church admins.  
+
+4. **Published reports**  
+   - Church admin can open/view the report (the "View" button should be visible and functional).  
+   - The "Edit report" button should **not** be displayed.  
+   - All fields inside the report form should always be **disabled**, regardless of the report’s status.  
+   - For outreach reports: dropdown buttons should remain enabled, but the checkboxes inside them should be disabled.  
+
+5. **Pending reports**  
+   - Church admin should **not be able to open pending reports**.  
+   - The "Publish" button should not be rendered at all.  
+   - Publishing functions should not be applicable.  
+
+6. **General restriction**  
+   - All functions for publishing and editing **cell** reports should not be applicable for church admins.  
+
+**Task:**  
+- Read the `church-reports.php` file first to understand the structure of the church reports section that already exists.  
+- Place/append the new functionality in the correct parts of this file accordingly.  
+
+**Possible files to modify:**  
+- `church-reports.php` (may not require much or any modification at all)  
+- `cells-reports.php` (for reference on the report format. May also not require modification)
+- `ajax.php`
+- `ajax.js`
+
+
+GitHub Copilot: GitHub Copilot
+
+Solution (steps)
+1. Add an ajax endpoint to return drafts for a given cell (ajax.php).
+2. Expose whether current user is a church admin in the church-reports view and mark the container with that flag (church-reports.php).
+3. Add JS to populate the cell <select>, fetch drafts for the selected cell, render a .reports-section (same structure as cell page) and enforce church-admin restrictions in the UI (ajax.js).
+
+Changes grouped by file:
+
+### [ajax.php](file:///c%3A/xampp/htdocs/cell-tracker/php/ajax.php)
+
+Add a new action handler "fetch_reports_for_cell" that returns drafts for a provided cell_id (same shape as fetch_report_drafts). This is inserted near the existing fetch_report_drafts block.
+
+````php
+// ...existing code...
+
+/*=======================================
+   Fetch Reports For A Specific Cell
+     (used by church-reports page)
+=======================================*/
+if ($action === 'fetch_reports_for_cell') {
+  $cell_id = isset($_POST['cell_id']) ? clean_input($_POST['cell_id']) : null;
+  if (!$cell_id) {
+    echo json_encode(['status' => 'error', 'message' => 'Missing cell_id']);
+    exit;
+  }
+
+  try {
+    $sql = "
+      SELECT id, type, week, description, status, 
+             DATE_FORMAT(date_generated, '%Y-%m-%d %H:%i:%s') AS date_generated, 
+             expiry_date, cell_id
+      FROM cell_report_drafts
+      WHERE cell_id = ?
+      ORDER BY date_generated DESC
+    ";
+    $q = $conn->prepare($sql);
+    $q->execute([clean_input($cell_id)]);
+    $rows = $q->fetchAll(PDO::FETCH_ASSOC);
+
+    // Expire any pending drafts whose expiry_date is in the past (server-side enforcement)
+    foreach ($rows as &$row) {
+      $expiry = $row['expiry_date'] ?? null;
+      if (strtolower($row['status']) === 'pending' && !empty($expiry) && strtotime($expiry) < time()) {
+        $upd = $conn->prepare("UPDATE cell_report_drafts SET status = 'expired' WHERE id = ? AND status = 'pending'");
+        $upd->execute([clean_input($row['id'])]);
+        $row['status'] = 'expired';
+      }
+      // Ensure description/type reflect computed values
+      $row['description'] = getMeetingDescription($row['week']);
+      $row['type'] = getReportTypeByWeek($row['week']);
+    }
+
+    echo json_encode(['status' => 'success', 'data' => $rows]);
+    exit;
+  } catch (PDOException $ex) {
+    error_log("fetch_reports_for_cell error: " . $ex->getMessage());
+    echo json_encode(['status' => 'error', 'message' => 'Database error']);
+    exit;
+  }
+}
+
+// ...existing code...
+````
+
+### [church-reports.php](file:///c%3A/xampp/htdocs/cell-tracker/dashboard/pages/reports/church-reports.php)
+
+Expose whether the viewer is a church admin via a data attribute on the .cells-reports container (used by JS), so frontend can enforce the "view-only" rules. No visual change.
+
+````php
+
+
+Made changes.
+
+<!-- Church Reports Section -->
+<section class="church-reports-section">
+  <div class="cells-reports" data-is-church-admin="<?= (isset($_SESSION['admin_type']) && $_SESSION['admin_type'] === 'church') ? '1' : '0' ?>">
+    <div class="top-bar">
+      <div class="select-group d-flex align-items-center gap-2">
+        <label for="select-cell fw-bold">Select a Cell to view their reports:</label>
+        <select name="" id="select-cell" class="form-select form-control">
+          <option value="">Select Cell</option>
+          <!-- Options will be populated via JS -->
+        </select>
+      </div>
+    </div>
+    <!-- Append selected cell report section here -->
+  </div>
+</section>
+````
+
+### [ajax.js](file:///c%3A/xampp/htdocs/cell-tracker/ajax.js)
+
+Add functions to populate the select, fetch drafts for selected cell, build a reports-section DOM (same structure as cell page) and render drafts into it. Enforce church-admin rules in UI (no Edit / Publish, no opening pending drafts). New code integrates with existing helpers (getMeetingDescription etc.) and uses the new ajax endpoint. Inserted near other report-related JS.
+
+````javascript
+
+
+Made changes.
+
+// ...existing code...
+
+// --- Church Reports: populate cell select and load chosen cell's reports ---
+// Called on pages where #select-cell exists (church admin page)
+function initChurchReports() {
+  const $cellsReportsRoot = $(".cells-reports");
+  if ($cellsReportsRoot.length === 0) return;
+
+  const isChurchAdmin = String($cellsReportsRoot.data("is-church-admin") || "0") === "1";
+  const $select = $("#select-cell");
+
+  // Fill select with cells (reuse existing endpoint)
+  $.ajax({
+    url: "../php/ajax.php",
+    method: "POST",
+    dataType: "json",
+    data: { action: "fetch_all_cells" },
+    success: function (cells) {
+      // remove existing options except placeholder
+      $select.find("option:not(:first)").remove();
+      if (!cells || !cells.length) return;
+      cells.forEach(c => {
+        $select.append($(`<option/>`).val(c.id).text(c.cell_name));
+      });
+      // Optionally select first cell
+      // $select.val(cells[0].id).trigger('change');
+    },
+    error: function () {
+      console.error("Failed to load cells for church-reports.");
+    }
+  });
+
+  // When a cell is selected, fetch and render its reports
+  $select.on("change", function () {
+    const cellId = $(this).val();
+    const cellName = $(this).find("option:selected").text() || "";
+    if (!cellId) {
+      // remove appended sections if any
+      $cellsReportsRoot.find(".reports-section.for-church-cell").remove();
+      return;
+    }
+    loadAndRenderCellReports(cellId, cellName, isChurchAdmin);
+  });
+}
+
+// Fetch drafts for a cell and render a reports-section appended to .cells-reports
+function loadAndRenderCellReports(cellId, cellName, isChurchAdmin) {
+  $.ajax({
+    url: "../php/ajax.php",
+    method: "POST",
+    dataType: "json",
+    data: { action: "fetch_reports_for_cell", cell_id: cellId },
+    success: function (res) {
+      if (!res || res.status !== "success") {
+        alert(res && res.message ? res.message : "Failed to load reports.");
+        return;
+      }
+      const drafts = res.data || [];
+
+      // Clean previous injected section for this container
+      $(".cells-reports .reports-section.for-church-cell").remove();
+
+      // Build a reports-section structure similar to cell-reports.php
+      const $section = $(`
+        <section class="reports-section for-church-cell">
+          <div class="reports-status-bar d-flex align-items-center gap-4 mt-2">
+            <div class="report-status published">
+              <h6 class="text m-0 p-0">Published: <span class="count span-box">0</span></h6>
+            </div>
+            <div class="report-status pending">
+              <h6 class="text m-0 p-0">Pending: <span class="count span-box">0</span></h6>
+            </div>
+            <div class="report-status unpublished">
+              <h6 class="text m-0 p-0">Unpublished: <span class="count span-box">0</span></h6>
+            </div>
+          </div>
+          <div class="filter-bar d-flex align-items-center gap-3 mt-4">
+            <button class="filter active" data-filter="all">All</button>
+            <button class="filter" data-filter="meeting">Meetings</button>
+            <button class="filter" data-filter="outreach">Outreaches</button>
+          </div>
+          <div class="reports-body mt-3"></div>
+        </section>
+      `);
+
+      // Append header/title for the selected cell
+      const $title = $(`<div class="p-2"><h5 class="m-0">${cellName} Reports</h5></div>`);
+      $section.prepend($title);
+
+      // Append to DOM
+      $(".cells-reports").append($section);
+
+      // Render drafts grouped by month inside this section
+      renderDraftsIntoSection(drafts, $section, isChurchAdmin);
+
+      // Wire filter buttons (local to this section)
+      $section.find(".filter-bar .filter").on("click", function () {
+        $section.find(".filter-bar .filter").removeClass("active");
+        $(this).addClass("active");
+        const filter = $(this).data("filter");
+        if (filter === "all") {
+          $section.find(".report-item").show();
+        } else {
+          $section.find(".report-item").hide().filter(`[data-report-type="${filter}"]`).show();
+        }
+        // refresh counts
+        updateSectionStatusCounts($section);
+      });
+    },
+    error: function () {
+      alert("Error loading reports for the selected cell.");
+    }
+  });
+}
+
+// Render drafts grouped by month into a given section
+function renderDraftsIntoSection(drafts, $section, isChurchAdmin) {
+  const $body = $section.find(".reports-body");
+  $body.empty();
+
+  // Helper to format month-year from date_generated
+  const monthKey = d => {
+    if (!d || !d.date_generated) return "Unknown";
+    const iso = d.date_generated.replace(" ", "T");
+    const dt = new Date(iso);
+    return dt.toLocaleString(undefined, { month: "short", year: "numeric" });
+  };
+  const group = {};
+  drafts.forEach(d => {
+    const key = monthKey(d);
+    group[key] = group[key] || [];
+    group[key].push(d);
+  });
+
+  // Insert months in descending order by parsed date (newest first)
+  const months = Object.keys(group).sort((a, b) => {
+    // parse first draft date in group
+    const da = new Date((group[a][0].date_generated || "").replace(" ", "T"));
+    const db = new Date((group[b][0].date_generated || "").replace(" ", "T"));
+    return db - da;
+  });
+
+  months.forEach(month => {
+    const $block = $(`
+      <div class="reports-block mt-4">
+        <div class="date-bar"><h5 class="date">${month}</h5></div>
+        <div class="reports-container mt-2"></div>
+      </div>
+    `);
+    const $container = $block.find(".reports-container");
+
+    // Sort drafts in this month by date_generated desc
+    group[month].sort((a, b) => new Date(b.date_generated.replace(" ", "T")) - new Date(a.date_generated.replace(" ", "T")));
+
+    group[month].forEach(draft => {
+      const status = (draft.status || "pending").toLowerCase();
+      const desc = $('<div>').text(draft.description || getMeetingDescription(draft.week)).html();
+
+      // Choose allowed actions for church admin:
+      // - If church admin: do not show Publish or Edit buttons.
+      // - If published: show View button.
+      // - If pending or expired and user is church admin: do not render View/Publish.
+      let $actionBtn = $();
+      if (status === "published") {
+        // published -> show View (allowed to church admin)
+        if (isChurchAdmin) {
+          $actionBtn = $(`<button class="view-btn m-0 p-0" data-draft-id="${draft.id}" data-cell-id="${draft.cell_id}">View</button>`);
+        } else {
+          $actionBtn = $(`<button class="view-btn m-0 p-0" data-draft-id="${draft.id}" data-cell-id="${draft.cell_id}">View</button>`);
+        }
+      } else if (status === "pending") {
+        // pending -> only show Publish to non-church-admins
+        if (!isChurchAdmin) {
+          $actionBtn = $(`<button class="publish-btn m-0 p-0" data-draft-id="${draft.id}" data-cell-id="${draft.cell_id}">Publish</button>`);
+        } else {
+          $actionBtn = $(); // no button
+        }
+      } else if (status === "expired") {
+        // expired -> no publish; show label only for all users; view only if published (not here)
+        $actionBtn = $();
+      }
+
+      const $draftEl = $(`
+        <div class="report-item report-draft px-3 py-2 d-flex align-items-center justify-content-between gap-2"
+             data-report-type="${draft.type}" data-week="${draft.week}" data-report-status="${status}" data-id="${draft.id}" data-date-generated="${draft.date_generated}">
+          <div class="text-bar d-flex align-items-center gap-2">
+            <h6 class="m-0 p-0 week">W${draft.week}:</h6>
+            <p class="m-0 p-0 description">${desc}</p>
+          </div>
+          <div class="action-bar d-flex align-items-center justify-content-between gap-2">
+          </div>
+        </div>
+      `);
+      // attach action (if any)
+      if ($actionBtn && $actionBtn.length) {
+        $draftEl.find(".action-bar").append($actionBtn);
+      } else if (status === "expired") {
+        $draftEl.find(".action-bar").append($(`<span class="label text-muted">expired</span>`));
+      }
+
+      $container.append($draftEl);
+    });
+
+    $body.append($block);
+  });
+
+  // Update status counters for this section
+  updateSectionStatusCounts($section);
+
+  // Wire view/publish buttons inside this injected section
+  $section.off("click", ".view-btn").on("click", ".view-btn", function (e) {
+    e.preventDefault();
+    const $btn = $(this);
+    const draftId = $btn.data("draft-id");
+    const status = $btn.closest(".report-item").data("report-status");
+    // Prevent opening pending/expired drafts for church admins: they shouldn't be rendered, but double-guard
+    if (String(status) !== "published") {
+      alert("You cannot open this draft.");
+      return;
+    }
+    // Open read-only view via existing load_dynamic_content flow
+    $.ajax({
+      url: "../php/load_dynamic_content.php",
+      method: "POST",
+      data: {
+        "content-type": "cell-report-form",
+        "draft-id": draftId,
+        "mode": "view"
+      },
+      success: function (res) {
+        $("#action-modal header .title").text("View Report");
+        $("#action-modal .content-container").html(res);
+        // Ensure all fields are disabled in the returned form (server also enforces)
+        $("#action-modal #cell-report-form input, #action-modal #cell-report-form select, #action-modal #cell-report-form textarea").prop("disabled", true);
+        // For outreach forms keep dropdown buttons enabled but disable checkboxes inside them
+        $("#action-modal .custom-dropdown input[type='checkbox']").prop("disabled", true);
+        toggleActionModal();
+      }
+    });
+  });
+
+  // publish buttons should work only for non-church-admins; they exist only for non-church-admins
+  $section.off("click", ".publish-btn").on("click", ".publish-btn", function (e) {
+    e.preventDefault();
+    if (isChurchAdmin) {
+      alert("Publishing is not allowed for Church admins.");
+      return;
+    }
+    const $btn = $(this);
+    const draftId = $btn.data("draft-id");
+    // reuse existing publish flow if available; here simply open publish form (mode publish)
+    $.ajax({
+      url: "../php/load_dynamic_content.php",
+      method: "POST",
+      data: {
+        "content-type": "cell-report-form",
+        "draft-id": draftId,
+        "mode": "publish"
+      },
+      success: function (res) {
+        $("#action-modal header .title").text("Publish Report");
+        $("#action-modal .content-container").html(res);
+        toggleActionModal();
+      }
+    });
+  });
+}
+
+// update status counters in a specific injected section
+function updateSectionStatusCounts($section) {
+  const published = $section.find(".report-item[data-report-status='published']").length;
+  const pending = $section.find(".report-item[data-report-status='pending']").length;
+  const unpublished = $section.find(".report-item").length - published; // includes pending & expired
+  $section.find(".report-status.published .count").text(published);
+  $section.find(".report-status.pending .count").text(pending);
+  $section.find(".report-status.unpublished .count").text(unpublished);
+}
+
+// initialize church reports on DOM ready (run only on pages with #select-cell)
+$(document).ready(function () {
+  try { initChurchReports(); } catch (e) { /* ignore if not on page */ }
+});
+
+// ...existing code...
+````
+
+Notes
+- Server: new ajax.php action fetch_reports_for_cell returns drafts for any cell (used by church page). Server still enforces expiry and draft status.
+- View restrictions: JS enforces that church admins do not see Publish/Edit and cannot open pending drafts; server still enforces expiry when submitting.
+- Rendering: created a localized reports-section appended under .cells-reports; it follows the same basic structure as the cell page (status bar, filter, reports). Buttons behave per requirements.
+- No changes were made to publishing server paths beyond the new fetch action; Publish/Edit server-side enforcement remains.
+
+If you want, I can:
+- Move the new JS into a separate file (e.g., reports-church.js) and include it in the view.
+- Make publish/view handlers reuse existing code paths more tightly (e.g., unified openReport modal).
+- Add tests for the new endpoint.
+
+
+
+Made changes.
+
+celestialscriptpriest: #codebase  
+
+**Issue:**  
+- In `ajax.js`, there is a code block that appends a header/title for the selected cell:  
+
+```js
+// Append header/title for the selected cell
+const $title = $(`<div class="p-2"><h5 class="m-0">${cellName} Reports</h5></div>`);
+$section.prepend($title);
+
+**Task:**
+
+- Remove the above code from ajax.js.
+
+- Ensure that the filter reports functionality also applies to church admins:
+
+- When a church admin selects a cell, they should be able to filter the reports of that cell using the filter buttons.
+
+- The filter buttons should fetch and display the reports for the selected cell accordingly.
+
+- Reuse the existing filtering mechanism for cell admins for church admins as well (do not duplicate logic — keep the code DRY).
+
+- Do not break the existing cell admin filtering logic while implementing this.
+
+- Work only within the scope of this prompt
+
+GitHub Copilot: GitHub Copilot
+
+Solution (steps)
+1. Remove the header/title injection for the selected cell (the unwanted DOM prepend).
+2. Keep the reports UI generation logic unchanged (renderDraftsIntoSection).
+3. Store the fetched drafts on the injected section element so filter buttons can operate by re-rendering using the existing renderDraftsIntoSection function (DRY).
+4. Replace the current filter handler (which only shows/hides DOM nodes) with a handler that re-calls renderDraftsIntoSection using the stored drafts filtered by type. This ensures church admins can filter selected-cell reports and reuses the existing rendering logic.
+
+Files changed
+
+### [ajax.js](file:///c%3A/xampp/htdocs/cell-tracker/ajax.js)
+
+Remove the $section.prepend($title) call and add storage of drafts plus a filter handler that calls renderDraftsIntoSection with a filtered drafts array. Only the minimal surrounding context is shown.
+
+````javascript
+// ...existing code...
+
+      // Append header/title for the selected cell
+-      const $title = $(`<div class="p-2"><h5 class="m-0">${cellName} Reports</h5></div>`);
+-      $section.prepend($title);
++      // NOTE: removed visual header prepend (handled by page layout)
++      // Store drafts on the section so filter buttons can re-render using the same render function
++      $section.data('drafts', drafts);
+
+      // Append to DOM
+      $(".cells-reports").append($section);
+
+      // Render drafts grouped by month inside this section
+-      renderDraftsIntoSection(drafts, $section, isChurchAdmin);
++      renderDraftsIntoSection(drafts, $section, isChurchAdmin);
+
+      // Wire filter buttons (local to this section)
+-      $section.find(".filter-bar .filter").on("click", function () {
+-        $section.find(".filter-bar .filter").removeClass("active");
+-        $(this).addClass("active");
+-        const filter = $(this).data("filter");
+-        if (filter === "all") {
+-          $section.find(".report-item").show();
+-        } else {
+-          $section.find(".report-item").hide().filter(`[data-report-type="${filter}"]`).show();
+-        }
+-        // refresh counts
+-        updateSectionStatusCounts($section);
+-      });
++      $section.find(".filter-bar .filter").on("click", function () {
++        const $btn = $(this);
++        $section.find(".filter-bar .filter").removeClass("active");
++        $btn.addClass("active");
++        const filter = $btn.data("filter");
++        // Use the stored drafts and re-render via the existing function (keeps logic DRY)
++        const allDrafts = $section.data('drafts') || [];
++        const filtered = (filter === 'all') ? allDrafts : allDrafts.filter(d => d.type === filter);
++        renderDraftsIntoSection(filtered, $section, isChurchAdmin);
++      });
+
+// ...existing code...
+````
+
+Notes
+- This change only removes the unwanted header prepend and makes the filter buttons trigger a re-render using the same rendering function and stored drafts. No server changes were made.
+- The filter behavior now works for church admins (they get the same filtering UX as cell admins), and logic is not duplicated — renderDraftsIntoSection is reused.
+- Manual check:
+  1. Select a cell in the church reports page — section renders (no extra title).
+  2. Click filter buttons — reports update according to the selected filter.
+  3. Confirm cell-admin behavior is unchanged.
+
+Made changes.
+
+celestialscriptpriest: #codebase  
+
+**Tasks:**  
+
+1. In the `<select>` element’s options, append the word **"Cell"** after the name of each cell.  
+
+2. When a cell is selected:  
+   - Parse the **cell-id** of that cell into the browser’s URL so that if the page is refreshed, that cell’s report section will persist (not clear out).  
+   - The URL format should look like:  
+     ```
+     ?p=reports&cell-id=1
+     ```
+
+3. For filtering cell reports as a **church admin**:  
+   - Use the **cell-id** to ensure the correct cell’s reports are being filtered.  
+   - Currently, the URL changes incorrectly to:  
+     ```
+     ?p=reports&filter=undefined
+     ```
+   - Update the logic so the URL includes both the **cell-id** and the filter type.  
+   - Example format when applying a filter (e.g., `meeting`):  
+     ```
+     ?p=reports&cell-id=1&filter=meeting
+     ```
+
+**Important:**  
+- Do not break the existing **cell admin report filtering logic** while implementing these changes.  
+- Reuse existing cell report filtering mechanisms where possible. 
+- Work only within the scope of this prompt and make sure no bugs are introduced to my codebase. 
+
+
+GitHub Copilot: Permission Request
+[object Object]
+
+celestialscriptpriest: @GitHubCopilot Grant: "Permission Request"
+
+GitHub Copilot: GitHub Copilot
+
+Solution (steps)
+1. When populating the cell <select>, append " Cell" to each option label.
+2. Persist selected cell in the browser URL when a cell is chosen (pushState ?p=reports&cell-id=ID).
+3. On init, if URL has cell-id, pre-select that option and load its reports.
+4. When applying a filter from the church-reports section, update the URL to include both cell-id and filter, and reuse the existing renderDraftsIntoSection logic (DRY).
+5. Fix the global filter click handler to use data-filter (fallback to id) and include cell-id when present so it doesn't set filter=undefined and does not break cell-admin filtering.
+
+Files changed
+
+### [ajax.js](file:///c%3A/xampp/htdocs/cell-tracker/ajax.js)
+
+Update: append " Cell" to options, persist cell-id in URL when selecting a cell, pre-select cell from URL on load, and make the section's filter buttons push a URL containing both cell-id and filter while reusing the same render function.
+
+````javascript
+// ...existing code...
+
+  function initChurchReports() {
+    const $cellsReportsRoot = $(".cells-reports");
+    if ($cellsReportsRoot.length === 0) return;
+
+    const isChurchAdmin = String($cellsReportsRoot.data("is-church-admin") || "0") === "1";
+    const $select = $("#select-cell");
+
+    // Fill select with cells (reuse existing endpoint)
+    $.ajax({
+      url: "../php/ajax.php",
+      method: "POST",
+      dataType: "json",
+      data: { action: "fetch_all_cells" },
+      success: function (cells) {
+        // remove existing options except placeholder
+        $select.find("option:not(:first)").remove();
+        if (!cells || !cells.length) return;
+        cells.forEach(c => {
+          // append " Cell" to each option label
+          $select.append($(`<option/>`).val(c.id).text(`${c.cell_name} Cell`));
+        });
+
+        // Pre-select cell from URL if provided (?p=reports&cell-id=...)
+        const urlCellId = new URLSearchParams(window.location.search).get('cell-id');
+        if (urlCellId) {
+          // only set if option exists
+          if ($select.find(`option[value='${urlCellId}']`).length) {
+            $select.val(urlCellId).trigger('change');
+          }
+        }
+        // Optionally select first cell if you want automatic load when none in URL
+        // else { /* $select.val(cells[0].id).trigger('change'); */ }
+      },
+      error: function () {
+        console.error("Failed to load cells for church-reports.");
+      }
+    });
+
+    // When a cell is selected, fetch and render its reports
+    $select.on("change", function () {
+      const cellId = $(this).val();
+      const cellName = $(this).find("option:selected").text() || "";
+      if (!cellId) {
+        // remove appended sections if any
+        $cellsReportsRoot.find(".reports-section.for-church-cell").remove();
+        // remove cell-id from URL
+        const params = new URLSearchParams(window.location.search);
+        params.delete('cell-id');
+        history.replaceState({}, "", `?p=reports${params.toString() ? '&' + params.toString() : ''}`);
+        return;
+      }
+
+      // Push cell-id into URL so selection persists on refresh
+      const params = new URLSearchParams(window.location.search);
+      params.set('cell-id', cellId);
+      // If there's an existing filter param, keep it
+      const filter = params.get('filter');
+      const url = `?p=reports&cell-id=${encodeURIComponent(cellId)}${filter ? `&filter=${encodeURIComponent(filter)}` : ''}`;
+      history.replaceState({}, "", url);
+
+      loadAndRenderCellReports(cellId, cellName, isChurchAdmin);
+    });
+  }
+
+  // Fetch drafts for a cell and render a reports-section appended to .cells-reports
+  function loadAndRenderCellReports(cellId, cellName, isChurchAdmin) {
+    $.ajax({
+      url: "../php/ajax.php",
+      method: "POST",
+      dataType: "json",
+      data: { action: "fetch_reports_for_cell", cell_id: cellId },
+      success: function (res) {
+        if (!res || res.status !== "success") {
+          alert(res && res.message ? res.message : "Failed to load reports.");
+          return;
+        }
+        const drafts = res.data || [];
+
+        // Clean previous injected section for this container
+        $(".cells-reports .reports-section.for-church-cell").remove();
+
+        // Build a reports-section structure similar to cell-reports.php
+        const $section = $(`...`); // ...existing markup as before...
+
+        // NOTE: removed visual header prepend (handled by page layout)
+        // Store drafts on the section so filter buttons can re-render using the same render function
+        $section.data('drafts', drafts);
+        // expose the selected cell id too so filter handlers can read it
+        $section.data('cell-id', String(cellId));
+
+        // Append to DOM
+        $(".cells-reports").append($section);
+
+        // Apply filter from URL if present (keeps behavior consistent on refresh)
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlFilter = urlParams.get('filter') || 'all';
+        const filteredDrafts = (urlFilter === 'all') ? drafts : drafts.filter(d => d.type === urlFilter);
+
+        // Render drafts grouped by month inside this section (use filtered set)
+        renderDraftsIntoSection(filteredDrafts, $section, isChurchAdmin);
+
+        // Wire filter buttons (local to this section)
+        $section.find(".filter-bar .filter").on("click", function () {
+          const $btn = $(this);
+          $section.find(".filter-bar .filter").removeClass("active");
+          $btn.addClass("active");
+          const filter = $btn.data("filter") || 'all';
+
+          // Use the stored drafts and re-render via the existing function (keeps logic DRY)
+          const allDrafts = $section.data('drafts') || [];
+          const filtered = (filter === 'all') ? allDrafts : allDrafts.filter(d => d.type === filter);
+          renderDraftsIntoSection(filtered, $section, isChurchAdmin);
+
+          // Update URL to include both cell-id and filter so state persists on refresh
+          const cellParam = $section.data('cell-id') || cellId;
+          const newUrl = `?p=reports&cell-id=${encodeURIComponent(cellParam)}&filter=${encodeURIComponent(filter)}`;
+          history.replaceState({}, "", newUrl);
+        });
+      },
+      error: function () {
+        alert("Error loading reports for the selected cell.");
+      }
+    });
+  }
+
+// ...existing code...
+````
+
+### [script.js](file:///c%3A/xampp/htdocs/cell-tracker/script.js)
+
+Update: make the global ".filter" click handler robust — prefer data-filter, include cell-id when present (from URL or #select-cell), and avoid setting filter=undefined so cell-admin filtering remains unchanged.
+
+````javascript
+
+
+Made changes.
+
+// ...existing code...
+
+  // Reports filter navigation: update URL and show filtered reports
+  $(document).on("click", ".filter", function () {
+    // prefer data-filter (used by church-reports created buttons), fallback to id (used by cell-reports)
+    let filterId = $(this).data("filter") || $(this).attr("id") || "all";
+
+    // determine current cell-id: prefer explicit URL param, fallback to #select-cell value if present
+    const params = new URLSearchParams(window.location.search);
+    let cellId = params.get('cell-id') || null;
+    const $selectCell = $("#select-cell");
+    if (!cellId && $selectCell.length) {
+      const sel = $selectCell.val();
+      if (sel) cellId = sel;
+    }
+
+    // Build URL including cell-id if we have one
+    let url = "";
+    if (cellId) {
+      url = `?p=reports&cell-id=${encodeURIComponent(cellId)}&filter=${encodeURIComponent(filterId)}`;
+    } else {
+      url = `?p=reports&filter=${encodeURIComponent(filterId)}`;
+    }
+
+    history.pushState({}, "", url);
+    showPageFromURL();
+  });
+
+// ...existing code...
+````
+
+Notes
+- The ajax.js changes reuse renderDraftsIntoSection and store drafts on the injected section (no logic duplication).
+- The script.js change makes the global filter handler resilient so it won't create filter=undefined and preserves cell-admin flow.
+- Manual checks:
+  1. Church page: select a cell — URL updates to ?p=reports&cell-id=ID and persists after refresh.
+  2. Apply a filter as church admin — URL becomes ?p=reports&cell-id=ID&filter=meeting (or filter=outreach) and reports update accordingly.
+  3. Cell admin filtering (existing buttons with ids) continues to work unchanged.
+
+Made changes.
+
+celestialscriptpriest: #codebase  
+
+**Issue 1:**  
+- When the default **"Select Cell"** `<option>` is clicked in the `<select>` element:  
+  - The URL should reset back to its original state:  
+    ```
+    ?p=reports
+    ```  
+  - **Currently**, it is incorrectly parsing as:  
+    ```
+    ?p=reports&p=reports
+    ?p=reports&p=reports&filter=meeting   (when a filter was previously applied)
+    ```
+
+**Issue 2:**  
+- The **cell report filtering for the church admin** is still not working.  
+- Ensure that:  
+  - Filtering works based on both **cell-id** and **filter type**.  
+  - The URL reflects the correct structure, e.g.:  
+    ```
+    ?p=reports&cell-id=1&filter=meeting
+    ```
+
+**Task:**  
+- Fix both issues.  
+- Ensure the **church admin filtering** functions correctly without breaking the existing **cell admin filtering logic**.  
+- Keep code DRY (reuse existing filtering logic).  
+- Work only within the scope of this prompt.  
+
+
+GitHub Copilot: GitHub Copilot
+
+Solution (steps)
+1. When "Select Cell" placeholder is chosen, reset URL to exactly "?p=reports" (no duplication).
+2. Ensure church-admin's local filter buttons stop event propagation so the global filter handler doesn't run and cause conflicting URL/state changes.
+3. Keep filter behavior DRY: local filter handler re-uses renderDraftsIntoSection and updates URL with both cell-id and filter.
+4. Minimal, safe edits to two files: ajax.js and script.js.
+
+Changes grouped by file:
+
+### [ajax.js](file:///c%3A/xampp/htdocs/cell-tracker/ajax.js)
+
+Remove the previous URL-construction when the placeholder option is selected; replace with a canonical reset to "?p=reports". Also make the church-reports local filter buttons stop propagation so the global .filter handler won't run for those buttons.
+
+````javascript
+// ...existing code...
+
+    // When a cell is selected, fetch and render its reports
+    $select.on("change", function () {
+      const cellId = $(this).val();
+      const cellName = $(this).find("option:selected").text() || "";
+      if (!cellId) {
+        // remove appended sections if any
+        $cellsReportsRoot.find(".reports-section.for-church-cell").remove();
+        // Reset URL to canonical reports page (no duplicate params)
+        history.replaceState({}, "", "?p=reports");
+        return;
+      }
+
+      // Push cell-id into URL so selection persists on refresh
+      const params = new URLSearchParams(window.location.search);
+      params.set('cell-id', cellId);
+      const filter = params.get('filter');
+      const url = `?p=reports&cell-id=${encodeURIComponent(cellId)}${filter ? `&filter=${encodeURIComponent(filter)}` : ''}`;
+      history.replaceState({}, "", url);
+
+      loadAndRenderCellReports(cellId, cellName, isChurchAdmin);
+    });
+
+// ...existing code...
+
+        // Wire filter buttons (local to this section)
+-        $section.find(".filter-bar .filter").on("click", function () {
+-          const $btn = $(this);
+-          $section.find(".filter-bar .filter").removeClass("active");
+-          $btn.addClass("active");
+-          const filter = $btn.data("filter") || 'all';
+-
+-          // Use the stored drafts and re-render via the existing function (keeps logic DRY)
+-          const allDrafts = $section.data('drafts') || [];
+-          const filtered = (filter === 'all') ? allDrafts : allDrafts.filter(d => d.type === filter);
+-          renderDraftsIntoSection(filtered, $section, isChurchAdmin);
+-
+-          // Update URL to include both cell-id and filter so state persists on refresh
+-          const cellParam = $section.data('cell-id') || cellId;
+-          const newUrl = `?p=reports&cell-id=${encodeURIComponent(cellParam)}&filter=${encodeURIComponent(filter)}`;
+-          history.replaceState({}, "", newUrl);
+-        });
++        $section.find(".filter-bar .filter").on("click", function (e) {
++          // Prevent the global ".filter" click handler from also running
++          e.stopPropagation();
++          const $btn = $(this);
++          $section.find(".filter-bar .filter").removeClass("active");
++          $btn.addClass("active");
++          const filter = $btn.data("filter") || 'all';
++
++          // Use the stored drafts and re-render via the existing function (keeps logic DRY)
++          const allDrafts = $section.data('drafts') || [];
++          const filtered = (filter === 'all') ? allDrafts : allDrafts.filter(d => d.type === filter);
++          renderDraftsIntoSection(filtered, $section, isChurchAdmin);
++
++          // Update URL to include both cell-id and filter so state persists on refresh
++          const cellParam = $section.data('cell-id') || cellId;
++          const newUrl = `?p=reports&cell-id=${encodeURIComponent(cellParam)}&filter=${encodeURIComponent(filter)}`;
++          history.replaceState({}, "", newUrl);
++        });
+
+// ...existing code...
+````
+
+### [script.js](file:///c%3A/xampp/htdocs/cell-tracker/script.js)
+
+No major logic changes — ensure the global filter handler remains intact but will not run for church-reports local filters because local handlers now stop propagation. Keep URL building explicit and safe (no merging of existing params that might contain 'p').
+
+````javascript
+
+
+Made changes.
+
+// ...existing code...
+
+  // Reports filter navigation: update URL and show filtered reports
+  $(document).on("click", ".filter", function () {
+    // prefer data-filter (used by church-reports created buttons), fallback to id (used by cell-reports)
+    let filterId = $(this).data("filter") || $(this).attr("id") || "all";
+
+    // determine current cell-id: prefer explicit URL param, fallback to #select-cell value if present
+    const params = new URLSearchParams(window.location.search);
+    let cellId = params.get('cell-id') || null;
+    const $selectCell = $("#select-cell");
+    if (!cellId && $selectCell.length) {
+      const sel = $selectCell.val();
+      if (sel) cellId = sel;
+    }
+
+    // Build URL including cell-id if we have one
+    let url = "";
+    if (cellId) {
+      url = `?p=reports&cell-id=${encodeURIComponent(cellId)}&filter=${encodeURIComponent(filterId)}`;
+    } else {
+      url = `?p=reports&filter=${encodeURIComponent(filterId)}`;
+    }
+
+    history.pushState({}, "", url);
+    showPageFromURL();
+  });
+
+// ...existing code...
+````
+
+Notes
+- Clicking the default "Select Cell" option now resets the URL to exactly "?p=reports" (Issue 1 fixed).
+- Local church-report filters stop propagation so the global filter handler does not run and overwrite state; local filters update URL with both cell-id and filter (Issue 2 fixed).
+- Cell-admin filtering (global filter handler + fetchReportDrafts) remains unchanged and continues to work.
+- Minimal, localized edits — no new endpoints or server changes.
+
+Made changes.
+
+celestialscriptpriest: #codebase  
+
+**Issue:**  
+- The **active state** of the filter buttons does not persist after a page refresh.  
+- Current behavior:  
+  - When a filter button is clicked, the reports are correctly filtered and the URL updates.  
+  - However, after refreshing the page, the active filter button resets back to **"All"** even though:  
+    - The URL still contains the correct filter parameter.  
+    - The report filtering itself still works correctly.  
+
+**Task:**  
+- Ensure the **active state** of the filter buttons is determined by the `filter` parameter in the URL.  
+- After refreshing the page, the filter button that matches the URL should remain active.  
+- Do not break the existing filtering logic.  
+- Work only within the scope of this prompt.  
+
+
+GitHub Copilot: GitHub Copilot
+
+Solution (steps)
+1. Ensure church-reports filter buttons have predictable IDs (all / meeting / outreach) so URL-driven logic can target them.
+2. When rendering a church reports section, read the URL filter parameter and set the matching button's active class inside that section.
+3. Keep existing filtering/rendering logic unchanged (DRY) — just set the active UI state to match the URL.
+
+Files changed
+
+### [ajax.js](file:///c%3A/xampp/htdocs/cell-tracker/ajax.js)
+
+Add ids to the locally-created filter buttons and set the active class based on the URL filter parameter when building the section for a selected cell.
+
+````javascript
+// ...existing code...
+
+        // Build a reports-section structure similar to cell-reports.php
+-        const $section = $(`
++        const $section = $(`
+           <section class="reports-section for-church-cell">
+             <div class="reports-status-bar d-flex align-items-center gap-4 mt-2">
+               <div class="report-status published">
+                 <h6 class="text m-0 p-0">Published: <span class="count span-box">0</span></h6>
+               </div>
+               <div class="report-status pending">
+                 <h6 class="text m-0 p-0">Pending: <span class="count span-box">0</span></h6>
+               </div>
+               <div class="report-status unpublished">
+                 <h6 class="text m-0 p-0">Unpublished: <span class="count span-box">0</span></h6>
+               </div>
+             </div>
+-            <div class="filter-bar d-flex align-items-center gap-3 mt-4">
+-              <button class="filter active" data-filter="all">All</button>
+-              <button class="filter" data-filter="meeting">Meetings</button>
+-              <button class="filter" data-filter="outreach">Outreaches</button>
+-            </div>
++            <div class="filter-bar d-flex align-items-center gap-3 mt-4">
++              <button id="all" class="filter" data-filter="all">All</button>
++              <button id="meeting" class="filter" data-filter="meeting">Meetings</button>
++              <button id="outreach" class="filter" data-filter="outreach">Outreaches</button>
++            </div>
+             <div class="reports-body mt-3"></div>
+           </section>
+         `);
+
+         // NOTE: removed visual header prepend (handled by page layout)
+         // Store drafts on the section so filter buttons can re-render using the same render function
+         $section.data('drafts', drafts);
+         // expose the selected cell id too so filter handlers can read it
+         $section.data('cell-id', String(cellId));
+
+         // Append to DOM
+         $(".cells-reports").append($section);
+
++        // Read URL filter param and set active class for buttons inside this injected section
++        const urlParams = new URLSearchParams(window.location.search);
++        const urlFilter = urlParams.get('filter') || 'all';
++        $section.find('.filter-bar .filter').removeClass('active');
++        $section.find(`.filter-bar .filter[data-filter="${urlFilter}"]`).addClass('active');
+
+         // Apply filter from URL if present (keeps behavior consistent on refresh)
+-        const urlParams = new URLSearchParams(window.location.search);
+-        const urlFilter = urlParams.get('filter') || 'all';
+-        const filteredDrafts = (urlFilter === 'all') ? drafts : drafts.filter(d => d.type === urlFilter);
++        const filteredDrafts = (urlFilter === 'all') ? drafts : drafts.filter(d => d.type === urlFilter);
+
+         // Render drafts grouped by month inside this section (use filtered set)
+         renderDraftsIntoSection(filteredDrafts, $section, isChurchAdmin);
+
+// ...existing code...
+````
+
+Notes
+- Adding IDs to the church-reports filter buttons makes them addressable the same way as the static cell-reports buttons.
+- The code sets the active class inside the newly-inserted section based on the current URL filter parameter so the active state persists after refresh.
+- No change to rendering/filter logic itself; this only sets UI state to match the URL.
+
+Made changes.
+
+celestialscriptpriest: #codebase  
+
+**Issues:**  
+Church admin cannot view a cell's published report correctly.  
+
+**Problems:**  
+1. When the **'View'** button is clicked, the modal pops up but immediately closes, making it impossible to view the report.  
+2. The **label** is not visible on the report's draft.  
+
+**Requirements:**  
+- Fix the modal so that church admins can correctly view published reports without it closing immediately.  
+- Ensure the **draft's label** is properly rendered for all report states:  
+  - **Pending**  
+  - **Published**  
+  - **Expired**  
+
+**Task:**  
+- Implement these fixes without breaking existing cell admin functionality.  
+- Work only within the scope of this prompt.  
+
+
+GitHub Copilot: GitHub Copilot
+
+Solution (steps)
+1. Prevent the global document-level handlers from also running when a church-reports section's local view/publish handlers run — stop event propagation so the modal toggle is not called twice (which caused open→close).
+2. Add a visible label element inside each draft's action-bar for all statuses (pending, published, expired). Use the same published SVG used elsewhere for published; show text for pending; keep "expired" text muted.
+3. Reuse existing rendering and handler logic; only add label output and stop propagation in the section-scoped handlers.
+
+File changed
+
+### [ajax.js](file:///c%3A/xampp/htdocs/cell-tracker/ajax.js)
+
+Update: add labelHtml and include it inside each draft's action-bar; call e.stopPropagation() and e.stopImmediatePropagation() at the start of the section-scoped view/publish handlers so the document-scoped handler does not also run and toggle the modal twice.
+
+````javascript
+// ...existing code...
+
+      group[month].forEach(draft => {
+        const status = (draft.status || "pending").toLowerCase();
+        const desc = $('<div>').text(draft.description || getMeetingDescription(draft.week)).html();
+
+        // Build status label HTML for visibility in the action-bar
+        let labelHtml = "";
+        if (status === "published") {
+          labelHtml = `<svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill=""><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>`;
+        } else if (status === "pending") {
+          labelHtml = `<span class="label pending">pending</span>`;
+        } else if (status === "expired") {
+          labelHtml = `<span class="label text-muted">expired</span>`;
+        }
+
+        // Choose allowed actions for church admin:
+        // - If church admin: do not show Publish or Edit buttons.
+        // - If published: show View button.
+        // - If pending or expired and user is church admin: do not render View/Publish.
+        let $actionBtn = $();
+        if (status === "published") {
+          // published -> show View (allowed to church admin)
+          $actionBtn = $(`<button class="view-btn m-0 p-0" data-draft-id="${draft.id}" data-cell-id="${draft.cell_id}">View</button>`);
+        } else if (status === "pending") {
+          // pending -> only show Publish to non-church-admins
+          if (!isChurchAdmin) {
+            $actionBtn = $(`<button class="publish-btn m-0 p-0" data-draft-id="${draft.id}" data-cell-id="${draft.cell_id}">Publish</button>`);
+          } else {
+            $actionBtn = $(); // no button for church admin
+          }
+        } else if (status === "expired") {
+          $actionBtn = $(); // no action for expired
+        }
+
+        const $draftEl = $(`
+          <div class="report-item report-draft px-3 py-2 d-flex align-items-center justify-content-between gap-2"
+               data-report-type="${draft.type}" data-week="${draft.week}" data-report-status="${status}" data-id="${draft.id}" data-date-generated="${draft.date_generated}">
+            <div class="text-bar d-flex align-items-center gap-2">
+              <h6 class="m-0 p-0 week">W${draft.week}:</h6>
+              <p class="m-0 p-0 description">${desc}</p>
+            </div>
+            <div class="action-bar d-flex align-items-center justify-content-between gap-2">
+              <span class="label">${labelHtml}</span>
+            </div>
+          </div>
+        `);
+
+        // attach action (if any) after label so both appear
+        if ($actionBtn && $actionBtn.length) {
+          $draftEl.find(".action-bar").append($actionBtn);
+        }
+
+        $container.append($draftEl);
+      });
+
+      $body.append($block);
+    });
+
+    // Update status counters for this section
+    updateSectionStatusCounts($section);
+
+    // Wire view/publish buttons inside this injected section
+-    $section.off("click", ".view-btn").on("click", ".view-btn", function (e) {
+-      e.preventDefault();
++    $section.off("click", ".view-btn").on("click", ".view-btn", function (e) {
++      // Prevent document-level handlers from also running (they toggle the modal too)
++      e.preventDefault();
++      e.stopPropagation();
++      e.stopImmediatePropagation();
+
+      const $btn = $(this);
+      const draftId = $btn.data("draft-id");
+      const status = $btn.closest(".report-item").data("report-status");
+      // Prevent opening pending/expired drafts for church admins: they shouldn't be rendered, but double-guard
+      if (String(status) !== "published") {
+        alert("You cannot open this draft.");
+        return;
+      }
+      // Open read-only view via existing load_dynamic_content flow
+      $.ajax({
+        url: "../php/load_dynamic_content.php",
+        method: "POST",
+        data: {
+          "content-type": "cell-report-form",
+          "draft-id": draftId,
+          "mode": "view"
+        },
+        success: function (res) {
+          $("#action-modal header .title").text("View Report");
+          $("#action-modal .content-container").html(res);
+          // Ensure all fields are disabled in the returned form (server also enforces)
+          $("#action-modal #cell-report-form input, #action-modal #cell-report-form select, #action-modal #cell-report-form textarea").prop("disabled", true);
+          // For outreach forms keep dropdown buttons enabled but disable checkboxes inside them
+          $("#action-modal .custom-dropdown input[type='checkbox']").prop("disabled", true);
+          toggleActionModal();
+        }
+      });
+    });
+
+-    // publish buttons should work only for non-church-admins; they exist only for non-church-admins
+-    $section.off("click", ".publish-btn").on("click", ".publish-btn", function (e) {
+-      e.preventDefault();
+-      if (isChurchAdmin) {
+-        alert("Publishing is not allowed for Church admins.");
+-        return;
+-      }
++    // publish buttons should work only for non-church-admins; they exist only for non-church-admins
++    $section.off("click", ".publish-btn").on("click", ".publish-btn", function (e) {
++      // Prevent document-level handlers from also running
++      e.preventDefault();
++      e.stopPropagation();
++      e.stopImmediatePropagation();
++      if (isChurchAdmin) {
++        alert("Publishing is not allowed for Church admins.");
++        return;
++      }
+      const $btn = $(this);
+      const draftId = $btn.data("draft-id");
+      // reuse existing publish flow if available; here simply open publish form (mode publish)
+      $.ajax({
+        url: "../php/load_dynamic_content.php",
+        method: "POST",
+        data: {
+          "content-type": "cell-report-form",
+          "draft-id": draftId,
+          "mode": "publish"
+        },
+        success: function (res) {
+          $("#action-modal header .title").text("Publish Report");
+          $("#action-modal .content-container").html(res);
+          toggleActionModal();
+        }
+      });
+    });
+
+// ...existing code...
+````
+
+Notes
+- Stopping propagation in section-scoped handlers prevents the document-level handler (which also toggled the modal) from running, fixing the open→immediate-close behavior for church admins.
+- The label is now always rendered inside the draft's action-bar so published/pending/expired states are visible.
+- This preserves existing cell-admin behavior (global handlers still run for non-section buttons) and keeps rendering/filters DRY.
+
+Made changes.
+
+celestialscriptpriest: I made some changes to this part of the ajax.js code:
+let labelHtml = "";
+        if (status === "published") {
+          labelHtml = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill=""><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>`;
+        } else if (status === "pending") {
+          labelHtml = `<span class="label"></span>`;
+        } else if (status === "expired") {
+          labelHtml = `<span class="label">expired</span>`;
+        }
+
+Please leave it this way.
+
+GitHub Copilot: Summarized conversation historyAcknowledged — I'll preserve the exact `labelHtml` block you posted and make no edits to it.
+
+Checklist
+- [x] Leave the `labelHtml` block unchanged in ajax.js:
+  - Kept as:
+    let labelHtml = "";
+    if (status === "published") { labelHtml = `<svg ...></svg>`; }
+    else if (status === "pending") { labelHtml = `<span class="label"></span>`; }
+    else if (status === "expired") { labelHtml = `<span class="label">expired</span>`; }
+- [x] Do not modify surrounding code or other files.
+- [x] Preserve all your recent manual changes.
+
+Status
+- Done: I will not change that code and will keep your edit exactly as shown in ajax.js.
+
+Next steps (optional)
+- I can run a quick static scan or run the app to verify labels render correctly and modal behavior; tell me if you want me to proceed.
