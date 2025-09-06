@@ -8,15 +8,15 @@
                 </span>
             </div>
             <div class="text-div w-100">
-                <h6 class="name m-0"><!--First name + Last name--></h6>
-                <span class="role d-block m-0"><!--User's role--></span> <!--Fetch this from the cell-role column or church role column of the `users` db table if user is a cell admin or church admin respectively-->
+                <h6 class="name m-0"><!-- filled by JS --></h6>
+                <span class="role d-block m-0"><!-- filled by JS --></span>
             </div>
         </div>
 
         <div class="change-password-section sub-section">
             <div class="change-password-bar">
                 <span class="change-password-clicker w-100 d-block text-start form-select" id="change-password-clicker">Change account password</span>
-                <form id="change-password-form" class="input-container p-2"> <!--Toggle display when the '.change-password-clicker' is clicked-->
+                <form id="change-password-form" class="input-container p-2" style="display:none;">
                     <input type="password" class="form-control w-100 mt-1" id="current-password-input" placeholder="Enter current password">
                     <input type="password" class="form-control w-100 mt-1" id="new-password-input" placeholder="Enter new password">
                     <button type="submit" class="change-password-submit-btn mt-2 text-center w-100">Change password</button>
@@ -49,11 +49,9 @@
                 </div>
                 <footer class="form-footer mt-3 d-flex align-items-center gap-3">
                     <button type="button" class="edit-btn" id="profile-form-edit-btn">Edit</button>
-                    <button type="submit" class="save-btn d-none" id="profile-form-save-btn">Save</button> <!--Render this button when edit button is clicked-->
+                    <button type="submit" class="save-btn d-none" id="profile-form-save-btn">Save</button>
                 </footer>
             </form>
         </div>
     </section>
 </section>
-
-

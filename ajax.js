@@ -39,10 +39,11 @@ $(document).ready(() => {
       data,
       success: (res) => {
         if (res === "success") {
-          successMsg.text("Logging in...");
+          //successMsg.text("Logging in...");
           window.location.href = "./dashboard";
         } else if (res === "wrongDetails") {
-          errMsg.text("Wrong username or password");
+          alert('Incorrect email or password');
+          //errMsg.text("Wrong username or password");
         }
       },
       error: () => {
@@ -1775,6 +1776,7 @@ function renderCellsTable(cells, query) {
           <td>${cell.cell_members_count}</td>
           <td class="d-flex align-items-center gap-2">
            
+           
             <button type="button" class="load-action-modal-dyn-content view-cell-details-btn action-btn px-3 py-1" data-content-type="view-cell-details" data-cell-name="${cell.cell_name}" data-cell-id="${cell.id}">View</button>
             <button type="button" class="load-action-modal-dyn-content assign-cell-admin-btn action-btn px-3 py-1" data-content-type="assign-cell-admin" data-cell-name="${cell.cell_name}" data-cell-id="${cell.id}">Assign admin</button>
           </td>
@@ -2207,3 +2209,162 @@ function applyChurchAdminModalRestrictions() {
   $("#action-modal .edit-btn, #action-modal .publish-btn, #action-modal .submit-btn").remove();
 }
 window.applyChurchAdminModalRestrictions = applyChurchAdminModalRestrictions;
+
+// Settings page: fetch and populate user details
+function fetchUserDetails() {
+  const $settingsForm = $("#settings-page .profile-form");
+  if ($settingsForm.length === 0) return;
+
+  $.ajax({
+    url: "../php/ajax.php",
+    method: "POST",
+    dataType: "json",
+    data: { action: "fetch_user_details" },
+    success: (res) => {
+      if (!res || res.status !== "success") return;
+      const u = res.data;
+      // Populate profile bar
+      const fullName = (u.first_name || "") + (u.last_name ? " " + u.last_name : "");
+      $(".profile-bar .name").text(fullName);
+      // Role display logic
+      let roleText = "";
+      if ((u.admin_type || "") === "cell") {
+        if (u.cell_role) roleText = "Cell " + u.cell_role;
+      } else if ((u.admin_type || "") === "church") {
+        if (u.church_role) roleText = u.church_role;
+      } else if ((u.admin_type || "") === "group") {
+        if (u.group_role) roleText = u.group_role;
+      } else {
+        roleText = "User";
+      }
+      $(".profile-bar .role").text(roleText);
+
+      // Populate form fields
+      $settingsForm.find("#first-name").val(u.first_name || "").prop("disabled", true);
+      $settingsForm.find("#last-name").val(u.last_name || "").prop("disabled", true);
+      $settingsForm.find("#email").val(u.email || "").prop("disabled", true);
+      $settingsForm.find("#phone").val(u.phone_number || "").prop("disabled", true);
+
+      // Ensure buttons state
+      $settingsForm.find("#profile-form-save-btn").addClass("d-none");
+      $settingsForm.find("#profile-form-edit-btn").removeClass("cancel-btn").text("Edit").prop("disabled", false);
+    },
+    error: () => {
+      // silent
+    }
+  });
+}
+window.fetchUserDetails = fetchUserDetails;
+
+// Wire Edit / Cancel toggle and Save
+$(document).on("click", "#profile-form-edit-btn", function () {
+  const $btn = $(this);
+  const $form = $(this).closest(".profile-form");
+  const isCancel = $btn.hasClass("cancel-btn");
+
+  if (!isCancel) {
+    // Enter edit mode
+    $btn.text("Cancel").removeClass("edit-btn").addClass("cancel-btn");
+    $form.find("input").prop("disabled", false);
+    $form.find("#profile-form-save-btn").removeClass("d-none");
+  } else {
+    // Cancel edit - revert UI (re-fetch latest values from server)
+    $btn.text("Edit").removeClass("cancel-btn").addClass("edit-btn");
+    $form.find("input").prop("disabled", true);
+    $form.find("#profile-form-save-btn").addClass("d-none");
+    fetchUserDetails();
+  }
+});
+
+// Save profile details
+$(document).on("submit", ".profile-form", function (e) {
+  e.preventDefault();
+  const $form = $(this);
+  const first = $.trim($form.find("#first-name").val() || "");
+  const last = $.trim($form.find("#last-name").val() || "");
+  const email = $.trim($form.find("#email").val() || "");
+  const phone = $.trim($form.find("#phone").val() || "");
+
+  if (!first || !last || !email) {
+    alert("First name, last name and email are required.");
+    return;
+  }
+
+  const $saveBtn = $form.find("#profile-form-save-btn").prop("disabled", true).text("Saving...");
+  $.ajax({
+    url: "../php/ajax.php",
+    method: "POST",
+    dataType: "json",
+    data: {
+      action: "update_user_details",
+      first_name: first,
+      last_name: last,
+      email: email,
+      phone: phone
+    },
+    success: (res) => {
+      if (res && res.status === "success") {
+        fetchUserDetails();
+        alert("Profile updated.");
+        $saveBtn.prop("disabled", false).text("Save");
+        $('#profile-form-edit-btn').text("Edit").removeClass("cancel-btn").addClass("edit-btn");
+      } else {
+        alert((res && res.message) || "Failed to update profile.");
+        $saveBtn.prop("disabled", false).text("Save");
+        $('#profile-form-edit-btn').text("Edit").removeClass("cancel-btn").addClass("edit-btn");
+      }
+    },
+    error: () => {
+      alert("Server error");
+      $saveBtn.prop("disabled", false).text("Save");
+      $('#profile-form-edit-btn').text("Cancel").removeClass("cancel-btn").addClass("cancel-btn");
+    }
+  });
+});
+
+// Change password toggle and submit
+$(document).on("click", "#change-password-clicker", function () {
+  // toggle with slide for simple transition
+  $("#change-password-form").stop(true, true).slideToggle(180);
+});
+
+$(document).on("submit", "#change-password-form", function (e) {
+  e.preventDefault();
+  const current = $.trim($("#current-password-input").val() || "");
+  const nw = $.trim($("#new-password-input").val() || "");
+  if (!current || !nw) {
+    alert("Both current and new passwords are required.");
+    return;
+  }
+  const $btn = $(this).find(".change-password-submit-btn").prop("disabled", true).text("Changing...");
+  $.ajax({
+    url: "../php/ajax.php",
+    method: "POST",
+    dataType: "json",
+    data: {
+      action: "change_password",
+      current_password: current,
+      new_password: nw
+    },
+    success: (res) => {
+      if (res && res.status === "success") {
+        alert("Password changed successfully.");
+        $("#change-password-form").trigger("reset").slideUp(180);
+      } else {
+        alert((res && res.message) || "Failed to change password");
+      }
+      $btn.prop("disabled", false).text("Change password");
+    },
+    error: () => {
+      alert("Server error");
+      $btn.prop("disabled", false).text("Change password");
+    }
+  });
+});
+
+// Ensure settings page pulls user details when visible
+$(function () {
+  if ($("#settings-page").length) {
+    fetchUserDetails();
+  }
+});

@@ -1431,3 +1431,114 @@ if ($action === 'auto_generate_all_drafts') {
   exit;
 }
 
+/*=======================================
+      Fetch current logged-in user's details
+=======================================*/
+if ($action === 'fetch_user_details') {
+  $userId = $_SESSION['user_id'] ?? null;
+  if (!$userId) {
+    echo json_encode(['status' => 'error', 'message' => 'Not authenticated']);
+    exit;
+  }
+
+  $stmt = $conn->prepare("SELECT id, first_name, last_name, user_login AS email, phone_number, cell_role, church_role, group_role FROM users WHERE id = ? LIMIT 1");
+  $stmt->execute([clean_input($userId)]);
+  $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+  if (!$user) {
+    echo json_encode(['status' => 'error', 'message' => 'User not found']);
+    exit;
+  }
+
+  // include current admin context so client can decide which role to display
+  $user['admin_type'] = $_SESSION['admin_type'] ?? null;
+  $user['entity_id'] = $_SESSION['entity_id'] ?? null;
+  echo json_encode(['status' => 'success', 'data' => $user]);
+  exit;
+}
+
+/*=======================================
+      Update logged-in user's details
+=======================================*/
+if ($action === 'update_user_details') {
+  $userId = $_SESSION['user_id'] ?? null;
+  if (!$userId) {
+    echo json_encode(['status' => 'error', 'message' => 'Not authenticated']);
+    exit;
+  }
+
+  $first = clean_input($_POST['first_name'] ?? '');
+  $last  = clean_input($_POST['last_name'] ?? '');
+  $email = clean_input($_POST['email'] ?? '');
+  $phone = clean_input($_POST['phone'] ?? '');
+
+  if ($first === '' || $last === '' || $email === '') {
+    echo json_encode(['status' => 'error', 'message' => 'Missing required fields']);
+    exit;
+  }
+
+  // Check email uniqueness (allow current user)
+  $q = $conn->prepare("SELECT id FROM users WHERE user_login = ? AND id != ? LIMIT 1");
+  $q->execute([$email, $userId]);
+  if ($q->fetchColumn()) {
+    echo json_encode(['status' => 'error', 'message' => 'Email already in use']);
+    exit;
+  }
+
+  $upd = $conn->prepare("UPDATE users SET first_name = ?, last_name = ?, user_login = ?, phone_number = ? WHERE id = ?");
+  $ok = $upd->execute([$first, $last, $email, $phone, $userId]);
+
+  if ($ok) {
+    // If email/login changed, update session user_login
+    $_SESSION['user_login'] = $email;
+    echo json_encode(['status' => 'success']);
+  } else {
+    echo json_encode(['status' => 'error', 'message' => 'Update failed']);
+  }
+  exit;
+}
+
+/*=======================================
+      Change password for logged-in user
+=======================================*/
+if ($action === 'change_password') {
+  $userId = $_SESSION['user_id'] ?? null;
+  if (!$userId) {
+    echo json_encode(['status' => 'error', 'message' => 'Not authenticated']);
+    exit;
+  }
+
+  $current = $_POST['current_password'] ?? '';
+  $new     = $_POST['new_password'] ?? '';
+
+  if (trim($current) === '' || trim($new) === '') {
+    echo json_encode(['status' => 'error', 'message' => 'Missing password fields']);
+    exit;
+  }
+
+  // Fetch stored hash
+  $stmt = $conn->prepare("SELECT password FROM users WHERE id = ? LIMIT 1");
+  $stmt->execute([clean_input($userId)]);
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+  if (!$row) {
+    echo json_encode(['status' => 'error', 'message' => 'User not found']);
+    exit;
+  }
+
+  if (!password_verify($current, $row['password'])) {
+    echo json_encode(['status' => 'error', 'message' => 'Incorrect current password']);
+    exit;
+  }
+
+  $newHash = password_hash($new, PASSWORD_DEFAULT);
+  $upd = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
+  $ok = $upd->execute([$newHash, $userId]);
+
+  if ($ok) {
+    echo json_encode(['status' => 'success']);
+  } else {
+    echo json_encode(['status' => 'error', 'message' => 'Failed to update password']);
+  }
+  exit;
+}
+
