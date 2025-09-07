@@ -1050,6 +1050,78 @@ if ($action === 'fetch_church_cell_member_count') {
 }
 
 /*=======================================
+  Fetch church-wide published report counts
+  (meetings & outreaches) across all cells for the church
+=======================================*/
+if ($action === 'fetch_church_report_counts') {
+  $churchId = clean_input($_SESSION['entity_id'] ?? null);
+  if (!$churchId) {
+    echo json_encode(['status'=>'error','message'=>'Not authenticated']);
+    exit;
+  }
+
+  try {
+    // Count published meeting reports for cells under this church
+    $stmt = $conn->prepare("
+      SELECT COUNT(cr.id) AS cnt
+      FROM cell_reports cr
+      INNER JOIN cells c ON cr.cell_id = c.id
+      WHERE c.church_id = :church_id AND cr.type = 'meeting'
+    ");
+    $stmt->bindValue(':church_id', $churchId, PDO::PARAM_INT);
+    $stmt->execute();
+    $meetings = (int)$stmt->fetchColumn();
+
+    // Count published outreach reports
+    $stmt = $conn->prepare("
+      SELECT COUNT(cr.id) AS cnt
+      FROM cell_reports cr
+      INNER JOIN cells c ON cr.cell_id = c.id
+      WHERE c.church_id = :church_id AND cr.type = 'outreach'
+    ");
+    $stmt->bindValue(':church_id', $churchId, PDO::PARAM_INT);
+    $stmt->execute();
+    $outreaches = (int)$stmt->fetchColumn();
+
+    echo json_encode(['status'=>'success','meetings'=>$meetings,'outreaches'=>$outreaches]);
+    exit;
+  } catch (PDOException $ex) {
+    error_log("fetch_church_report_counts error: ".$ex->getMessage());
+    echo json_encode(['status'=>'error','message'=>'Database error']);
+    exit;
+  }
+}
+
+/*=======================================
+  Fetch single cell published report counts
+  (meetings & outreaches) for the current cell
+=======================================*/
+if ($action === 'fetch_cell_report_counts') {
+  $cellId = clean_input($_SESSION['entity_id'] ?? null);
+  if (!$cellId) {
+    echo json_encode(['status'=>'error','message'=>'Not authenticated']);
+    exit;
+  }
+
+  try {
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM cell_reports WHERE cell_id = ? AND type = 'meeting'");
+    $stmt->execute([ $cellId ]);
+    $meetings = (int)$stmt->fetchColumn();
+
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM cell_reports WHERE cell_id = ? AND type = 'outreach'");
+    $stmt->execute([ $cellId ]);
+    $outreaches = (int)$stmt->fetchColumn();
+
+    echo json_encode(['status'=>'success','meetings'=>$meetings,'outreaches'=>$outreaches]);
+    exit;
+  } catch (PDOException $ex) {
+    error_log("fetch_cell_report_counts error: ".$ex->getMessage());
+    echo json_encode(['status'=>'error','message'=>'Database error']);
+    exit;
+  }
+}
+
+/*=======================================
       Submit Cell Report Form 
           - Functionality
 =======================================*/

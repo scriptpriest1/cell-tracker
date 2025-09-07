@@ -1,4 +1,4 @@
-        <!-- Church Stats -->
+<!-- Church Stats -->
         <div class="stats">
         <div class="data-block stats-block d-grid">
           <div class="stat px-3 py-2">
@@ -12,12 +12,12 @@
           </div>
 
           <div class="stat px-3 py-2">
-            <span class="value fs-4 fw-bold d-block">--</span>
+            <span class="value fs-4 fw-bold d-block total-meetings">--</span>
             <span class="title d-block">Total cell meetings reported</span>
           </div>
 
           <div class="stat px-3 py-2">
-            <span class="value fs-4 fw-bold d-block">--</span>
+            <span class="value fs-4 fw-bold d-block total-outreaches">--</span>
             <span class="title d-block">Total cell outreaches reported</span>
           </div>
         </div>

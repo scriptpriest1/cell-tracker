@@ -1,8 +1,8 @@
-celestialscriptpriest: I want to revamp my entire code base for this project; make it more modular and object-oriented. I will send you an overview of my project so far then I will send you the necessary prompts. You will rewrite my entire project inside the empty 'revamped' folder I have just created.
+greatkingpriest: I want to revamp my entire code base for this project; make it more modular and object-oriented. I will send you an overview of my project so far then I will send you the necessary prompts. You will rewrite my entire project inside the empty 'revamped' folder I have just created.
 
 GitHub Copilot: Understood. Please send your project overview and any specific requirements or prompts you have. I will wait for your instructions before proceeding with the modular and object-oriented rewrite inside `c:\xampp\htdocs\cell-tracker\revamped`.
 
-celestialscriptpriest: This is the overview:
+greatkingpriest: This is the overview:
 
 Project: Cell Tracker (refactor + reporting)
 
@@ -110,12 +110,12 @@ GitHub Copilot: Thank you for the detailed overview and instructions. Here’s m
 
 I will now create the initial files for the DB layer, autoloader, config, and validation utilities inside `/revamped`. Let me know if you want to adjust the structure or proceed.
 
-celestialscriptpriest: First of all, read through all my files and entire codebase. Understand the flow. The project is a church growth management web app. I want you to rewrite my entire codebase, everything, inside the 'revamped' folder (which should be a revamped duplicate of the original project) using your proposed structure. Use all the instructions inside the overview I sent you. Make the new codebase very modular and object-oriented. Take as much time as you can to understand everything first before editing.
+greatkingpriest: First of all, read through all my files and entire codebase. Understand the flow. The project is a church growth management web app. I want you to rewrite my entire codebase, everything, inside the 'revamped' folder (which should be a revamped duplicate of the original project) using your proposed structure. Use all the instructions inside the overview I sent you. Make the new codebase very modular and object-oriented. Take as much time as you can to understand everything first before editing.
 You may Proceed...
 
 GitHub Copilot: Please add the files to be modified to the working set, or use `#codebase` in your request to automatically discover working set files.
 
-celestialscriptpriest: #codebase 
+greatkingpriest: #codebase 
 
 GitHub Copilot: ### [switch_profile.php](file:///c%3A/xampp/htdocs/cell-tracker/php/switch_profile.php)
 
@@ -516,13 +516,13 @@ Let me know if you want the full implementation of the new classes and files, or
 
 Made changes.
 
-celestialscriptpriest: I want full implementation of new classes and files
+greatkingpriest: I want full implementation of new classes and files
 
 GitHub Copilot: Understood. I will provide full implementations for new classes and files, following your directory structure and requirements. Each code block will start with a comment containing the filepath. I will avoid repeating unchanged code and use `...existing code...` where appropriate for existing files. 
 
 Please confirm if you want me to start with the foundational files (autoload, config, DB class, validation utilities, and base models), or if you want to specify a particular feature or module to begin with.
 
-celestialscriptpriest: Don't use '...existing code...'. Just write it all over again. Every thing you're doing should be only inside the 'revamped' folder. Proceed
+greatkingpriest: Don't use '...existing code...'. Just write it all over again. Every thing you're doing should be only inside the 'revamped' folder. Proceed
 
 GitHub Copilot: Thank you for clarifying. I will write all new code from scratch, placing everything inside `c:\xampp\htdocs\cell-tracker\revamped` as per your requirements. Here is the step-by-step plan for the initial foundational files:
 
@@ -881,11 +881,11 @@ Let me know if you want to proceed with controllers, services, views, or specifi
 
 Made changes.
 
-celestialscriptpriest: Proceed
+greatkingpriest: Proceed
 
 GitHub Copilot: Please add the files to be modified to the working set, or use `#codebase` in your request to automatically discover working set files.
 
-celestialscriptpriest: Phase 1 Task: Full repo refactor to modular + OOP
+greatkingpriest: Phase 1 Task: Full repo refactor to modular + OOP
 
 Requirements:
 - Read `cell_tracker_schema.sql` and the repository to map DB tables to models.
@@ -908,7 +908,7 @@ Acceptance tests:
 
 GitHub Copilot: Please add the files to be modified to the working set, or use `#codebase` in your request to automatically discover working set files.
 
-celestialscriptpriest: Phase 2 Task: Switch Profile immediate update (no reload)
+greatkingpriest: Phase 2 Task: Switch Profile immediate update (no reload)
 
 Context:
 - When a user assigns themself to another cell, session `entity_id` (or similar) must update and the UI should reflect the new cell immediately without a full browser reload.
@@ -1111,7 +1111,7 @@ Let me know if you need further implementation or want to proceed to the next ph
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 Issue:  
 - When the attendance dropdown is edited (an option is checked or unchecked), the form becomes unable to submit.  
@@ -1286,7 +1286,7 @@ If you want I can also harden the server-side submit handler to accept attendanc
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 Issue:  
 - When the attendance dropdown is edited (an option is checked or unchecked), the form becomes unable to submit.  
@@ -1680,7 +1680,7 @@ If you'd like, I can also:
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 Critical Issue:  
 - The form is still not submitting after the attendance dropdown is edited.  
@@ -1802,7 +1802,7 @@ If you'd like, I can also:
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 Issue:  
 - When trying to publish a 'meeting' report, the browser shows this error:  
@@ -1883,7 +1883,7 @@ Notes:
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 Issue:  
 - The insertion of attendees into the database is duplicating somewhere in my code.  
@@ -2007,7 +2007,7 @@ If you want, I can also:
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 Feature: CELL REPORT EXPIRATION  
 
@@ -2259,7 +2259,7 @@ Made changes.
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 Requirement:  
 - Do not add any message inside the report form.  
@@ -2390,21 +2390,21 @@ Notes:
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 - For expired reports, the normal function of the "Edit report" button (changing its text to "Cancel" and revealing the "Save changes" button) should no longer work. Instead, only the alert should appear.  
 
 
 GitHub Copilot: Copilot failed to get ready. Please ensure you are signed in to GitHub and that the extension `GitHub.copilot-chat` is installed and enabled.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 - For expired reports, the normal function of the "Edit report" button (changing its text to "Cancel" and revealing the "Save changes" button) should no longer work. Instead, only the alert should appear.  
 
 
 GitHub Copilot: 
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 - For expired reports, the normal function of the "Edit report" button (changing its text to "Cancel" and revealing the "Save changes" button) should no longer work. Instead, only the alert should appear.  
 
@@ -2412,11 +2412,11 @@ celestialscriptpriest: #codebase
 GitHub Copilot: Permission Request
 [object Object]
 
-celestialscriptpriest: @GitHubCopilot Grant: "Permission Request"
+greatkingpriest: @GitHubCopilot Grant: "Permission Request"
 
 GitHub Copilot: 
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 - For expired reports, the normal function of the "Edit report" button (changing its text to "Cancel" and revealing the "Save changes" button) should no longer work. Instead, only the alert should appear.  Also reduce the opacity of the edit report button to 0.5
 
@@ -2502,7 +2502,7 @@ Notes:
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 Feature: CELL REPORT DRAFT EXPIRATION  (for pending drafts only)
 
@@ -2725,7 +2725,7 @@ Notes:
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 Feature: CELL REPORT DRAFT EXPIRATION  (for pending drafts only)
 
@@ -2747,7 +2747,7 @@ Task:
 
 GitHub Copilot: Copilot failed to get ready. Please ensure you are signed in to GitHub and that the extension `GitHub.copilot-chat` is installed and enabled.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 Feature: CELL REPORT DRAFT EXPIRATION  (for pending drafts only)
 
@@ -2966,7 +2966,7 @@ Notes:
 
 Made changes.
 
-celestialscriptpriest: There's a bug in this file. Find and fix it
+greatkingpriest: There's a bug in this file. Find and fix it
 
 GitHub Copilot: Solution (steps):
 1. Identify the JavaScript syntax error at the end of ajax.js caused by accidental HTML/text injection and a duplicated buildDraftElement helper.
@@ -3001,7 +3001,7 @@ Notes:
 
 Made changes.
 
-celestialscriptpriest: Another bug has issued at the end of the file. Find ou what the problem is and fix it
+greatkingpriest: Another bug has issued at the end of the file. Find ou what the problem is and fix it
 
 GitHub Copilot: Solution (brief):
 1. The file ended with a malformed/truncated fragment (broken HTML and duplicated function) that causes a JS syntax error.
@@ -3029,7 +3029,7 @@ function getMeetingDescription(week) {
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 Feature: CELL REPORT DRAFT EXPIRATION  (for pending drafts only)
 
@@ -3248,7 +3248,7 @@ Notes:
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 FOR PUBLISHED REPORTS ONLY:
 
 - For expired published reports (only), the normal function of the "Edit report" button (changing its text to "Cancel" and revealing the "Save changes" button) should no longer work. Instead,  the alert with the error message: 'Report expired and cannot be edited.' should appear.  
@@ -3306,7 +3306,7 @@ Add an early guard in the edit-button handler to block edit-mode for expired pub
 
 Made changes.
 
-celestialscriptpriest: #codebase 
+greatkingpriest: #codebase 
 Something in my codebase may be preventing this styling to work in style.css:
 
 .report-status.published .span-box {
@@ -3376,7 +3376,7 @@ GitHub Copilot: ```javascript
 
 Made changes.
 
-celestialscriptpriest: There is no 'unpublished' report status anymore
+greatkingpriest: There is no 'unpublished' report status anymore
 
 GitHub Copilot: Solution (steps):
 1. Remove the broken duplicate buildDraftElement at the end of ajax.js (it breaks parsing).
@@ -3486,7 +3486,7 @@ Notes:
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 Feature: REPORT FILTERS  
 
@@ -3704,7 +3704,7 @@ If you want, I can also:
 
 Made changes.
 
-celestialscriptpriest: - Change the filter names on the url from 'meetings' and 'outreached' to 'meeting' and 'outreach' respectively. 
+greatkingpriest: - Change the filter names on the url from 'meetings' and 'outreached' to 'meeting' and 'outreach' respectively. 
 - Redo the filter logic with this update
 
 GitHub Copilot: Solution (steps):
@@ -3889,7 +3889,7 @@ Notes:
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 Feature: REPORT FILTERS (URL Handling)  
 
@@ -3944,7 +3944,7 @@ Notes:
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 Feature: REPORT RENDERING ORDER  
 
@@ -4135,7 +4135,7 @@ Made changes.
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 Feature: CREATE DRAFTS BUTTON  
 
@@ -4220,7 +4220,7 @@ Notes:
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 Feature: AUTO-GENERATION OF REPORT DRAFTS  
 
@@ -4525,7 +4525,7 @@ If you want, I can:
 
 Made changes.
 
-celestialscriptpriest: #codebase 
+greatkingpriest: #codebase 
 The cell report drafts should be auto- every Mondays by 00:00:00 not Sundays. Redo the logic with this update
 
 GitHub Copilot: GitHub Copilot
@@ -4827,7 +4827,7 @@ If you want, I can:
 
 Made changes.
 
-celestialscriptpriest: The auto-generation is not working. Find the possible issues and fix it
+greatkingpriest: The auto-generation is not working. Find the possible issues and fix it
 
 GitHub Copilot: GitHub Copilot
 
@@ -5088,7 +5088,7 @@ Notes:
 
 Made changes.
 
-celestialscriptpriest: #codebase 
+greatkingpriest: #codebase 
 The auto-generation is still not working. Find the possible issues and fix it
 
 GitHub Copilot: Solution — steps:
@@ -5490,7 +5490,7 @@ If you want, I can also:
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 Instruction:
 - Scan my codebase carefully.  
@@ -5530,7 +5530,7 @@ If you'd like, I can:
 
 No files modified.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 Feature: AUTO-GENERATION OF REPORT DRAFTS  
 
@@ -5883,7 +5883,7 @@ If you want, I can:
 
 Made changes.
 
-celestialscriptpriest: #codebase
+greatkingpriest: #codebase
 
 **Issue:**
 - After setting up the auto-generation logic, a bug is preventing the functions for fetching **cells** and **cell members** from working.  
@@ -5919,7 +5919,7 @@ include 'cell_report_helpers.php'; // <-- added missing semicolon
 // ...existing code...
 ```
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 **Feature: Report Drafts Filtering - Status Counts**  
 
@@ -6028,7 +6028,7 @@ Add calls to updateStatusCounts() after processing fetchReportDrafts results, an
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 **Feature: Church Reports Page**  
 
@@ -6470,7 +6470,7 @@ If you want, I can:
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 **Issue:**  
 - In `ajax.js`, there is a code block that appends a header/title for the selected cell:  
@@ -6564,7 +6564,7 @@ Notes
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 **Tasks:**  
 
@@ -6598,7 +6598,7 @@ celestialscriptpriest: #codebase
 GitHub Copilot: Permission Request
 [object Object]
 
-celestialscriptpriest: @GitHubCopilot Grant: "Permission Request"
+greatkingpriest: @GitHubCopilot Grant: "Permission Request"
 
 GitHub Copilot: GitHub Copilot
 
@@ -6796,7 +6796,7 @@ Notes
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 **Issue 1:**  
 - When the default **"Select Cell"** `<option>` is clicked in the `<select>` element:  
@@ -6954,7 +6954,7 @@ Notes
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 **Issue:**  
 - The **active state** of the filter buttons does not persist after a page refresh.  
@@ -7050,7 +7050,7 @@ Notes
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 **Issues:**  
 Church admin cannot view a cell's published report correctly.  
@@ -7231,7 +7231,7 @@ Notes
 
 Made changes.
 
-celestialscriptpriest: I made some changes to this part of the ajax.js code:
+greatkingpriest: I made some changes to this part of the ajax.js code:
 let labelHtml = "";
         if (status === "published") {
           labelHtml = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill=""><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>`;
@@ -7261,7 +7261,7 @@ Status
 Next steps (optional)
 - I can run a quick static scan or run the app to verify labels render correctly and modal behavior; tell me if you want me to proceed.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 REQUIREMENTS FOR **CHURCH REPORTS** PAGE
 
@@ -7423,7 +7423,7 @@ Notes
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 **Issue:**  
 - The title of the action modal for church admins is currently set to `"View Report"`.  
@@ -7544,7 +7544,7 @@ Notes
 
 Made changes.
 
-celestialscriptpriest: #codebase 
+greatkingpriest: #codebase 
 The cell report's dropdown search input should not be disabled even for the church admin. Re-enable the search inputs
 
 GitHub Copilot: GitHub Copilot
@@ -7603,7 +7603,7 @@ Notes
 
 Made changes.
 
-celestialscriptpriest: **Pending reports**  
+greatkingpriest: **Pending reports**  
    - Church admin should **not be able to open pending reports**.  
    - The "Publish" button should not be rendered at all.  
    - Publishing functions should not be applicable.  
@@ -7675,7 +7675,7 @@ Notes
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 **Critical Issue:**  
 - In the **church admin's report page**, the report form for type `'outreach'` is incorrectly using the same structure as for `'meeting'`.  
@@ -7776,7 +7776,7 @@ Notes
 
 Made changes.
 
-celestialscriptpriest: #codebase  
+greatkingpriest: #codebase  
 
 **Issue:**  
 - On the **Church admin's** report page, the `attendance` dropdown currently renders **all members of the cell** instead of only those who were marked as present.  
@@ -7872,5 +7872,631 @@ Notes
 - This change only affects the attendance dropdown rendering for church-admins viewing a published report (mode === 'view' and $_SESSION['admin_type'] === 'church').  
 - Cell admins and edit/publish modes are left unchanged.  
 - No other logic or server-side processing was modified.
+
+Made changes.
+
+greatkingpriest: #codebase  
+
+## SETTINGS PAGE  
+
+### References  
+- **HTML Structure:** Scan `draft.html` to see the structure of the settings page for both Cell and Church admins.  
+- **Database Schema:** Scan `cell_tracker_schema.sql` to understand the `users` table.  
+
+---
+
+### Requirements  
+
+#### Fetch User Details  
+- Implement a `fetchUserDetails()` function that fetches user details from the `users` table.  
+- Populate the form fields on the settings page with the fetched user details.  
+
+#### Edit User Details  
+- When the **Edit** button is clicked:  
+  - Change its innerText to `"Cancel"`.  
+  - Change its className from `"edit-btn"` to `"cancel-btn"`.  
+  - Enable the form fields so the user can edit their details.  
+  - On clicking the **Save** button, update the user’s details in the database.  
+- When the same button (now with `"cancel-btn"`) is clicked:  
+  - Revert the above changes (disable form fields, reset button text and className).  
+- After a successful update of user details:  
+  - Immediately call `fetchUserDetails()` to refresh the UI with the latest data.  
+
+#### Display Role in `.profile-bar`  
+- In the `.profile-bar` element of `draft.html`, use the `.role` element to display the user’s role.  
+- Logic for displaying roles:  
+  - **Cell Admins:** Prefix roles from `cell_role` with `"Cell "`. Example: `"leader"` → `"Cell leader"`.  
+  - **Church Admins:** Display the role directly from the `group_role` column (no prefix).  
+
+---
+
+### Change Password Functionality  
+- When `.change-password-clicker` is clicked:  
+  - Toggle the visibility of `.change-password-form` using Bootstrap or jQuery transitions (whichever is simpler).  
+- Inside the change password form:  
+  - Require the user to enter their **current password** and a **new password**.  
+  - Verify the current password by comparing its **hashed value** with what’s stored in the database (`users` table).  
+    - If correct → update the password with the new one.  
+    - If incorrect → show an `alert("Incorrect current password")`.  
+
+---
+
+### File Integration  
+- The settings page structure from `draft.html` should be inserted into both:  
+  - `cell-settings.php`  
+  - `church-settings.php`  
+
+---
+
+### Constraints  
+- Work only within the scope defined above.  
+- Ensure changes do not break existing functionality for either Cell or Church admins.  
+
+
+GitHub Copilot: Please add the files to be modified to the working set, or use `#codebase` in your request to automatically discover working set files.
+
+greatkingpriest: #codebase  
+
+## SETTINGS PAGE  
+
+### References  
+- **HTML Structure:** Scan `draft.html` to see the structure of the settings page for both Cell and Church admins.  
+- **Database Schema:** Scan `cell_tracker_schema.sql` to understand the `users` table.  
+
+---
+
+### Requirements  
+
+#### Fetch User Details  
+- Implement a `fetchUserDetails()` function that fetches user details from the `users` table.  
+- Populate the form fields on the settings page with the fetched user details.  
+
+#### Edit User Details  
+- When the **Edit** button is clicked:  
+  - Change its innerText to `"Cancel"`.  
+  - Change its className from `"edit-btn"` to `"cancel-btn"`.  
+  - Enable the form fields so the user can edit their details.  
+  - On clicking the **Save** button, update the user’s details in the database.  
+- When the same button (now with `"cancel-btn"`) is clicked:  
+  - Revert the above changes (disable form fields, reset button text and className).  
+- After a successful update of user details:  
+  - Immediately call `fetchUserDetails()` to refresh the UI with the latest data.  
+
+#### Display Role in `.profile-bar`  
+- In the `.profile-bar` element of `draft.html`, use the `.role` element to display the user’s role.  
+- Logic for displaying roles:  
+  - **Cell Admins:** Prefix roles from `cell_role` with `"Cell "`. Example: `"leader"` → `"Cell leader"`.  
+  - **Church Admins:** Display the role directly from the `group_role` column (no prefix).  
+
+---
+
+### Change Password Functionality  
+- When `.change-password-clicker` is clicked:  
+  - Toggle the visibility of `.change-password-form` using Bootstrap or jQuery transitions (whichever is simpler).  
+- Inside the change password form:  
+  - Require the user to enter their **current password** and a **new password**.  
+  - Verify the current password by comparing its **hashed value** with what’s stored in the database (`users` table).  
+    - If correct → update the password with the new one.  
+    - If incorrect → show an `alert("Incorrect current password")`.  
+
+---
+
+### File Integration  
+- The settings page structure from `draft.html` should be inserted into both:  
+  - `cell-settings.php`  
+  - `church-settings.php`  
+
+---
+
+### Constraints  
+- Work only within the scope defined above.  
+- Ensure changes do not break existing functionality for either Cell or Church admins.  
+
+
+GitHub Copilot: 
+
+greatkingpriest: #codebase  
+
+## SETTINGS PAGE  
+
+### References  
+- **HTML Structure:** Scan `draft.html` to see the structure of the settings page for both Cell and Church admins.  
+- **Database Schema:** Scan `cell_tracker_schema.sql` to understand the `users` table.  
+
+---
+
+### Requirements  
+
+#### Fetch User Details  
+- Implement a `fetchUserDetails()` function that fetches user details from the `users` table.  
+- Populate the form fields on the settings page with the fetched user details.  
+
+#### Edit User Details  
+- When the **Edit** button is clicked:  
+  - Change its innerText to `"Cancel"`.  
+  - Change its className from `"edit-btn"` to `"cancel-btn"`.  
+  - Enable the form fields so the user can edit their details.  
+  - On clicking the **Save** button, update the user’s details in the database.  
+- When the same button (now with `"cancel-btn"`) is clicked:  
+  - Revert the above changes (disable form fields, reset button text and className).  
+- After a successful update of user details:  
+  - Immediately call `fetchUserDetails()` to refresh the UI with the latest data.  
+
+#### Display Role in `.profile-bar`  
+- In the `.profile-bar` element of `draft.html`, use the `.role` element to display the user’s role.  
+- Logic for displaying roles:  
+  - **Cell Admins:** Prefix roles from `cell_role` with `"Cell "`. Example: `"leader"` → `"Cell leader"`.  
+  - **Church Admins:** Display the role directly from the `group_role` column (no prefix).  
+
+---
+
+### Change Password Functionality  
+- When `.change-password-clicker` is clicked:  
+  - Toggle the visibility of `.change-password-form` using Bootstrap or jQuery transitions (whichever is simpler).  
+- Inside the change password form:  
+  - Require the user to enter their **current password** and a **new password**.  
+  - Verify the current password by comparing its **hashed value** with what’s stored in the database (`users` table).  
+    - If correct → update the password with the new one.  
+    - If incorrect → show an `alert("Incorrect current password")`.  
+
+---
+
+### File Integration  
+- The settings page structure from `draft.html` should be inserted into both:  
+  - `cell-settings.php`  
+  - `church-settings.php`  
+
+---
+
+### Constraints  
+- Work only within the scope defined above.  
+- Ensure changes do not break existing functionality for either Cell or Church admins.  
+
+
+GitHub Copilot: Permission Request
+[object Object]
+
+greatkingpriest: @GitHubCopilot Grant: "Permission Request"
+
+GitHub Copilot: GitHub Copilot
+
+Solution — steps
+1. Add three AJAX endpoints to php/ajax.php: fetch_user_details, update_user_details, change_password. Each uses session user_id, clean_input, password_verify / password_hash where needed and returns JSON.
+2. Add client JS in ajax.js: fetchUserDetails() to populate .profile-bar and settings form, handlers for Edit/Cancel toggle, Save (submit), change-password toggle & submit.
+3. Insert the settings page markup (from draft.html) into both dashboard/pages/settings/cell-settings.php and dashboard/pages/settings/church-settings.php so those pages render the same UI.
+4. On successful profile update, fetchUserDetails() is called to refresh UI. Change-password verifies current hashed password server-side and updates with password_hash; on failure alert.
+5. Minimal, safe edits; keep existing flow and endpoints unchanged.
+
+Files changed
+
+### [ajax.php](file:///c%3A/xampp/htdocs/cell-tracker/php/ajax.php)
+
+Add three new actions: fetch_user_details, update_user_details, change_password. Placed alongside other actions. Uses session user id for auth, returns JSON.
+
+````php
+<?php
+// ...existing code...
+
+/*=======================================
+      Fetch current logged-in user's details
+=======================================*/
+if ($action === 'fetch_user_details') {
+  $userId = $_SESSION['user_id'] ?? null;
+  if (!$userId) {
+    echo json_encode(['status' => 'error', 'message' => 'Not authenticated']);
+    exit;
+  }
+
+  $stmt = $conn->prepare("SELECT id, first_name, last_name, user_login AS email, phone_number, cell_role, church_role, group_role FROM users WHERE id = ? LIMIT 1");
+  $stmt->execute([clean_input($userId)]);
+  $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+  if (!$user) {
+    echo json_encode(['status' => 'error', 'message' => 'User not found']);
+    exit;
+  }
+
+  // include current admin context so client can decide which role to display
+  $user['admin_type'] = $_SESSION['admin_type'] ?? null;
+  $user['entity_id'] = $_SESSION['entity_id'] ?? null;
+  echo json_encode(['status' => 'success', 'data' => $user]);
+  exit;
+}
+
+/*=======================================
+      Update logged-in user's details
+=======================================*/
+if ($action === 'update_user_details') {
+  $userId = $_SESSION['user_id'] ?? null;
+  if (!$userId) {
+    echo json_encode(['status' => 'error', 'message' => 'Not authenticated']);
+    exit;
+  }
+
+  $first = clean_input($_POST['first_name'] ?? '');
+  $last  = clean_input($_POST['last_name'] ?? '');
+  $email = clean_input($_POST['email'] ?? '');
+  $phone = clean_input($_POST['phone'] ?? '');
+
+  if ($first === '' || $last === '' || $email === '') {
+    echo json_encode(['status' => 'error', 'message' => 'Missing required fields']);
+    exit;
+  }
+
+  // Check email uniqueness (allow current user)
+  $q = $conn->prepare("SELECT id FROM users WHERE user_login = ? AND id != ? LIMIT 1");
+  $q->execute([$email, $userId]);
+  if ($q->fetchColumn()) {
+    echo json_encode(['status' => 'error', 'message' => 'Email already in use']);
+    exit;
+  }
+
+  $upd = $conn->prepare("UPDATE users SET first_name = ?, last_name = ?, user_login = ?, phone_number = ? WHERE id = ?");
+  $ok = $upd->execute([$first, $last, $email, $phone, $userId]);
+
+  if ($ok) {
+    // If email/login changed, update session user_login
+    $_SESSION['user_login'] = $email;
+    echo json_encode(['status' => 'success']);
+  } else {
+    echo json_encode(['status' => 'error', 'message' => 'Update failed']);
+  }
+  exit;
+}
+
+/*=======================================
+      Change password for logged-in user
+=======================================*/
+if ($action === 'change_password') {
+  $userId = $_SESSION['user_id'] ?? null;
+  if (!$userId) {
+    echo json_encode(['status' => 'error', 'message' => 'Not authenticated']);
+    exit;
+  }
+
+  $current = $_POST['current_password'] ?? '';
+  $new     = $_POST['new_password'] ?? '';
+
+  if (trim($current) === '' || trim($new) === '') {
+    echo json_encode(['status' => 'error', 'message' => 'Missing password fields']);
+    exit;
+  }
+
+  // Fetch stored hash
+  $stmt = $conn->prepare("SELECT password FROM users WHERE id = ? LIMIT 1");
+  $stmt->execute([clean_input($userId)]);
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+  if (!$row) {
+    echo json_encode(['status' => 'error', 'message' => 'User not found']);
+    exit;
+  }
+
+  if (!password_verify($current, $row['password'])) {
+    echo json_encode(['status' => 'error', 'message' => 'Incorrect current password']);
+    exit;
+  }
+
+  $newHash = password_hash($new, PASSWORD_DEFAULT);
+  $upd = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
+  $ok = $upd->execute([$newHash, $userId]);
+
+  if ($ok) {
+    echo json_encode(['status' => 'success']);
+  } else {
+    echo json_encode(['status' => 'error', 'message' => 'Failed to update password']);
+  }
+  exit;
+}
+
+// ...existing code...
+````
+
+### [ajax.js](file:///c%3A/xampp/htdocs/cell-tracker/ajax.js)
+
+Add client functions: fetchUserDetails(), edit/cancel toggle, save profile submit, change-password toggle & submit. Populate .profile-bar .name/.role and form inputs. Call fetchUserDetails() when settings page is present.
+
+````javascript
+
+
+Made changes.
+
+// ...existing code...
+
+// Settings page: fetch and populate user details
+function fetchUserDetails() {
+  const $settingsForm = $("#settings-page .profile-form");
+  if ($settingsForm.length === 0) return;
+
+  $.ajax({
+    url: "../php/ajax.php",
+    method: "POST",
+    dataType: "json",
+    data: { action: "fetch_user_details" },
+    success: (res) => {
+      if (!res || res.status !== "success") return;
+      const u = res.data;
+      // Populate profile bar
+      const fullName = (u.first_name || "") + (u.last_name ? " " + u.last_name : "");
+      $(".profile-bar .name").text(fullName);
+      // Role display logic
+      let roleText = "";
+      if ((u.admin_type || "") === "cell") {
+        if (u.cell_role) roleText = "Cell " + u.cell_role;
+      } else if ((u.admin_type || "") === "church") {
+        if (u.group_role) roleText = u.group_role;
+      } else {
+        roleText = u.cell_role || u.church_role || u.group_role || "";
+      }
+      $(".profile-bar .role").text(roleText);
+
+      // Populate form fields
+      $settingsForm.find("#first-name").val(u.first_name || "").prop("disabled", true);
+      $settingsForm.find("#last-name").val(u.last_name || "").prop("disabled", true);
+      $settingsForm.find("#email").val(u.email || "").prop("disabled", true);
+      $settingsForm.find("#phone").val(u.phone_number || "").prop("disabled", true);
+
+      // Ensure buttons state
+      $settingsForm.find("#profile-form-save-btn").addClass("d-none");
+      $settingsForm.find("#profile-form-edit-btn").removeClass("cancel-btn").text("Edit").prop("disabled", false);
+    },
+    error: () => {
+      // silent
+    }
+  });
+}
+window.fetchUserDetails = fetchUserDetails;
+
+// Wire Edit / Cancel toggle and Save
+$(document).on("click", "#profile-form-edit-btn", function () {
+  const $btn = $(this);
+  const $form = $(this).closest(".profile-form");
+  const isCancel = $btn.hasClass("cancel-btn");
+
+  if (!isCancel) {
+    // Enter edit mode
+    $btn.text("Cancel").removeClass("edit-btn").addClass("cancel-btn");
+    $form.find("input").prop("disabled", false);
+    $form.find("#profile-form-save-btn").removeClass("d-none");
+  } else {
+    // Cancel edit - revert UI (re-fetch latest values from server)
+    $btn.text("Edit").removeClass("cancel-btn").addClass("edit-btn");
+    $form.find("input").prop("disabled", true);
+    $form.find("#profile-form-save-btn").addClass("d-none");
+    fetchUserDetails();
+  }
+});
+
+// Save profile details
+$(document).on("submit", ".profile-form", function (e) {
+  e.preventDefault();
+  const $form = $(this);
+  const first = $.trim($form.find("#first-name").val() || "");
+  const last  = $.trim($form.find("#last-name").val() || "");
+  const email = $.trim($form.find("#email").val() || "");
+  const phone = $.trim($form.find("#phone").val() || "");
+
+  if (!first || !last || !email) {
+    alert("First name, last name and email are required.");
+    return;
+  }
+
+  const $saveBtn = $form.find("#profile-form-save-btn").prop("disabled", true).text("Saving...");
+  $.ajax({
+    url: "../php/ajax.php",
+    method: "POST",
+    dataType: "json",
+    data: {
+      action: "update_user_details",
+      first_name: first,
+      last_name: last,
+      email: email,
+      phone: phone
+    },
+    success: (res) => {
+      if (res && res.status === "success") {
+        fetchUserDetails();
+        alert("Profile updated.");
+      } else {
+        alert((res && res.message) || "Failed to update profile.");
+        $saveBtn.prop("disabled", false).text("Save");
+      }
+    },
+    error: () => {
+      alert("Server error");
+      $saveBtn.prop("disabled", false).text("Save");
+    }
+  });
+});
+
+// Change password toggle and submit
+$(document).on("click", "#change-password-clicker", function () {
+  // toggle with slide for simple transition
+  $("#change-password-form").stop(true, true).slideToggle(180);
+});
+
+$(document).on("submit", "#change-password-form", function (e) {
+  e.preventDefault();
+  const current = $.trim($("#current-password-input").val() || "");
+  const nw = $.trim($("#new-password-input").val() || "");
+  if (!current || !nw) {
+    alert("Both current and new passwords are required.");
+    return;
+  }
+  const $btn = $(this).find(".change-password-submit-btn").prop("disabled", true).text("Changing...");
+  $.ajax({
+    url: "../php/ajax.php",
+    method: "POST",
+    dataType: "json",
+    data: {
+      action: "change_password",
+      current_password: current,
+      new_password: nw
+    },
+    success: (res) => {
+      if (res && res.status === "success") {
+        alert("Password changed successfully.");
+        $("#change-password-form").trigger("reset").slideUp(180);
+      } else {
+        alert((res && res.message) || "Failed to change password");
+      }
+      $btn.prop("disabled", false).text("Change password");
+    },
+    error: () => {
+      alert("Server error");
+      $btn.prop("disabled", false).text("Change password");
+    }
+  });
+});
+
+// Ensure settings page pulls user details when visible
+$(function () {
+  if ($("#settings-page").length) {
+    fetchUserDetails();
+  }
+});
+
+// ...existing code...
+````
+
+### [cell-settings.php](file:///c%3A/xampp/htdocs/cell-tracker/dashboard/pages/settings/cell-settings.php)
+
+Insert settings page markup (same structure as draft.html). This file is rendered when a Cell admin visits settings. Minimal PHP wrapper — content is static HTML UI; JS will populate fields.
+
+````php
+
+
+Made changes.
+
+<section class="profile-section mt-2 d-md-flex gap-4">
+    <section class="profile-details-containe w-100">
+        <h5 class="heading">Profile</h5>
+        <div class="profile-bar sub-section d-flex align-items-center gap-3 mt-2 mb-2 p-2">
+            <div class="icon-div p-2">
+                <span class="icon">
+                    <!-- svg omitted for brevity -->
+                </span>
+            </div>
+            <div class="text-div w-100">
+                <h6 class="name m-0"><!-- filled by JS --></h6>
+                <span class="role d-block m-0"><!-- filled by JS --></span>
+            </div>
+        </div>
+
+        <div class="change-password-section sub-section">
+            <div class="change-password-bar">
+                <span class="change-password-clicker w-100 d-block text-start form-select" id="change-password-clicker">Change account password</span>
+                <form id="change-password-form" class="input-container p-2" style="display:none;">
+                    <input type="password" class="form-control w-100 mt-1" id="current-password-input" placeholder="Enter current password">
+                    <input type="password" class="form-control w-100 mt-1" id="new-password-input" placeholder="Enter new password">
+                    <button type="submit" class="change-password-submit-btn mt-2 text-center w-100">Change password</button>
+                </form>
+            </div>
+        </div>
+    </section>
+    
+    <section class="profile-form-container mt-4 mt-md-0 w-100">
+        <div class="profile-form-section sub-section mb-2">
+            <h5 class="heading">Update profile info</h5>
+            <form class="profile-form py-2 px-3 pb-3">
+                <div class="body">
+                    <div class="form-group">
+                        <label for="first-name">First name:</label>
+                        <input type="text" id="first-name" name="first-name" class="form-control" value="" disabled />
+                    </div>
+                    <div class="form-group">
+                        <label for="last-name">Last name:</label>
+                        <input type="text" id="last-name" name="last-name" class="form-control" value="" disabled />
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email address:</label>
+                        <input type="email" id="email" name="email" class="form-control" value="" disabled />
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone number:</label>
+                        <input type="phone" id="phone" name="phone" class="form-control" value="" disabled />
+                    </div>
+                </div>
+                <footer class="form-footer mt-3 d-flex align-items-center gap-3">
+                    <button type="button" class="edit-btn" id="profile-form-edit-btn">Edit</button>
+                    <button type="submit" class="save-btn d-none" id="profile-form-save-btn">Save</button>
+                </footer>
+            </form>
+        </div>
+    </section>
+</section>
+````
+
+### [church-settings.php](file:///c%3A/xampp/htdocs/cell-tracker/dashboard/pages/settings/church-settings.php)
+
+Insert identical settings page markup for Church admins (same UI).
+
+````php
+
+
+Made changes.
+
+<section class="profile-section mt-2 d-md-flex gap-4">
+    <section class="profile-details-containe w-100">
+        <h5 class="heading">Profile</h5>
+        <div class="profile-bar sub-section d-flex align-items-center gap-3 mt-2 mb-2 p-2">
+            <div class="icon-div p-2">
+                <span class="icon">
+                    <!-- svg omitted for brevity -->
+                </span>
+            </div>
+            <div class="text-div w-100">
+                <h6 class="name m-0"><!-- filled by JS --></h6>
+                <span class="role d-block m-0"><!-- filled by JS --></span>
+            </div>
+        </div>
+
+        <div class="change-password-section sub-section">
+            <div class="change-password-bar">
+                <span class="change-password-clicker w-100 d-block text-start form-select" id="change-password-clicker">Change account password</span>
+                <form id="change-password-form" class="input-container p-2" style="display:none;">
+                    <input type="password" class="form-control w-100 mt-1" id="current-password-input" placeholder="Enter current password">
+                    <input type="password" class="form-control w-100 mt-1" id="new-password-input" placeholder="Enter new password">
+                    <button type="submit" class="change-password-submit-btn mt-2 text-center w-100">Change password</button>
+                </form>
+            </div>
+        </div>
+    </section>
+    
+    <section class="profile-form-container mt-4 mt-md-0 w-100">
+        <div class="profile-form-section sub-section mb-2">
+            <h5 class="heading">Update profile info</h5>
+            <form class="profile-form py-2 px-3 pb-3">
+                <div class="body">
+                    <div class="form-group">
+                        <label for="first-name">First name:</label>
+                        <input type="text" id="first-name" name="first-name" class="form-control" value="" disabled />
+                    </div>
+                    <div class="form-group">
+                        <label for="last-name">Last name:</label>
+                        <input type="text" id="last-name" name="last-name" class="form-control" value="" disabled />
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email address:</label>
+                        <input type="email" id="email" name="email" class="form-control" value="" disabled />
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone number:</label>
+                        <input type="phone" id="phone" name="phone" class="form-control" value="" disabled />
+                    </div>
+                </div>
+                <footer class="form-footer mt-3 d-flex align-items-center gap-3">
+                    <button type="button" class="edit-btn" id="profile-form-edit-btn">Edit</button>
+                    <button type="submit" class="save-btn d-none" id="profile-form-save-btn">Save</button>
+                </footer>
+            </form>
+        </div>
+    </section>
+</section>
+````
+
+Notes
+- These changes only implement settings UI wiring and backend endpoints required by the prompt. They reuse existing clean_input and session usage.
+- Client calls existing ajax.php so no new routing changes required.
+- Tests: open Settings (Cell or Church), ensure name/role populated, click Edit → fields enabled and button becomes Cancel, change values and Save → server updates and UI refreshes via fetchUserDetails(); Change password verifies current password and updates hashed password; wrong current password alerts "Incorrect current password".
 
 Made changes.

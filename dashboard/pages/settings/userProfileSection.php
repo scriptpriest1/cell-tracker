@@ -27,7 +27,7 @@
     
     <section class="profile-form-container mt-4 mt-md-0 w-100">
         <div class="profile-form-section sub-section mb-2">
-            <h5 class="heading">Update profile info</h5>
+            <h5 class="heading">Profile Info</h5>
             <form class="profile-form py-2 px-3 pb-3">
                 <div class="body">
                     <div class="form-group">

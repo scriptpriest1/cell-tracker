@@ -7,6 +7,13 @@ $(document).ready(() => {
   // If church admin, fetch total cell members for dashboard stats
   if ($("body").hasClass("church-admin") || $("#dashboard-page .cell-count").length) {
     fetchChurchCellMemberCount();
+    // fetch church-level report counts (meetings & outreaches)
+    if (typeof fetchChurchReportCounts === 'function') fetchChurchReportCounts();
+  }
+
+  // If cell admin, fetch cell-level report counts
+  if ($("body").hasClass("cell-admin") || $("#dashboard-page .cell-member-count").length) {
+    if (typeof fetchCellReportCounts === 'function') fetchCellReportCounts();
   }
 
   // Feedback alerts
@@ -2229,7 +2236,7 @@ function fetchUserDetails() {
       // Role display logic
       let roleText = "";
       if ((u.admin_type || "") === "cell") {
-        if (u.cell_role) roleText = "Cell " + u.cell_role;
+        if (u.cell_role) roleText = "Cell " + u.cell_role.charAt(0).toUpperCase() + u.cell_role.slice(1);
       } else if ((u.admin_type || "") === "church") {
         if (u.church_role) roleText = u.church_role;
       } else if ((u.admin_type || "") === "group") {
@@ -2368,3 +2375,45 @@ $(function () {
     fetchUserDetails();
   }
 });
+
+// New: fetch and populate church totals (published reports across all cells in church)
+function fetchChurchReportCounts() {
+  $.ajax({
+    url: "../php/ajax.php",
+    method: "POST",
+    dataType: "json",
+    data: { action: "fetch_church_report_counts" },
+    success: function (res) {
+      if (res && res.status === "success") {
+        // populate spans added to church dashboard
+        $(".total-meetings").text(res.meetings);
+        $(".total-outreaches").text(res.outreaches);
+      }
+    },
+    error: function () {
+      // silent fail
+    }
+  });
+}
+window.fetchChurchReportCounts = fetchChurchReportCounts;
+
+// New: fetch and populate current cell totals (published reports for this cell)
+function fetchCellReportCounts() {
+  $.ajax({
+    url: "../php/ajax.php",
+    method: "POST",
+    dataType: "json",
+    data: { action: "fetch_cell_report_counts" },
+    success: function (res) {
+      if (res && res.status === "success") {
+        // populate spans added to cell dashboard
+        $(".cell-meetings-reported").text(res.meetings);
+        $(".cell-outreaches-reported").text(res.outreaches);
+      }
+    },
+    error: function () {
+      // silent fail
+    }
+  });
+}
+window.fetchCellReportCounts = fetchCellReportCounts;
