@@ -87,7 +87,7 @@ if ($isLoggedIn) {
       </div>
       <button type="submit" class="btn submit-btn">Log in</button>
       <footer class="mt-2">
-        <a href="forgot-password.html" class="forgot-password">Forgot Password</a>
+        <a href="" class="forgot-password">Forgot Password</a>
       </footer>
     </section>
   </form>
