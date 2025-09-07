@@ -605,85 +605,96 @@ if ($action === 'fetch_all_cell_members') {
           - Functionality
 =======================================*/
 if ($action === 'edit_cell_member') {
-  $member_id = clean_input($_POST['member_id'] ?? '');
+  header('Content-Type: application/json; charset=utf-8');
+  try {
+    $member_id = clean_input($_POST['member_id']);
 
-  if (!$member_id) {
-    echo json_encode(["status" => "error", "message" => "Cell member ID not found!"]);
-    exit;
-  }
-
-  $title = clean_input($_POST['title']);
-  $first_name = clean_input($_POST['first_name']);
-  $last_name = clean_input($_POST['last_name']);
-  $phone_number = clean_input($_POST['phone_number']);
-  $email = clean_input($_POST['email']);
-  $dob_month = clean_input($_POST['dob_month']);
-  $dob_day = clean_input($_POST['dob_day']);
-  $occupation = clean_input($_POST['occupation']);
-  $residential_address = clean_input($_POST['res_address']);
-  $foundation_sch_status = clean_input($_POST['fs_status']);
-  $delg_in_cell = clean_input($_POST['delg_in_cell']);
-  $dept_in_church = clean_input($_POST['dept_in_church']);
-  $date_joined_ministry = clean_input($_POST['date_joined_ministry']);
-
-  // Server-side validation (first & last name required)
-  if ($first_name === '' || $last_name === '') {
-      echo 'First name and last name are required.';
-      exit;
-  }
-
-  // Check if the email already exists
-  if ($email !== '') {
-    // compare case-insensitively
-    $q = $conn->prepare("SELECT id FROM cell_members WHERE LOWER(email) = LOWER(?) LIMIT 1");
-    $q->execute([clean_input($email)]);
-    $foundId = $q->fetchColumn();
-
-    if ($foundId && $foundId != $member_id) {
-      echo json_encode([
-        'status' => 'error',
-        'message' => 'Email address taken! Please use another email.'
-      ]);
+    if (!$member_id) {
+      echo json_encode(["status" => "error", "message" => "Cell member ID not found!"]);
       exit;
     }
-  }
 
-  $stmt = $conn->prepare(
-    "UPDATE cell_members 
-    SET title = ?, first_name = ?, last_name = ?, phone_number = ?, email = ?, dob_month = ?, dob_day = ?, occupation = ?, residential_address = ?, foundation_sch_status = ?, delg_in_cell = ?, dept_in_church = ?, date_joined_ministry = ?
-    WHERE id = ?");
-  
-  $success = $stmt->execute([
-    clean_input($title),
-    clean_input($first_name),
-    clean_input($last_name),
-    clean_input($phone_number),
-    clean_input($email),
-    clean_input($dob_month),
-    clean_input($dob_day),
-    clean_input($occupation),
-    clean_input($residential_address),
-    clean_input($foundation_sch_status),
-    clean_input($delg_in_cell),
-    clean_input($dept_in_church),
-    clean_input($date_joined_ministry),
-    clean_input($member_id)
-  ]);
+    $title = clean_input($_POST['title']);
+    $first_name = clean_input($_POST['first_name']);
+    $last_name = clean_input($_POST['last_name']);
+    $phone_number = clean_input($_POST['phone']);
+    $email = clean_input($_POST['email']);
+    $dob_month = clean_input($_POST['dob_month']);
+    $dob_day = clean_input($_POST['dob_day']);
+    $occupation = clean_input($_POST['occupation']);
+    $residential_address = clean_input($_POST['res_address']);
+    $foundation_sch_status = clean_input($_POST['fs_status']);
+    $delg_in_cell = clean_input($_POST['delg_in_cell']);
+    $dept_in_church = clean_input($_POST['dept_in_church']);
+    $date_joined_ministry = clean_input($_POST['date_joined_ministry']);
 
-  if ($success) {
-    echo json_encode(["status" => "success"]);
-  } else {
-    echo json_encode(["status" => "error", "message" => "Failed to update member's details."]);
+    // Server-side validation (first & last name required)
+    if ($first_name === '' || $last_name === '') {
+      echo json_encode(["status" => "error", "message" => "First name and last name are required."]);
+      exit;
+    }
+
+    // Check if the email already exists (case-insensitive), but allow same member
+    if ($email !== '') {
+      $q = $conn->prepare("SELECT id FROM cell_members WHERE LOWER(email) = LOWER(?) LIMIT 1");
+      $q->execute([ $email ]);
+      $foundId = $q->fetchColumn();
+
+      if ($foundId && $foundId != $member_id) {
+        echo json_encode([
+          'status' => 'error',
+          'message' => 'Email address taken! Please use another email.'
+        ]);
+        exit;
+      }
+    }
+
+    $stmt = $conn->prepare(
+      "UPDATE cell_members 
+       SET title = ?, first_name = ?, last_name = ?, phone_number = ?, email = ?, dob_month = ?, dob_day = ?, occupation = ?, residential_address = ?, foundation_sch_status = ?, delg_in_cell = ?, dept_in_church = ?, date_joined_ministry = ?
+       WHERE id = ?"
+    );
+
+    $success = $stmt->execute([
+      $title,
+      $first_name,
+      $last_name,
+      $phone_number,
+      $email,
+      $dob_month,
+      $dob_day,
+      $occupation,
+      $residential_address,
+      $foundation_sch_status,
+      $delg_in_cell,
+      $dept_in_church,
+      $date_joined_ministry,
+      $member_id
+    ]);
+
+    if ($success) {
+      echo json_encode(["status" => "success"]);
+    } else {
+      // Provide a consistent JSON error message (avoid emitting raw SQL/HTML)
+      echo json_encode(["status" => "error", "message" => "Failed to update member's details."]);
+    }
+    exit;
+  } catch (PDOException $ex) {
+    error_log("edit_cell_member PDO error: " . $ex->getMessage());
+    echo json_encode(["status" => "error", "message" => "Database error while updating member."]);
+    exit;
+  } catch (Exception $ex) {
+    error_log("edit_cell_member error: " . $ex->getMessage());
+    echo json_encode(["status" => "error", "message" => "Unexpected error while updating member."]);
+    exit;
   }
-  exit;
 }
-
 
 /*=======================================
       Delete Cell Members Functionality
 =======================================*/
 if ($action === 'delete_cell_member') {
-  $member_id = clean_input($_POST['member_id'] ?? '');
+  $member_id = clean_input($_POST['member_id']);
 
   if (empty($member_id)) {
     echo json_encode([
