@@ -99,6 +99,11 @@ a,
   text-decoration: none !important;
 }
 
+input[type="checkbox"],
+input[type="radio"] {
+  box-shadow: none !important;
+}
+
 .form-control {
   box-shadow: none !important;
   border-radius: 10px;
@@ -261,9 +266,19 @@ button.check-btn svg {
   z-index: 2;
 }
 
+.action-modal .action-panel .header .title-bar {
+  width: 75%;
+}
+
+.action-modal .action-panel .header .title-bar .title {
+  max-width: 85%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .action-modal .action-panel .footer {
   background-color: inherit;
-  z-index: 2;
 }
 
 .action-modal .action-panel .panel-body .side-panel {
@@ -776,4 +791,41 @@ button.check-btn svg {
 .report-draft .publish-btn:hover,
 .report-draft .view-btn:hover {
   text-decoration: underline;
+}
+
+.custom-dropdown {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 100%;
+  z-index: 1000;
+  background: var(--tertiary-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  max-height: 250px;
+  overflow-y: auto;
+  width: 100%;
+  padding: 10px;
+  box-shadow: var(--box-shadow);
+  margin-top: 5px;
+}
+
+.custom-dropdown .dropdown-option {
+  padding: 5px 0;
+  cursor: pointer;
+}
+
+.custom-dropdown .dropdown-option:has(.select-all-options) {
+  border-bottom: 1px solid var(--tertiary-lighter);
+  margin-bottom: 5px;
+  padding-top: 3px;
+  padding-bottom: 7px;
+}
+
+.custom-dropdown .dropdown-option label {
+  display: block;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  cursor: pointer;
 }

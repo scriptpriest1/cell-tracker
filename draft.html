@@ -13,9 +13,9 @@
             <!-- A custom select dropdown here -->
             <!-- 
                 - The dropdown options should be populated from the backend with the list of all cell members of that cell with checkboxes beside them.
-                - When a member is selected, the value of the dropdown's custom select element just increases by 1 showing just the number of members that have been checked as the attendance.
-                - There should be an option to select all members at once.
-                - There should be a search input (on top of the list of members) in the dropdown to search for members by name. The search should filter through the list of members in the dropdown not fetching them from the backend. If the search input is cleared/empty the list of all the members should be restored.
+                - When a member is selected, the value of the dropdown's custom span(countiong element) for that dropdown should increment by 1 showing just the number of members that have been checked as the attendance. It should also decrement as the options are unchecked.
+                - The select-all-options checkbox should select all the members in the list when checked and uncheck all the members when unchecked.
+                - The search functionality in the dropdown should be implemented to search for members by name. The search should filter through the list of members in the dropdown not fetching them from the backend. If the search input is cleared/empty the list of all the members should be restored.
                 - The dropdown should be scrollable. Max height of the dropdown should be 250px.
                 - The attendees will be saved in the cell_report_attendees table in the database as rows. Read the sql file (cell_tracker_schema.sql) to see the structure and relation view of the cell_report_attendees table.
              -->
@@ -26,9 +26,9 @@
             <!-- A custom select dropdown here -->
             <!-- 
                 - The dropdown options should be populated from the list of all cell members that were in attendance (from the selected list of members in the select dropdown above) with checkboxes beside them.
-                - When a member is selected, the value of the dropdown's custom select element just increases by 1 showing just the number of members that have been checked as the first timers.
-                - There should be an option to select all members at once.
-                - There should be a search input (on top of the list of members) in the dropdown to search for members by name. The search should filter through the list of members in the dropdown not fetching them from the backend. If the search input is cleared/empty the list of all the members should be restored.
+                - When a member is selected, the value of the dropdown's custom span(countiong element) for that dropdown should increment by 1 showing just the number of members that have been checked as the first timers. It should also decrement as the options are unchecked.
+                - The select-all-options checkbox should select all the members in the list when checked and uncheck all the members when unchecked.
+                - The search functionality in the dropdown should be implemented to search for members by name. The search should filter through the list of members in the dropdown not fetching them from the backend. If the search input is cleared/empty the list of all the members should be restored.
                 - The dropdown should be scrollable. Max height of the dropdown should be 250px.
              -->
         </div>
@@ -38,9 +38,9 @@
             <!-- A custom select dropdown here -->
             <!-- 
                 - The dropdown options should be populated from the list of all cell members that were in attendance (from the selected list of members in the select dropdown above) with checkboxes beside them.
-                - When a member is selected, the value of the dropdown's custom select element just increases by 1 showing just the number of members that have been checked as the new converts.
-                - There should be an option to select all members at once.
-                - There should be a search input (on top of the list of members) in the dropdown to search for members by name. The search should filter through the list of members in the dropdown not fetching them from the backend. If the search input is cleared/empty the list of all the members should be restored.
+                - When a member is selected, the value of the dropdown's custom span(countiong element) for that dropdown should increment by 1 showing just the number of members that have been checked as the new converts. It should also decrement as the options are unchecked.
+                - The select-all-options checkbox should select all the members in the list when checked and uncheck all the members when unchecked.
+                - The search functionality in the dropdown should be implemented to search for members by name. The search should filter through the list of members in the dropdown not fetching them from the backend. If the search input is cleared/empty the list of all the members should be restored.
                 - The dropdown should be scrollable. Max height of the dropdown should be 250px.
              -->
         </div>

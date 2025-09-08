@@ -314,7 +314,7 @@ $(document).ready(() => {
     const $editModalTitleContent = `
       <div class="m-0 mb-1 p-0">
         <button class="p-0 m-0 dropdown-btn" id="editTitleBtn" title="Edit Cell Name">
-          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill=""><path class= "p-0 m-0" d="M200-200h57l391-391-57-57-391 391v57Zm-40 80q-17 0-28.5-11.5T120-160v-97q0-16 6-30.5t17-25.5l505-504q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L313-143q-11 11-25.5 17t-30.5 6h-97Zm600-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 50 50" width="24px" fill=""><path class= "p-0 m-0" d="M200-200h57l391-391-57-57-391 391v57Zm-40 80q-17 0-28.5-11.5T120-160v-97q0-16 6-30.5t17-25.5l505-504q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L313-143q-11 11-25.5 17t-30.5 6h-97Zm600-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>
         </button>
 
         <div class="position-absolute d-none align-items-center gap-2 p-0 m-0 edit-title-bar" style="border: none !important; left: 0; top: 30px">
@@ -759,8 +759,9 @@ $(document).ready(() => {
   // Create single draft DOM element (matching your sample)
   const buildDraftElement = (draft) => {
     // draft: object with id, type, week, status, date_generated, description (optional)
-    const desc = draft.description;
     const status = draft.status ?? "pending";
+    // Use correct description (fix: use helper, not undefined variable)
+    const desc = getMeetingDescription(draft.week);
     const $el = $(`
     <div class="report-draft px-3 py-2 d-flex align-items-center justify-content-between gap-2"
          data-report-type="${draft.type}"
@@ -980,19 +981,50 @@ $(document).ready(() => {
     const status = $draftDiv.data("report-status");
     const type = $draftDiv.data("report-type");
 
-    // Load the report form into the action modal
-    loadDynamicContentfunction.call(this, {
-      type: "report-form",
-      draftId,
-      week,
-      description,
-      status,
-      reportType: type,
-      mode: $btn.hasClass("publish-btn") ? "publish" : "view"
+    // Load the report form via AJAX and show in modal
+    $.ajax({
+      url: "../php/load_dynamic_content.php",
+      method: "POST",
+      data: {
+        "content-type": "cell-report-form",
+        "draft-id": draftId,
+        "week": week,
+        "description": description,
+        "status": status,
+        "report-type": type,
+        "mode": $btn.hasClass("publish-btn") ? "publish" : "view"
+      },
+      success: function (res) {
+        $("#action-modal header .title").text(`Week ${week}: ${description}`);
+        $("#action-modal .content-container").html(res);
+        toggleActionModal();
+      }
     });
   });
 
-  // Close ready() function
+  // Custom dropdown show/hide logic for report form
+  $(document).on("click", ".attendance-select", function (e) {
+    e.stopPropagation();
+    $(".custom-dropdown").not($(this).closest(".form-group").find(".attendance-dropdown")).hide();
+    $(this).closest(".form-group").find(".attendance-dropdown").toggle();
+  });
+  $(document).on("click", ".first-timers-select", function (e) {
+    e.stopPropagation();
+    $(".custom-dropdown").not($(this).closest(".form-group").find(".first-timers-dropdown")).hide();
+    $(this).closest(".form-group").find(".first-timers-dropdown").toggle();
+  });
+  $(document).on("click", ".new-converts-select", function (e) {
+    e.stopPropagation();
+    $(".custom-dropdown").not($(this).closest(".form-group").find(".new-converts-dropdown")).hide();
+    $(this).closest(".form-group").find(".new-converts-dropdown").toggle();
+  });
+
+  // Hide dropdowns when clicking outside
+  $(document).on("mousedown", function (e) {
+    if (!$(e.target).closest('.custom-dropdown, .attendance-select, .first-timers-select, .new-converts-select').length) {
+      $(".custom-dropdown").hide();
+    }
+  });
 });
 
 class SearchBar {
@@ -1212,3 +1244,234 @@ function fetchChurchCellMemberCount() {
     }
   });
 }
+
+/*********************************************
+  Custom Dropdown Member Selection Logic
+*********************************************/
+function initDropdownCheckboxLogic() {
+  // Helper to update count span for a dropdown
+  function updateDropdownCount($dropdown, checkboxSelector, countSpanSelector) {
+    const checkedCount = $dropdown.find(checkboxSelector + ":checked").length;
+    $dropdown.closest(".form-group").find(countSpanSelector).text(checkedCount);
+  }
+
+  // Helper to sync select-all checkbox state
+  function syncSelectAll($dropdown, checkboxSelector, selectAllSelector) {
+    const $checkboxes = $dropdown.find(checkboxSelector);
+    const $selectAll = $dropdown.find(selectAllSelector);
+    const checkedCount = $checkboxes.filter(":checked").length;
+    if (checkedCount === $checkboxes.length && $checkboxes.length > 0) {
+      $selectAll.prop("checked", true);
+    } else {
+      $selectAll.prop("checked", false);
+    }
+  }
+
+  // Attendance dropdown: update count and select-all on change
+  $(document).on("change", ".attendance-list input[type='checkbox']:not(.select-all-options)", function () {
+    const $dropdown = $(this).closest(".attendance-dropdown");
+    updateDropdownCount($dropdown, "input[type='checkbox']:not(.select-all-options)", ".attendance-count");
+    syncSelectAll($dropdown, "input[type='checkbox']:not(.select-all-options)", ".select-all-attendance.select-all-options");
+  });
+
+  // First timers dropdown: update count and select-all on change
+  $(document).on("change", ".first-timers-list input[type='checkbox']:not(.select-all-options)", function () {
+    const $dropdown = $(this).closest(".first-timers-dropdown");
+    updateDropdownCount($dropdown, "input[type='checkbox']:not(.select-all-options)", ".first-timers-count");
+    syncSelectAll($dropdown, "input[type='checkbox']:not(.select-all-options)", ".select-all-first-timers.select-all-options");
+  });
+
+  // New converts dropdown: update count and select-all on change
+  $(document).on("change", ".new-converts-list input[type='checkbox']:not(.select-all-options)", function () {
+    const $dropdown = $(this).closest(".new-converts-dropdown");
+    updateDropdownCount($dropdown, "input[type='checkbox']:not(.select-all-options)", ".new-converts-count");
+    syncSelectAll($dropdown, "input[type='checkbox']:not(.select-all-options)", ".select-all-new-converts.select-all-options");
+  });
+
+  // Select-all logic for attendance
+  $(document).on("change", ".select-all-attendance.select-all-options", function () {
+    const checked = $(this).prop("checked");
+    const $dropdown = $(this).closest(".attendance-dropdown");
+    $dropdown.find("input[type='checkbox']:not(.select-all-options)").prop("checked", checked);
+    updateDropdownCount($dropdown, "input[type='checkbox']:not(.select-all-options)", ".attendance-count");
+  });
+
+  // Select-all logic for first-timers
+  $(document).on("change", ".select-all-first-timers.select-all-options", function () {
+    const checked = $(this).prop("checked");
+    const $dropdown = $(this).closest(".first-timers-dropdown");
+    $dropdown.find("input[type='checkbox']:not(.select-all-options)").prop("checked", checked);
+    updateDropdownCount($dropdown, "input[type='checkbox']:not(.select-all-options)", ".first-timers-count");
+  });
+
+  // Select-all logic for new-converts
+  $(document).on("change", ".select-all-new-converts.select-all-options", function () {
+    const checked = $(this).prop("checked");
+    const $dropdown = $(this).closest(".new-converts-dropdown");
+    $dropdown.find("input[type='checkbox']:not(.select-all-options)").prop("checked", checked);
+    updateDropdownCount($dropdown, "input[type='checkbox']:not(.select-all-options)", ".new-converts-count");
+  });
+
+  // --- Scoped search/filter logic for dropdowns ---
+  function filterDropdownList($dropdown, listSelector, searchSelector) {
+    const query = $dropdown.find(searchSelector).val().toLowerCase();
+    $dropdown.find(listSelector + " .dropdown-option").each(function () {
+      // Only filter member options, not select-all
+      if ($(this).find(".select-all-options").length) return;
+      const labelText = $(this).text().toLowerCase();
+      $(this).toggle(labelText.includes(query));
+    });
+  }
+
+  // Attendance search
+  $(document).on("input", ".attendance-dropdown .attendance-search", function () {
+    const $dropdown = $(this).closest(".attendance-dropdown");
+    filterDropdownList($dropdown, ".attendance-list", ".attendance-search");
+  });
+
+  // First timers search
+  $(document).on("input", ".first-timers-dropdown .first-timers-search", function () {
+    const $dropdown = $(this).closest(".first-timers-dropdown");
+    filterDropdownList($dropdown, ".first-timers-list", ".first-timers-search");
+  });
+
+  // New converts search
+  $(document).on("input", ".new-converts-dropdown .new-converts-search", function () {
+    const $dropdown = $(this).closest(".new-converts-dropdown");
+    filterDropdownList($dropdown, ".new-converts-list", ".new-converts-search");
+  });
+
+  // Restore all options when search is cleared
+  $(document).on("change", ".attendance-dropdown .attendance-search", function () {
+    if (!$(this).val()) {
+      const $dropdown = $(this).closest(".attendance-dropdown");
+      $dropdown.find(".attendance-list .dropdown-option").show();
+    }
+  });
+  $(document).on("change", ".first-timers-dropdown .first-timers-search", function () {
+    if (!$(this).val()) {
+      const $dropdown = $(this).closest(".first-timers-dropdown");
+      $dropdown.find(".first-timers-list .dropdown-option").show();
+    }
+  });
+  $(document).on("change", ".new-converts-dropdown .new-converts-search", function () {
+    if (!$(this).val()) {
+      const $dropdown = $(this).closest(".new-converts-dropdown");
+      $dropdown.find(".new-converts-list .dropdown-option").show();
+    }
+  });
+
+  // --- Dynamic population of first-timers and new-converts dropdowns based on attendance ---
+
+  // Helper to get checked attendance member IDs and names
+  function getCheckedAttendanceMembers() {
+    const members = [];
+    $(".attendance-dropdown .attendance-list input[type='checkbox']:not(.select-all-options):checked").each(function () {
+      const $option = $(this).closest(".dropdown-option");
+      const memberId = $(this).val();
+      // Get label text (member name)
+      const memberName = $option.text().trim();
+      members.push({ id: memberId, name: memberName });
+    });
+    return members;
+  }
+
+  // Helper to repopulate a dropdown list with given members
+  function repopulateDropdownList($dropdownList, members, selectAllClass) {
+    // Save select-all option
+    const $selectAllOption = $dropdownList.find(".dropdown-option:has(." + selectAllClass + ")").first().clone(true, true);
+    $dropdownList.empty();
+    $dropdownList.append($selectAllOption);
+
+    members.forEach(member => {
+      $dropdownList.append(
+        `<div class="dropdown-option">
+          <label>
+            <input type="checkbox" class="form-check-input me-2" value="${member.id}">
+            ${member.name}
+          </label>
+        </div>`
+      );
+    });
+  }
+
+  // Update first-timers and new-converts dropdowns when attendance changes
+  function updateDependentDropdowns() {
+    const members = getCheckedAttendanceMembers();
+
+    // First-timers
+    const $firstTimersList = $(".first-timers-dropdown .first-timers-list");
+    repopulateDropdownList($firstTimersList, members, "select-all-first-timers");
+
+    // New-converts
+    const $newConvertsList = $(".new-converts-dropdown .new-converts-list");
+    repopulateDropdownList($newConvertsList, members, "select-all-new-converts");
+
+    // Reset counts and select-all checkboxes
+    $(".first-timers-count").text("0");
+    $(".new-converts-count").text("0");
+    $(".select-all-first-timers.select-all-options").prop("checked", false);
+    $(".select-all-new-converts.select-all-options").prop("checked", false);
+  }
+
+  // Whenever attendance selection changes, update dependent dropdowns
+  $(document).on("change", ".attendance-list input[type='checkbox']:not(.select-all-options)", function () {
+    updateDependentDropdowns();
+    // ...existing count/select-all sync logic
+    const $dropdown = $(this).closest(".attendance-dropdown");
+    updateDropdownCount($dropdown, "input[type='checkbox']:not(.select-all-options)", ".attendance-count");
+    syncSelectAll($dropdown, "input[type='checkbox']:not(.select-all-options)", ".select-all-attendance.select-all-options");
+  });
+
+  // Also update dependent dropdowns when select-all attendance is toggled
+  $(document).on("change", ".select-all-attendance.select-all-options", function () {
+    updateDependentDropdowns();
+    // ...existing count logic
+    const $dropdown = $(this).closest(".attendance-dropdown");
+    updateDropdownCount($dropdown, "input[type='checkbox']:not(.select-all-options)", ".attendance-count");
+  });
+
+  // ...existing code for counts, select-all, search, etc...
+}
+
+// Initialize dropdown logic (self-contained)
+initDropdownCheckboxLogic();
+
+// Helper for meeting description (JS, for frontend rendering if needed)
+function getMeetingDescription(week) {
+  if (week == 1) return "Prayer and Planning";
+  if (week == 2) return "Bible Study Class 1";
+  if (week == 3) return "Bible Study Class 2";
+  if (week == 4) return "Cell Outreach";
+  return "Cell Fellowship";
+}
+
+// When rendering report drafts, ensure description is set using helper
+function buildDraftElement(draft) {
+  // draft: object with id, type, week, status, date_generated, description (optional)
+  const status = draft.status ?? "pending";
+  // Use correct description (fix: use helper, not undefined variable)
+  const desc = getMeetingDescription(draft.week);
+  const $el = $(`
+    <div class="report-draft px-3 py-2 d-flex align-items-center justify-content-between gap-2"
+         data-report-type="${draft.type}"
+         data-week="${draft.week}"
+         data-report-status="${status}"
+         data-id="${draft.id}"
+         data-date-generated="${draft.date_generated}">
+      <div class="text-bar d-flex align-items-center gap-2">
+        <h6 class="m-0 p-0 week">Week ${draft.week}:</h6>
+        <p class="m-0 p-0 description">${$("<div>").text(desc).html()}</p>
+      </div>
+
+      <div class="action-bar d-flex align-items-center justify-content-between gap-2">
+        <span class="label">${status === "published" ? "published" : ""}</span>
+        <button class="${status === "published" ? "view-btn" : "publish-btn"
+    } m-0 p-0" data-cell-id="${draft.cell_id}">${status === "published" ? "View" : "Publish"
+    }</button>
+      </div>
+    </div>
+  `);
+
+  return $el;
+};

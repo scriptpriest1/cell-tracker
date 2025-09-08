@@ -719,26 +719,26 @@ if ($action === 'generate_report_draft') {
 
   $type = in_array(clean_input($_POST['type'] ?? 'meeting'), ['meeting', 'outreach']) ? clean_input($_POST['type']) : 'meeting';
 
-  // Refactored week calculation: week 1 starts on first Sunday of the month
+  // Week calculation: week 1 starts on first Monday of the month
   $today = new DateTime();
   $year = (int)$today->format('Y');
   $month = (int)$today->format('m');
   $day = (int)$today->format('j');
 
-  // Find first Sunday of the month
-  $firstOfMonth = new DateTime("$year-$month-01");
-  $firstSunday = clone $firstOfMonth;
-  $dow = (int)$firstOfMonth->format('w'); // 0=Sun, 6=Sat
-  if ($dow !== 0) {
-    $firstSunday->modify('next Sunday');
+  // Find first Monday of the month
+  $firstOfMonth = new DateTime("$year-$month-01 00:00:00");
+  $dow = (int)$firstOfMonth->format('N'); // 1=Mon, 7=Sun
+  $firstMonday = clone $firstOfMonth;
+  if ($dow !== 1) {
+    $firstMonday->modify('next Monday');
   }
-  $firstSundayDay = (int)$firstSunday->format('j');
+  $firstMondayDay = (int)$firstMonday->format('j');
 
-  // Calculate week number (week 1 starts on first Sunday, next weeks start on following Sundays)
-  if ($day < $firstSundayDay) {
-    $week = 0; // before first Sunday, not a reporting week
+  // Calculate week number (week 1 starts on first Monday, next weeks start on following Mondays)
+  if ($day < $firstMondayDay) {
+    $week = 0; // before first Monday, not a reporting week
   } else {
-    $week = 1 + floor(($day - $firstSundayDay) / 7);
+    $week = 1 + floor(($day - $firstMondayDay) / 7);
   }
 
   // If not a reporting week, do not generate draft
@@ -747,25 +747,15 @@ if ($action === 'generate_report_draft') {
     exit;
   }
 
-  // Set expiry_date: Saturday 23:59:59 of the reporting week
-  $draftSunday = clone $firstSunday;
-  $draftSunday->modify('+' . ($week - 1) * 7 . ' days');
-  $expiryDate = clone $draftSunday;
-  $expiryDate->modify('next Saturday');
+  // Set expiry_date: Sunday 23:59:59 of the reporting week
+  $draftMonday = clone $firstMonday;
+  $draftMonday->modify('+' . ($week - 1) * 7 . ' days');
+  $expiryDate = clone $draftMonday;
+  $expiryDate->modify('next Sunday');
   $expiryDate->setTime(23, 59, 59);
 
-  // Set description
-  if ($week === 1) {
-    $description = 'Prayer and Planning';
-  } else if ($week === 2) {
-    $description = 'Bible Study Class 1';
-  } else if ($week === 3) {
-    $description = 'Bible Study Class 2';
-  } else if ($week === 4) {
-    $description = 'Cell Outreach';
-  } else {
-    $description = 'Cell Meeting';
-  }
+  // Set description using helper
+  $description = getMeetingDescription($week);
 
   try {
     $stmt = $conn->prepare("
@@ -817,6 +807,10 @@ if ($action === 'fetch_report_drafts') {
     ");
     $q->execute([clean_input($cell_id)]);
     $rows = $q->fetchAll(PDO::FETCH_ASSOC);
+    // Ensure description is set correctly for each draft
+    foreach ($rows as &$row) {
+      $row['description'] = getMeetingDescription($row['week']);
+    }
     echo json_encode(['status' => 'success', 'data' => $rows]);
     exit;
   } catch (PDOException $ex) {
@@ -969,5 +963,14 @@ if ($action === 'fetch_church_cell_member_count') {
   $count = $stmt->fetchColumn();
   echo json_encode(['count' => intval($count)]);
   exit;
+}
+
+// Helper function for meeting description
+function getMeetingDescription($week) {
+  if ($week == 1) return 'Prayer and Planning';
+  if ($week == 2) return 'Bible Study Class 1';
+  if ($week == 3) return 'Bible Study Class 2';
+  if ($week == 4) return 'Cell Outreach';
+  return 'Cell Fellowship';
 }
 
