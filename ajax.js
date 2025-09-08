@@ -314,7 +314,7 @@ $(document).ready(() => {
     const $editModalTitleContent = `
       <div class="m-0 mb-1 p-0">
         <button class="p-0 m-0 dropdown-btn" id="editTitleBtn" title="Edit Cell Name">
-          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 50 50" width="24px" fill=""><path class= "p-0 m-0" d="M200-200h57l391-391-57-57-391 391v57Zm-40 80q-17 0-28.5-11.5T120-160v-97q0-16 6-30.5t17-25.5l505-504q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L313-143q-11 11-25.5 17t-30.5 6h-97Zm600-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill=""><path class= "p-0 m-0" d="M200-200h57l391-391-57-57-391 391v57Zm-40 80q-17 0-28.5-11.5T120-160v-97q0-16 6-30.5t17-25.5l505-504q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L313-143q-11 11-25.5 17t-30.5 6h-97Zm600-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>
         </button>
 
         <div class="position-absolute d-none align-items-center gap-2 p-0 m-0 edit-title-bar" style="border: none !important; left: 0; top: 30px">
