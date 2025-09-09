@@ -944,6 +944,7 @@ if (isset($_POST['content-type'])) {
     $membersStmt = $conn->prepare("SELECT id, first_name, last_name FROM cell_members WHERE cell_id = ?");
     $membersStmt->execute([$cellId]);
     $members = $membersStmt->fetchAll(PDO::FETCH_ASSOC);
+    $members_count = count($members);
 
     // Ensure description is set correctly
     $description = getMeetingDescription($week);
@@ -980,14 +981,16 @@ if (isset($_POST['content-type'])) {
 
         // Select cell members that were not in attendance
         $absMembQ = $conn->prepare("
-        SELECT DISTINCT cm.id, 
-        cm.first_name, 
-        cm.last_name
-        FROM cell_members cm
-        LEFT JOIN cell_report_attendees cra
-        ON cm.id = cra.cell_member_id 
-        WHERE cm.cell_id = ?");
-        $absMembQ->execute([$cellId]);
+        SELECT id, first_name, last_name
+        FROM cell_members
+        WHERE cell_id = ?
+          AND id NOT IN (
+            SELECT cell_member_id
+            FROM cell_report_attendees
+            WHERE cell_report_id = ?
+          )
+        ");
+        $absMembQ->execute([$cellId, $cell_report_id]);
         $absMembers = $absMembQ->fetchAll(PDO::FETCH_ASSOC);
         $absentee_count = count($absMembers);
       }
@@ -1073,25 +1076,23 @@ if (isset($_POST['content-type'])) {
           <div class="form-group" style="position:relative;">
             <label for="absent-members">Cell members that were absent:</label>
             <button type="button" class="form-select form-control absent-members-select text-start" id="absent-members-select" tabindex="0">
-              (<span class="absentee-count"><?= $absentee_count || 0 ?></span>)
+              (<span class="absentee-count"><?= $absentee_count ?></span>)
             </button>
             <div class="custom-dropdown absent-members-dropdown">
               <input type="text" class="form-control mb-2 absent-members-search" placeholder="Search members...">
               <div class="absent-members-list">
-                <?php
-                foreach ($members as $m):
-                  $name = htmlspecialchars($m['first_name'] . ' ' . $m['last_name']); 
-                  break;
-                ?>
-                  <div class="dropdown-option">
-                    <label>
-                      <input type="checkbox" class="form-check-input me-2" name="" checked disabled>
-                      <?= $name ?>
-                    </label>
-                  </div>
-                <?php
-                  endforeach;
-                ?>
+                <?php if ($absentee_count === 0): ?>
+                  <div class="dropdown-option text-secondary text-center">No absentees</div>
+                <?php else: ?>
+                  <?php foreach ($absMembers as $m): ?>
+                    <div class="dropdown-option">
+                      <label>
+                        <input type="checkbox" class="form-check-input me-2" checked disabled>
+                        <?= htmlspecialchars($m['first_name'] . ' ' . $m['last_name']) ?>
+                      </label>
+                    </div>
+                  <?php endforeach; ?>
+                <?php endif; ?>
               </div>
             </div>
           </div>

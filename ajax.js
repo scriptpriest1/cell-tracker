@@ -175,6 +175,7 @@ $(document).ready(() => {
         if (res === "success") {
           alert("Cell added successfully!");
           fetchAllCells();
+          initChurchReports();
           $("#add-cell-form").trigger("reset");
           $("#add-cell-form .submit-btn")
             .prop("disabled", true)
