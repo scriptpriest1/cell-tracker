@@ -20,7 +20,7 @@
     <button id="outreach" class="filter">Outreaches</button>
   </div>
   <div class="reports-body">
-    <button type="button" id="create-draft-btn" class="bg-dark text-white position-absolute top-0 end-0">Create draft</button>
+    <?php //<button type="button" id="create-draft-btn" class="bg-dark text-white position-absolute top-0 end-0">Create draft</button> ?>
     <!-- Report block dynamically inserted here -->
   </div>
 </section>

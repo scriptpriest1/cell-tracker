@@ -254,7 +254,7 @@ button.check-btn svg {
   left: 50%;
   transform: translate(-50%, -50%);
   width: 500px;
-  height: fit-content;
+  height: auto;
   max-height: 450px;
   background-color: var(--tertiary-alt);
   border-radius: 20px;
