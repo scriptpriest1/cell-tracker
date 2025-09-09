@@ -1,25 +1,49 @@
 <?php
 session_start();
-include 'connect_db.php';   // sets up $conn as a PDO instance
+include 'connect_db.php';
 include 'functions.php';
 
+// Helper function for meeting description
+function getMeetingDescription($week) {
+  if ($week == 1) return 'Prayer and Planning';
+  if ($week == 2) return 'Bible Study Class 1';
+  if ($week == 3) return 'Bible Study Class 2';
+  if ($week == 4) return 'Cell Outreach';
+  return 'Cell Fellowship';
+}
+
+// Add helper for report type by week
+function getReportTypeByWeek($week) {
+  if ($week == 4) return 'outreach';
+  return 'meeting';
+}
+
 if (isset($_POST['content-type'])) {
-  $content_type = $_POST['content-type'];
+  $content_type = clean_input($_POST['content-type']);
 
   if ($content_type === 'add-a-cell-form') {
     echo <<<HTML
       <form id="add-cell-form" class="action-modal-form position-relative">
         <div class="body px-4 pt-2">
           <div class="form-group">
-            <label for="cell-name">Name of Cell:</label>
-            <input type="text" name="cell_name" id="cell-name" class="form-control" placeholder="e.g Haven (don't add &quot;Cell&quot; to the name)" required>
+            <label for="cell-name" class="">Name of Cell: &nbsp; <span class="text-warning d-block d-md-inline-block" style="font-size: 14px; margin-top: -5px;">(Don't add "Cell" to the name)</span></label>
+            <input type="text" name="cell_name" id="cell-name" class="form-control" placeholder="e.g &quot;Haven&quot; not &quot;Haven Cell&quot;" required>
           </div>
 
           <div class="admin-assignment-section mt-4">
             <h6 class="title mt-1 mb-2 text-center py-2 fw-normal">Assign a Cell leader/admin to this Cell (can be done later)</h6>
 
             <div class="form-group">
-              <label for="admin-role">Admin's role:</label>
+              <label for="choose-admin">Choose who to assign:</label>
+              <select name="choose_admin" id="choose-admin" class="form-control form-select">
+                <option value="">Select</option>
+                <option value="self">Assign yourself</option>
+                <option value="else">Assign someone else</option>
+              </select>
+            </div>
+
+            <div class="form-group role-container d-none">
+              <label for="admin-role">Role:</label>
               <select name="admin_role" id="admin-role" class="form-control form-select">
                 <option value="">Select</option>
                 <option value="leader">Cell Leader</option>
@@ -27,31 +51,39 @@ if (isset($_POST['content-type'])) {
               </select>
             </div>
 
-            <div class="form-group">
-              <label for="admin-first-name">Admin's first name:</label>
-              <input type="text" name="admin_first_name" id="admin-first-name" class="form-control">
-            </div>
+            <div class="hidden-section mt-3 d-none">
+              <div class="form-group">
+                <label for="admin-first-name">First name:</label>
+                <input type="text" name="admin_first_name" id="admin-first-name" class="form-control">
+              </div>
 
-            <div class="form-group">
-              <label for="admin-last-name">Admin's last name:</label>
-              <input type="text" name="admin_last_name" id="admin-last-name" class="form-control">
-            </div>
+              <div class="form-group">
+                <label for="admin-last-name">Last name:</label>
+                <input type="text" name="admin_last_name" id="admin-last-name" class="form-control">
+              </div>
 
-            <div class="form-group">
-              <label for="admin-email">Admin's email:</label>
-              <input type="email" name="admin_email" id="admin-email" class="form-control">
-            </div>
+              <div class="form-group">
+                <label for="admin-email">Email:</label>
+                <input type="email" name="admin_email" id="admin-email" class="form-control">
+              </div>
 
-            <div class="form-group">
-              <label for="admin-password">Create Admin's login password:</label>
-              <input type="password" name="admin_password" id="admin-password" class="form-control">
-            </div>
+              <div class="form-group">
+                <label for="admin-phone">Phone number:</label>
+                <input type="phone" name="admin_phone" id="admin-phone" class="form-control">
+              </div>
 
-            <div class="form-group">
-              <label for="admin-password-confirm">Confirm password:</label>
-              <input type="password" name="admin_password_confirm" id="admin-password-confirm" class="form-control">
+              <div class="form-group">
+                <label for="admin-password">Create login password:</label>
+                <input type="password" name="admin_password" id="admin-password" class="form-control">
+              </div>
+
+              <div class="form-group">
+                <label for="admin-password-confirm">Confirm password:</label>
+                <input type="password" name="admin_password_confirm" id="admin-password-confirm" class="form-control">
+              </div>
             </div>
           </div>
+
         </div>
 
         <footer class="position-absolute bottom-0 py-3 px-4 w-100">
@@ -74,7 +106,7 @@ if (isset($_POST['content-type'])) {
               class="form-control form-select"
             >
               <option value="">Select</option>
-              <option value="self">Assign youself</option>
+              <option value="self">Assign yourself</option>
               <option value="else">Assign someone else</option>
             </select>
           </div>
@@ -124,6 +156,11 @@ if (isset($_POST['content-type'])) {
             </div>
 
             <div class="form-group">
+              <label for="phone">Phone number:</label>
+              <input type="phone" name="phone" id="phone" class="form-control">
+            </div>
+
+            <div class="form-group">
               <label for="password">Create login password:</label>
               <input
                 type="password"
@@ -155,137 +192,1063 @@ if (isset($_POST['content-type'])) {
   /*=======================================
       Fetch Admins for a viewed Cell 
             - Functionality
-=======================================*/
-if ($content_type === 'view-cell-details' || $content_type === 'fetch-cell-admins') {
-  $cell_id = $_POST['cell-id'] ?? null;
+  =======================================*/
+  if ($content_type === 'view-cell-details' || $content_type === 'fetch-cell-admins') {
+    $cell_id = clean_input($_POST['cell-id'] ?? null);
 
-  if (!$cell_id) {
-    echo "Missing cell ID";
+    if (!$cell_id) {
+      echo "Cannot access Cell";
+      exit;
+    }
+
+    $user_login = clean_input($_SESSION['user_login']);
+    $admins = [];
+
+    // Fetch all users assigned to this cell
+    $stmt = $conn->prepare("SELECT id, first_name, last_name, user_login, cell_role, church_id FROM users WHERE cell_id = ?");
+    $stmt->execute([$cell_id]);
+    $all_users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $loggedInUser = null;
+    $cellLeader = null;
+    $others = [];
+
+    foreach ($all_users as $user) {
+      $name = htmlspecialchars($user['first_name'] . ' ' . $user['last_name']);
+      $email = htmlspecialchars($user['user_login']);
+      $userId = $user['id'];
+      $labels = [];
+
+      if ($email === $user_login) {
+        $labels[] = 'You';
+        if ($user['cell_role'] === 'leader') {
+          $labels[] = 'Cell Leader';
+        }
+        $loggedInUser = [
+          'id' => $userId,
+          'name' => $name,
+          'email' => $email,
+          'labels' => $labels,
+        ];
+        continue;
+      }
+
+      if ($user['cell_role'] === 'leader') {
+        $labels[] = 'Cell Leader';
+        $cellLeader = [
+          'id' => $userId,
+          'name' => $name,
+          'email' => $email,
+          'labels' => $labels,
+        ];
+        continue;
+      }
+
+      $others[] = [
+        'id' => $userId,
+        'name' => $name,
+        'email' => $email,
+        'labels' => [],
+      ];
+    }
+
+    ob_start();
+    ?>
+    <ol class="cell-admins-list p-0 m-0 ps-4">
+      <?php
+      if ($loggedInUser):
+        $labelText = !empty($loggedInUser['labels']) ? ' (' . implode(') (', $loggedInUser['labels']) . ')' : '';
+        $nameWithLabels = $loggedInUser['name'] . $labelText;
+        $email = $loggedInUser['email'];
+        $id = $loggedInUser['id'];
+      ?>
+        <li>
+          <div class="d-flex justify-content-between gap-3 align-items-start">
+            <div class="identity">
+              <p class="admin-name p-0 m-0"><?= $nameWithLabels ?></p>
+              <p class="admin-email p-0 m-0"><?= $email ?></p>
+            </div>
+
+            <!-- Dropdown Toggle -->
+            <div class="dropdown static">
+              <button
+                class="px-2 py-0 m-0"
+                type="button"
+                id="adminOptions<?= $id ?>"
+                data-bs-toggle="dropdown"
+                data-bs-display="static"
+                aria-expanded="false"
+              >
+                ⋮
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminOptions<?= $id ?>">
+                <?php if ($email !== $user_login): ?>
+                  <li>
+                    <a 
+                      class="dropdown-item load-action-modal-dyn-content edit-admin-btn" 
+                      href="#" 
+                      data-content-type="edit-cell-admin"
+                      data-cell-id="<?= $cell_id ?>"
+                      data-admin-id="<?= $id ?>"
+                    >Edit</a>
+                  </li>
+                <?php endif; ?>
+                <li>
+                  <a class="dropdown-item unassign-admin-btn" href="#" data-content-type="fetch-cell-admins" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">
+                  <?php if ($email === $user_login): ?>Unassign<?php else: ?>Remove Admin<?php endif; ?></a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </li>
+
+      <?php endif; ?>
+
+      <?php
+      if ($cellLeader && (!$loggedInUser || $cellLeader['email'] !== $loggedInUser['email'])):
+        $labelText = !empty($cellLeader['labels']) ? ' (' . implode(') (', $cellLeader['labels']) . ')' : '';
+        $nameWithLabels = $cellLeader['name'] . $labelText;
+        $email = $cellLeader['email'];
+        $id = $cellLeader['id'];
+      ?>
+        <li>
+          <div class="d-flex justify-content-between gap-3 align-items-start">
+            <div class="identity">
+              <p class="admin-name p-0 m-0"><?= $nameWithLabels ?></p>
+              <p class="admin-email p-0 m-0"><?= $email ?></p>
+            </div>
+
+            <!-- Dropdown Toggle -->
+            <div class="dropdown static">
+              <button
+                class="px-2 py-0 m-0"
+                type="button"
+                id="adminOptions<?= $id ?>"
+                data-bs-toggle="dropdown"
+                data-bs-display="static"
+                aria-expanded="false"
+              >
+                ⋮
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminOptions<?= $id ?>">
+                <?php if ($email !== $user_login): ?>
+                  <li>
+                    <a 
+                      class="dropdown-item load-action-modal-dyn-content edit-admin-btn" 
+                      href="#" 
+                      data-content-type="edit-cell-admin"
+                      data-cell-id="<?= $cell_id ?>"
+                      data-admin-id="<?= $id ?>"
+                    >Edit</a>
+                  </li>
+                <?php endif; ?>
+                <li>
+                  <a class="dropdown-item unassign-admin-btn" href="#" data-content-type="fetch-cell-admins" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">
+                  <?php if ($email === $user_login): ?>Unassign<?php else: ?>Remove Admin<?php endif; ?></a>
+                </li>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </li>
+      <?php endif; ?>
+
+      <?php foreach ($others as $admin):
+        $name = $admin['name'];
+        $email = $admin['email'];
+        $id = $admin['id'];
+      ?>
+        <li>
+          <div class="d-flex justify-content-between gap-3 align-items-start">
+            <div class="identity">
+              <p class="admin-name p-0 m-0"><?= $name ?></p>
+              <p class="admin-email p-0 m-0"><?= $email ?></p>
+            </div>
+
+            <!-- Dropdown Toggle -->
+            <div class="dropdown static">
+              <button
+                class="px-2 py-0 m-0"
+                type="button"
+                id="adminOptions<?= $id ?>"
+                data-bs-toggle="dropdown"
+                data-bs-display="static"
+                aria-expanded="false"
+              >
+                ⋮
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminOptions<?= $id ?>">
+                <?php if ($email !== $user_login): ?>
+                  <li>
+                    <a 
+                      class="dropdown-item load-action-modal-dyn-content edit-admin-btn" 
+                      href="#" 
+                      data-content-type="edit-cell-admin"
+                      data-cell-id="<?= $cell_id ?>"
+                      data-admin-id="<?= $id ?>"
+                    >Edit</a>
+                  </li>
+                <?php endif; ?>
+                <li>
+                  <a class="dropdown-item unassign-admin-btn" href="#" data-content-type="fetch-cell-admins" data-user-id="<?= $id ?>" data-cell-id="<?= $cell_id ?>">
+                  <?php if ($email === $user_login): ?>Unassign<?php else: ?>Remove Admin<?php endif; ?></a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </li>
+      <?php endforeach; ?>
+    </ol>
+    <?php
+    $html = ob_get_clean();
+
+    echo <<<HTML
+      <div class="action-modal-inner scrollable px-4 pt-2">
+        <span class="p-0 pb-1 m-0 mb-2 fw-bold">Admins</span>
+        <div class="cell-admins-list-container mt-2">
+          {$html}
+          <p class="text-center admins-list-info m-0 p-0 fs-6"></p>
+        </div>
+      </div>
+    HTML;
+
     exit;
   }
 
-  $user_login = $_SESSION['user_login'];
-  $admins = [];
+  /*=======================================
+      Fetch form for Editing a Cell Admin
+            - Functionality
+  =======================================*/
+  if ($content_type === 'edit-cell-admin') {
+    $cell_id = clean_input($_POST['cell-id'] ?? null);
+    $admin_id = clean_input($_POST['admin-id'] ?? null);
 
-  // Fetch all users assigned to this cell
-  $stmt = $conn->prepare("SELECT id, first_name, last_name, user_login, cell_role, church_id FROM users WHERE cell_id = ?");
-  $stmt->execute([$cell_id]);
-  $all_users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    if (!$admin_id) {
+      echo "<p class='text-center mt-4'>Cannot access Admin</p>";
+      exit;
+    } 
 
-  $loggedInUser = null;
-  $cellLeader = null;
-  $others = [];
+    $stmt = $conn->prepare("SELECT cell_role, first_name, last_name, user_login, phone_number FROM users WHERE id = ?");
+    $stmt->execute([clean_input($admin_id)]);
+    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
 
-  foreach ($all_users as $user) {
-    $name = htmlspecialchars($user['first_name'] . ' ' . $user['last_name']);
-    $email = htmlspecialchars($user['user_login']);
-    $userId = $user['id'];
-    $labels = [];
-
-    if ($email === $user_login) {
-      $labels[] = 'You';
-      if ($user['cell_role'] === 'leader') {
-        $labels[] = 'Cell Leader';
-      }
-      $loggedInUser = [
-        'id' => $userId,
-        'name' => $name,
-        'email' => $email,
-        'labels' => $labels,
-      ];
-      continue;
+    if (!$admin) {
+      echo "<p class='text-center mt-4'>Admin not found</p>";
+      exit;
     }
 
-    if ($user['cell_role'] === 'leader') {
-      $labels[] = 'Cell Leader';
-      $cellLeader = [
-        'id' => $userId,
-        'name' => $name,
-        'email' => $email,
-        'labels' => $labels,
-      ];
-      continue;
-    }
+    $role = htmlspecialchars($admin['cell_role']);
+    $first_name = htmlspecialchars($admin['first_name']);
+    $last_name = htmlspecialchars($admin['last_name']);
+    $email = htmlspecialchars($admin['user_login']);
+    $phone_number = htmlspecialchars($admin['phone_number']);
 
-    $others[] = [
-      'id' => $userId,
-      'name' => $name,
-      'email' => $email,
-      'labels' => [],
-    ];
+    ob_start();
+    ?>
+      <form id="edit-cell-admin-form" class="action-modal-form load-action-modal-dyn-content position-relative pt-2" data-content-type="fetch-cell-admins" data-cell-id="<?= $cell_id ?>">
+        <input type="hidden" name="cell_id" value="<?= $cell_id ?>" id="cell-id" />
+        <input type="hidden" name="admin_id" value="<?= $admin_id ?>" id="admin-id" />
+        <div class="body px-4 pt-2">
+          <div class="form-group">
+            <label for="role">Role:</label>
+            <select name="role" id="role" class="form-control form-select">
+              <option value="<?= $role ?>" selected>Default</option>
+              <option value="leader">Cell Leader</option>
+              <option value="executive">Cell Executive</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="first-name">First name:</label>
+            <input
+              type="text"
+              name="first_name"
+              id="first-name"
+              class="form-control"
+              value="<?= $first_name ?>"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="last-name">Last name:</label>
+            <input
+              type="text"
+              name="last_name"
+              id="last-name"
+              class="form-control"
+              value="<?= $last_name ?>"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" name="email" id="email" class="form-control" value="<?= $email ?>"/>
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone number:</label>
+            <input type="phone" name="phone" id="phone" class="form-control" value="<?= $phone_number ?>"/>
+          </div>
+        </div>
+
+        <footer class="position-absolute bottom-0 py-3 px-4 w-100 d-flex align-items-center gap-2">
+          <button type="button" class="cancel-btn w-100">Cancel</button>
+          <button type="submit" class="submit-btn w-100">Save</button>
+        </footer>
+      </form>
+    <?php
+    $form = ob_get_clean();
+    echo $form;
+
+    exit;
   }
 
-  ob_start();
-  ?>
-  <ol class="cell-admins-list p-0 m-0 ps-4">
-    <?php
-    if ($loggedInUser):
-      $labelText = !empty($loggedInUser['labels']) ? ' (' . implode(') (', $loggedInUser['labels']) . ')' : '';
-      $nameWithLabels = $loggedInUser['name'] . $labelText;
-      $email = $loggedInUser['email'];
-      $id = $loggedInUser['id'];
-    ?>
-      <li>
-        <div class="d-flex justify-content-between gap-3 align-items-start">
-          <div class="identity">
-            <p class="admin-name p-0 m-0"><?= $nameWithLabels ?></p>
-            <p class="admin-email p-0 m-0"><?= $email ?></p>
+    /*=======================================
+        Add Cell Member - Functionality
+  =======================================*/
+  if ($content_type === 'add-cell-member-form') {
+    echo <<<HTML
+      <form id="add-cell-member-form" class="action-modal-form position-relative">
+        <div class="body px-4 pt-2">
+          <div class="form-group">
+            <label for="title">Title:</label>
+            <select name="title" id="title" class="form-control form-select">
+              <option value="">Select</option>
+              <option value="brother">Brother</option>
+              <option value="sister">Sister</option>
+              <option value="pastor">Pastor</option>
+              <option value="deacon">Deacon</option>
+              <option value="deaconess">Deaconess</option>
+            </select>
           </div>
-          <button type="button" class=" px-3 py-1 unassign-btn" data-user-id="<?= $id ?>" data-content-type="fetch-cell-admins" data-cell-id="<?= $cell_id ?>">Unassign</button>
-        </div>
-      </li>
-    <?php endif; ?>
 
-    <?php
-    if ($cellLeader && (!$loggedInUser || $cellLeader['email'] !== $loggedInUser['email'])):
-      $labelText = !empty($cellLeader['labels']) ? ' (' . implode(') (', $cellLeader['labels']) . ')' : '';
-      $nameWithLabels = $cellLeader['name'] . $labelText;
-      $email = $cellLeader['email'];
-      $id = $cellLeader['id'];
-    ?>
-      <li>
-        <div class="d-flex justify-content-between gap-3 align-items-start">
-          <div class="identity">
-            <p class="admin-name p-0 m-0"><?= $nameWithLabels ?></p>
-            <p class="admin-email p-0 m-0"><?= $email ?></p>
+          <div class="form-group">
+            <label for="first-name">First name:</label>
+            <input
+              type="text"
+              name="first_name"
+              id="first-name"
+              class="form-control"
+            />
           </div>
-          <button type="button" class=" px-3 py-1 unassign-btn delete" data-user-id="<?= $id ?>" data-content-type="fetch-cell-admins" data-cell-id="<?= $cell_id ?>">Remove</button>
-        </div>
-      </li>
-    <?php endif; ?>
 
-    <?php foreach ($others as $admin):
-      $name = $admin['name'];
-      $email = $admin['email'];
-      $id = $admin['id'];
-    ?>
-      <li>
-        <div class="d-flex justify-content-between gap-3 align-items-start">
-          <div class="identity">
-            <p class="admin-name p-0 m-0"><?= $name ?></p>
-            <p class="admin-email p-0 m-0"><?= $email ?></p>
+          <div class="form-group">
+            <label for="last-name">Last name:</label>
+            <input
+              type="text"
+              name="last_name"
+              id="last-name"
+              class="form-control"
+            />
           </div>
-          <button type="button" class=" px-3 py-1 unassign-btn delete" data-user-id="<?= $id ?>" data-content-type="fetch-cell-admins" data-cell-id="<?= $cell_id ?>">Remove</button>
-        </div>
-      </li>
-    <?php endforeach; ?>
-  </ol>
-  <?php
-  $html = ob_get_clean();
 
-  echo <<<HTML
-    <div class="action-modal-inner scrollable px-4 pt-2">
-      <span class="p-0 pb-1 m-0 mb-2 fw-bold">Admins</span>
-      <div class="cell-admins-list-container mt-2">
-        {$html}
-        <p class="text-center admins-list-info m-0 p-0 fs-6"></p>
+          <div class="form-group">
+            <label for="phone">Phone number:</label>
+            <input type="phone" name="phone_number" id="phone" class="form-control" />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" name="email" id="email" class="form-control" />
+          </div>
+
+          <div class="form-group">
+            <label for="dob">Date of birth:</label>
+            <div class="d-flex align-items-center gap-2">
+              <!-- MONTH -->
+              <select name="dob_month" id="dob-month" class="form-control form-select">
+                <option value="">Month</option>
+                <option value="jan">Jan</option>
+                <option value="feb">Feb</option>
+                <option value="mar">Mar</option>
+                <option value="apr">Apr</option>
+                <option value="may">May</option>
+                <option value="jun">Jun</option>
+                <option value="jul">Jul</option>
+                <option value="aug">Aug</option>
+                <option value="sep">Sep</option>
+                <option value="oct">Oct</option>
+                <option value="nov">Nov</option>
+                <option value="dec">Dec</option>
+              </select>
+              <!-- DAY -->
+              <select name="dob_day" id="dob-day" class="form-control form-select">
+                <option value="">Day</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+                <option value="19">19</option>
+                <option value="20">20</option>
+                <option value="21">21</option>
+                <option value="22">22</option>
+                <option value="23">23</option>
+                <option value="24">24</option>
+                <option value="25">25</option>
+                <option value="26">26</option>
+                <option value="27">27</option>
+                <option value="28">28</option>
+                <option value="29">29</option>
+                <option value="30">30</option>
+                <option value="31">31</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="occupation">Occupation:</label>
+            <input
+              type="text"
+              name="occupation"
+              id="occupation"
+              class="form-control"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="res-address">Residential address:</label>
+            <input
+              type="text"
+              name="res_address"
+              id="res-address"
+              class="form-control"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="fs-status">Foundation sch. status:</label>
+            <select name="fs_status" id="fs-status" class="form-control form-select">
+              <option value="">Select</option>
+              <option value="not-enrolled">Not enrolled</option>
+              <option value="enrolled">Enrolled</option>
+              <option value="graduated">Graduated</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="delg-in-cell">Delegation in Cell:</label>
+            <input
+              type="text"
+              name="delg_in_cell"
+              id="delg-in-cell"
+              class="form-control"
+              placeholder="e.g: Cell leader, Secretary"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="dept-in-church">Dept. in Church:</label>
+            <input
+              type="text"
+              name="dept_in_church"
+              id="dept-in-church"
+              class="form-control"
+              placeholder="e.g: Choir"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="date-joined-ministry">Date joined ministry:</label>
+            <input
+              type="date"
+              name="date_joined_ministry"
+              id="date-joined-ministry"
+              class="form-control"
+            />
+          </div>
+
+        </div>
+
+        <footer class="position-absolute bottom-0 py-3 px-4 w-100 d-flex align-items-center gap-2">
+          <button type="submit" class="submit-btn w-100" disabled>Add member</button>
+        </footer>
+      </form>
+    HTML;
+  }
+
+  if ($content_type === 'edit-cell-member-details') {
+    $member_id = clean_input($_POST['cell-member-id'] ?? null);
+
+    if (!$member_id) {
+      echo "<p class='text-center mt-4'>Error fetching details</p>";
+      exit;
+    } 
+
+    $stmt = $conn->prepare("SELECT 
+      title,
+      first_name,
+      last_name,
+      phone_number,
+      email,
+      dob_month,
+      dob_day,
+      occupation,
+      residential_address,
+      foundation_sch_status,
+      delg_in_cell,
+      dept_in_church,
+      date_joined_ministry FROM cell_members WHERE id = ?");
+    $stmt->execute([clean_input($member_id)]);
+    $member = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$member) {
+      echo "<p class='text-center mt-4'>Error fetching member</p>";
+      exit;
+    }
+
+    $title = htmlspecialchars($member['title']);
+    $first_name = htmlspecialchars($member['first_name']);
+    $last_name = htmlspecialchars($member['last_name']);
+    $phone_number = htmlspecialchars($member['phone_number']);
+    $email = htmlspecialchars($member['email']);
+    $dob_month = htmlspecialchars($member['dob_month']);
+    $dob_day = htmlspecialchars($member['dob_day']);
+    $occupation = htmlspecialchars($member['occupation']);
+    $res_address = htmlspecialchars($member['residential_address']);
+    $fs_status = htmlspecialchars($member['foundation_sch_status']);
+    $delg_in_cell = htmlspecialchars($member['delg_in_cell']);
+    $dept_in_church = htmlspecialchars($member['dept_in_church']);
+    $date_joined_ministry = htmlspecialchars($member['date_joined_ministry']);
+
+    ob_start();
+    ?>
+    <form id="edit-cell-member-form" class="action-modal-form position-relative">
+      <input type="hidden" name="member_id" value="<?=$member_id?>">
+      <div class="body px-4 pt-2">
+        <div class="form-group">
+          <label for="title">Title:</label>
+          <select name="title" id="title" class="form-control form-select">
+            <option value="<?=$title?>" selected><?=ucfirst($title != '' ? $title : 'Select')?></option>
+            <option value="brother">Brother</option>
+            <option value="sister">Sister</option>
+            <option value="pastor">Pastor</option>
+            <option value="deacon">Deacon</option>
+            <option value="deaconess">Deaconess</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="first-name">First name:</label>
+          <input
+            type="text"
+            name="first_name"
+            id="first-name"
+            class="form-control"
+            value="<?=$first_name?>"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="last-name">Last name:</label>
+          <input
+            type="text"
+            name="last_name"
+            id="last-name"
+            class="form-control"
+            value="<?=$last_name?>"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone number:</label>
+          <input type="phone" name="phone" id="phone" class="form-control" value="<?=$phone_number?>" />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input type="email" name="email" id="email" class="form-control" value="<?=$email?>"/>
+        </div>
+
+        <div class="form-group">
+          <label for="dob">Date of birth:</label>
+          <div class="d-flex align-items-center gap-2">
+            <!-- MONTH -->
+            <select name="dob_month" id="dob-month" class="form-control form-select">
+              <option value="<?=$dob_month?>"><?=ucfirst($dob_month != '' ? $dob_month : 'Month')?></option>
+              <option value="jan">Jan</option>
+              <option value="feb">Feb</option>
+              <option value="mar">Mar</option>
+              <option value="apr">Apr</option>
+              <option value="may">May</option>
+              <option value="jun">Jun</option>
+              <option value="jul">Jul</option>
+              <option value="aug">Aug</option>
+              <option value="sep">Sep</option>
+              <option value="oct">Oct</option>
+              <option value="nov">Nov</option>
+              <option value="dec">Dec</option>
+            </select>
+            <!-- DAY -->
+            <select name="dob_day" id="dob-day" class="form-control form-select">
+              <option value="<?=$dob_day?>"><?=$dob_day != '' ? $dob_day : 'Day'?></option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+              <option value="13">13</option>
+              <option value="14">14</option>
+              <option value="15">15</option>
+              <option value="16">16</option>
+              <option value="17">17</option>
+              <option value="18">18</option>
+              <option value="19">19</option>
+              <option value="20">20</option>
+              <option value="21">21</option>
+              <option value="22">22</option>
+              <option value="23">23</option>
+              <option value="24">24</option>
+              <option value="25">25</option>
+              <option value="26">26</option>
+              <option value="27">27</option>
+              <option value="28">28</option>
+              <option value="29">29</option>
+              <option value="30">30</option>
+              <option value="31">31</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="occupation">Occupation:</label>
+          <input
+            type="text"
+            name="occupation"
+            id="occupation"
+            class="form-control"
+            value="<?=$occupation?>"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="res-address">Residential address:</label>
+          <input
+            type="text"
+            name="res_address"
+            id="res-address"
+            class="form-control"
+            value="<?=$res_address?>"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="dob">Foundation sch. status:</label>
+          <select name="fs_status" id="fs-status" class="form-control form-select">
+            <option value="<?=$fs_status?>" selected><?=ucfirst($fs_status != '' ? $fs_status : 'Select')?></option>
+            <option value="not-enrolled">Not enrolled</option>
+            <option value="enrolled">Enrolled</option>
+            <option value="graduated">Graduated</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="delg-in-cell">Delegation in Cell:</label>
+          <input
+            type="text"
+            name="delg_in_cell"
+            id="delg-in-cell"
+            class="form-control"
+            value="<?=$delg_in_cell?>"
+            placeholder="e.g: Cell leader, Secretary"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="dept-in-church">Dept. in Church:</label>
+          <input
+            type="text"
+            name="dept_in_church"
+            id="dept-in-church"
+            class="form-control"
+            value="<?=$dept_in_church?>"
+            placeholder="e.g: Choir"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="joined-ministry-date">Date joined ministry:</label>
+          <input
+            type="date"
+            name="date_joined_ministry"
+            id="date-joined-ministry"
+            class="form-control"
+            value="<?=$date_joined_ministry?>"
+          />
+        </div>
+
       </div>
-    </div>
-  HTML;
 
-  exit;
-}
+      <footer class="position-absolute bottom-0 py-3 px-4 w-100 d-flex align-items-center gap-2">
+        <button type="submit" class="submit-btn w-100">Save</button>
+      </footer>
+    </form>
+    <?php
+    $html = ob_get_clean();
+    echo $html;
+    exit;
+  }
 
+  // Cell Report Form (for both publish and view modes)
+  
+  if ($content_type === 'cell-report-form') {
+    $draftId = clean_input($_POST['draft-id'] ?? '');
+    $week = clean_input($_POST['week'] ?? '');
+    $description = clean_input($_POST['description'] ?? '');
+    $status = clean_input($_POST['status'] ?? '');
+    $reportType = getReportTypeByWeek($week);
+    $mode = clean_input($_POST['mode'] ?? 'publish'); // 'publish' or 'view'
 
+    // Fetch draft info
+    $stmt = $conn->prepare("SELECT * FROM cell_report_drafts WHERE id = ?");
+    $stmt->execute([$draftId]);
+    $draft = $stmt->fetch(PDO::FETCH_ASSOC);
 
+    // Determine expiry state
+    $expiry_date_raw = $draft['expiry_date'] ?? null;
+    $isExpired = false;
+    if (!empty($expiry_date_raw)) {
+      $isExpired = (strtotime($expiry_date_raw) < time());
+    }
+
+    // If viewing, fetch published report data
+    $report = null;
+    if ($mode === 'view' && $draft) {
+      $stmt = $conn->prepare("SELECT * FROM cell_reports WHERE cell_report_draft_id = ?");
+      $stmt->execute([$draftId]);
+      $report = $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // Fetch cell members for dropdowns
+    $cellId = $draft['cell_id'];
+    $membersStmt = $conn->prepare("SELECT id, first_name, last_name FROM cell_members WHERE cell_id = ?");
+    $membersStmt->execute([$cellId]);
+    $members = $membersStmt->fetchAll(PDO::FETCH_ASSOC);
+    $members_count = count($members);
+
+    // Ensure description is set correctly
+    $description = getMeetingDescription($week);
+
+    // Prepare attendee data when viewing a report: lists and counts come from cell_report_attendees
+    $attendance_ids = [];
+    $first_timers_ids = [];
+    $new_converts_ids = [];
+    $attendance_count = 0;
+    $first_timers_count = 0;
+    $new_converts_count = 0;
+    if ($report) {
+      $cell_report_id = (int)($report['id'] ?? 0);
+      if ($cell_report_id) {
+        $attQ = $conn->prepare("
+        SELECT cell_member_id, first_timer, new_convert 
+        FROM cell_report_attendees 
+        WHERE cell_report_id = ?");
+        $attQ->execute([$cell_report_id]);
+        $attRows = $attQ->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($attRows as $ar) {
+          $mid = (int)$ar['cell_member_id'];
+          $attendance_ids[] = $mid;
+          if (!empty($ar['first_timer'])) {
+            $first_timers_ids[] = $mid;
+          }
+          if (!empty($ar['new_convert'])) {
+            $new_converts_ids[] = $mid;
+          }
+        }
+        $attendance_count = count($attendance_ids);
+        $first_timers_count = count($first_timers_ids);
+        $new_converts_count = count($new_converts_ids);
+
+        // Select cell members that were not in attendance
+        $absMembQ = $conn->prepare("
+        SELECT id, first_name, last_name
+        FROM cell_members
+        WHERE cell_id = ?
+          AND id NOT IN (
+            SELECT cell_member_id
+            FROM cell_report_attendees
+            WHERE cell_report_id = ?
+          )
+        ");
+        $absMembQ->execute([$cellId, $cell_report_id]);
+        $absMembers = $absMembQ->fetchAll(PDO::FETCH_ASSOC);
+        $absentee_count = count($absMembers);
+      }
+    }
+
+    ?>
+    <form id="cell-report-form" class="action-modal-form position-relative" data-expired="<?= $isExpired ? '1' : '0' ?>">
+      <input type="hidden" name="draft_id" value="<?= htmlspecialchars($draftId) ?>">
+      <input type="hidden" name="expiry_date" value="<?= htmlspecialchars($expiry_date_raw ?? '') ?>">
+      <input type="hidden" name="cell_id" value="<?= htmlspecialchars($cellId) ?>">
+      <input type="hidden" name="week" value="<?= htmlspecialchars($week) ?>">
+      <input type="hidden" name="report_type" value="<?= htmlspecialchars($reportType) ?>">
+      <input type="hidden" name="mode" value="<?= htmlspecialchars($mode) ?>">
+      <input type="hidden" name="description" value="<?= htmlspecialchars($description) ?>">
+      <input type="hidden" name="validate" value="1">
+      <!-- If viewing an existing (published) report, include its id so edits update instead of inserting -->
+      <?php if (!empty($report) && !empty($report['id'])): ?>
+        <input type="hidden" name="report_id" value="<?= htmlspecialchars($report['id']) ?>">
+      <?php endif; ?>
+
+      <div class="body px-4 pt-2">
+        <div class="form-group" style="position:relative;">
+          <label for="attendance">Cell members in attendance:</label>
+          <button type="button" class="form-select form-control attendance-select text-start" id="attendance-select" tabindex="0">
+            (<span class="attendance-count"><?= ($mode === 'view') ? $attendance_count : 0 ?></span>)
+          </button>
+          <div class="custom-dropdown attendance-dropdown">
+            <input type="text" class="form-control mb-2 attendance-search" placeholder="Search members...">
+            <div class="attendance-list">
+              <?php if (isset($_SESSION['admin_type']) && $_SESSION['admin_type'] === 'cell'): ?>
+              <div class="dropdown-option">
+                <label>
+                  <input type="checkbox" class="form-check-input me-2 select-all-attendance select-all-options" <?= ($mode === 'view') ? 'disabled' : '' ?>>
+                  <span>Select all</span>
+                </label>
+              </div>
+              <?php endif; ?>
+
+              <?php
+              // If viewing as a Church admin, show ONLY members that were marked present (attendance_ids).
+              // Otherwise (cell admin or edit mode) render the full member list, marking checked ones as before.
+              $isChurchAdminView = ($mode === 'view' && isset($_SESSION['admin_type']) && $_SESSION['admin_type'] === 'church');
+
+              if ($isChurchAdminView) {
+                // Render only attendees (present members)
+                $listIds = array_values(array_unique($attendance_ids));
+                foreach ($listIds as $mid):
+                  $name = '';
+                  foreach ($members as $m) {
+                    if ((int)$m['id'] === (int)$mid) { $name = htmlspecialchars($m['first_name'] . ' ' . $m['last_name']); break; }
+                  }
+              ?>
+                <div class="dropdown-option">
+                  <label>
+                    <input type="checkbox" class="form-check-input me-2" name="attendance[]" value="<?= htmlspecialchars($mid) ?>" checked disabled>
+                    <?= $name ?>
+                  </label>
+                </div>
+              <?php
+                endforeach;
+              } else {
+                // Original behavior: list all members (for edit mode or non-church viewers)
+                foreach ($members as $m):
+                  $mid = (int)$m['id'];
+                  $checked = in_array($mid, $attendance_ids) ? 'checked' : '';
+                  $disabled = ($mode === 'view') ? 'disabled' : '';
+              ?>
+                <div class="dropdown-option">
+                  <label>
+                    <input type="checkbox" class="form-check-input me-2" name="attendance[]" value="<?= $mid ?>" <?= $checked ?> <?= $disabled ?>>
+                    <?= htmlspecialchars($m['first_name'] . ' ' . $m['last_name']) ?>
+                  </label>
+                </div>
+              <?php
+                endforeach;
+              }
+              ?>
+            </div>
+          </div>
+        </div>
+
+        <?php if (isset($_SESSION['admin_type']) && $_SESSION['admin_type'] === 'church'): ?>
+          <div class="form-group" style="position:relative;">
+            <label for="absent-members">Cell members that were absent:</label>
+            <button type="button" class="form-select form-control absent-members-select text-start" id="absent-members-select" tabindex="0">
+              (<span class="absentee-count"><?= $absentee_count ?></span>)
+            </button>
+            <div class="custom-dropdown absent-members-dropdown">
+              <input type="text" class="form-control mb-2 absent-members-search" placeholder="Search members...">
+              <div class="absent-members-list">
+                <?php if ($absentee_count === 0): ?>
+                  <div class="dropdown-option text-secondary text-center">No absentees</div>
+                <?php else: ?>
+                  <?php foreach ($absMembers as $m): ?>
+                    <div class="dropdown-option">
+                      <label>
+                        <input type="checkbox" class="form-check-input me-2" checked disabled>
+                        <?= htmlspecialchars($m['first_name'] . ' ' . $m['last_name']) ?>
+                      </label>
+                    </div>
+                  <?php endforeach; ?>
+                <?php endif; ?>
+              </div>
+            </div>
+          </div>
+        <?php endif; ?>
+
+        <?php if ($reportType === 'meeting'): ?>
+          <div class="form-group" style="position:relative;">
+            <label for="first-timers">First timers:</label>
+            <button type="button" class="form-select form-control first-timers-select text-start" id="first-timers-select" tabindex="0">
+              (<span class="first-timers-count"><?= ($mode === 'view') ? $first_timers_count : 0 ?></span>)
+            </button>
+            <div class="custom-dropdown first-timers-dropdown">
+              <input type="text" class="form-control mb-2 first-timers-search" placeholder="Search members...">
+              <div class="first-timers-list">
+                <?php if (isset($_SESSION['admin_type']) && $_SESSION['admin_type'] === 'cell'): ?>
+                <div class="dropdown-option">
+                  <label>
+                    <input type="checkbox" class="form-check-input me-2 select-all-first-timers select-all-options" <?= ($mode === 'view') ? 'disabled' : '' ?>>
+                    <span>Select all</span>
+                  </label>
+                </div>
+                <?php endif; ?>
+                <?php
+                // For view mode we populate from attendees (only those who attended)
+                if ($mode === 'view' && !empty($attendance_ids)):
+                  // If the current viewer is a church admin, show ONLY the members that were marked as first timers.
+                  // Otherwise preserve existing behavior (show attendance list but mark checked those in first_timers_ids).
+                  $isChurchAdminView = (isset($_SESSION['admin_type']) && $_SESSION['admin_type'] === 'church');
+                  $listIds = $isChurchAdminView ? $first_timers_ids : $attendance_ids;
+                  // Ensure listIds is an array and unique
+                  $listIds = array_values(array_unique($listIds));
+                  foreach ($listIds as $mid):
+                    // find name from $members array
+                    $name = '';
+                    foreach ($members as $m) {
+                      if ((int)$m['id'] === (int)$mid) { $name = htmlspecialchars($m['first_name'] . ' ' . $m['last_name']); break; }
+                    }
+                    $checked = in_array($mid, $first_timers_ids) ? 'checked' : '';
+                    $disabled = 'disabled';
+                ?>
+                  <div class="dropdown-option">
+                    <label>
+                      <input type="checkbox" class="form-check-input me-2" name="first_timers[]" value="<?= $mid ?>" <?= $checked ?> <?= $disabled ?>>
+                      <?= $name ?>
+                    </label>
+                  </div>
+                <?php
+                  endforeach;
+                  endif;
+                ?>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group" style="position:relative;">
+            <label for="new-converts">New converts:</label>
+            <button type="button" class="form-select form-control new-converts-select text-start" id="new-converts-select" tabindex="0">
+              (<span class="new-converts-count"><?= ($mode === 'view') ? $new_converts_count : 0 ?></span>)
+            </button>
+            <div class="custom-dropdown new-converts-dropdown">
+              <input type="text" class="form-control mb-2 new-converts-search" placeholder="Search members...">
+              <div class="new-converts-list">
+                <?php if (isset($_SESSION['admin_type']) && $_SESSION['admin_type'] === 'cell'): ?>
+                <div class="dropdown-option">
+                  <label>
+                    <input type="checkbox" class="form-check-input me-2 select-all-new-converts select-all-options" <?= ($mode === 'view') ? 'disabled' : '' ?>>
+                    <span>Select all</span>
+                  </label>
+                </div>
+                <?php endif; ?>
+
+                <?php
+                // For view mode populate from attendees
+                if ($mode === 'view' && !empty($attendance_ids)):
+                  // Church admin should see only members explicitly marked as new converts.
+                  $isChurchAdminView = (isset($_SESSION['admin_type']) && $_SESSION['admin_type'] === 'church');
+                  $listIds = $isChurchAdminView ? $new_converts_ids : $attendance_ids;
+                  $listIds = array_values(array_unique($listIds));
+                  foreach ($listIds as $mid):
+                    $name = '';
+                    foreach ($members as $m) {
+                      if ((int)$m['id'] === (int)$mid) { $name = htmlspecialchars($m['first_name'] . ' ' . $m['last_name']); break; }
+                    }
+                    $checked = in_array($mid, $new_converts_ids) ? 'checked' : '';
+                    $disabled = 'disabled';
+                ?>
+                  <div class="dropdown-option">
+                    <label>
+                      <input type="checkbox" class="form-check-input me-2" name="new_converts[]" value="<?= $mid ?>" <?= $checked ?> <?= $disabled ?>>
+                      <?= $name ?>
+                    </label>
+                  </div>
+                <?php
+                  endforeach;
+                endif;
+                ?>
+              </div>
+            </div>
+          </div>
+        <?php else: ?>
+          <div class="form-group">
+            <label for="people-reached">Number of people reached:</label>
+            <input type="number" name="people_reached" id="people-reached" class="form-control" required
+              value="<?= $report ? htmlspecialchars($report['people_reached']) : '' ?>"
+              <?= ($mode === 'view') ? 'disabled' : '' ?>>
+          </div> 
+
+          <div class="form-group">
+            <label for="new-converts">New converts in outreach:</label>
+            <input type="number" name="new_converts" id="new-converts" class="form-control"
+              value="<?= $report ? htmlspecialchars($report['new_converts']) : '' ?>"
+              <?= ($mode === 'view') ? 'disabled' : '' ?>>
+          </div>
+
+          <div class="form-group">
+            <label for="outreach-kind">Type of outreach held:</label>
+            <input type="text" name="outreach_kind" id="outreach-kind" class="form-control" required placeholder="e.g: Hospital outreach, etc."
+              value="<?= $report ? htmlspecialchars($report['outreach_kind']) : '' ?>"
+              <?= ($mode === 'view') ? 'disabled' : '' ?>>
+          </div>
+        <?php endif; ?>
+
+        <div class="form-group">
+          <label for="venue">Venue:</label>
+          <input type="text" name="venue" id="venue" class="form-control" required
+            value="<?= $report ? htmlspecialchars($report['venue']) : '' ?>"
+            <?= ($mode === 'view') ? 'disabled' : '' ?>>
+        </div>
+        <div class="form-group">
+          <label for="date"><?= ($reportType === 'meeting') ? 'Meeting' : 'Outreach' ?> date:</label>
+          <input type="date" name="date" id="date" class="form-control" required
+            value="<?= $report ? htmlspecialchars($report['date']) : '' ?>"
+            <?= ($mode === 'view') ? 'disabled' : '' ?>>
+        </div>
+        <div class="form-group">
+          <label for="time"><?= ($reportType === 'meeting') ? 'Meeting' : 'Outreach' ?> time:</label>
+          <input type="time" name="time" id="time" class="form-control" required
+            value="<?= $report ? htmlspecialchars($report['time']) : '' ?>"
+            <?= ($mode === 'view') ? 'disabled' : '' ?>>
+        </div>
+        <div class="form-group">
+          <label for="offering">Offering (in naira):</label>
+          <input type="number" name="offering" id="offering" class="form-control" required
+            value="<?= $report ? htmlspecialchars($report['offering']) : '' ?>"
+            <?= ($mode === 'view') ? 'disabled' : '' ?>>
+        </div>
+      </div>
+      <footer class="position-absolute bottom-0 py-3 px-4 w-100 d-flex align-items-center gap-2">
+        <?php if ($mode === 'view'): ?>
+          <button type="button" class="edit-btn w-100">Edit report</button>
+        <?php else: ?>
+          <button type="submit" class="submit-btn w-100" <?= $isExpired ? 'disabled' : 'disabled' /* kept disabled by validation; validation will prevent enabling if expired */ ?> >Publish</button>
+        <?php endif; ?>
+      </footer>
+    </form>
+    <?php
+    exit;
+  }
 }

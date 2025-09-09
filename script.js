@@ -1,4 +1,52 @@
 $(document).ready(function () {
+  // Control Bootstrap dropdown behaviour
+  $(document).on("show.bs.dropdown", ".dropdown.static", function () {
+    var $dropdown = $(this);
+    var $toggle = $dropdown.find('[data-bs-toggle="dropdown"]');
+    var $menu = $dropdown.find(".dropdown-menu");
+
+    // Clone menu instead of moving it (keeps Bootstrap happy)
+    var $menuClone = $menu
+      .clone(true)
+      .addClass("cloned-dropdown")
+      .appendTo("body");
+
+    var rect = $toggle[0].getBoundingClientRect();
+
+    // Align right side of dropdown with right side of button
+    var leftPos = rect.right - $menuClone.outerWidth();
+
+    $menuClone.css({
+      position: "absolute",
+      top: rect.bottom + "px",
+      left: leftPos + "px",
+      zIndex: 9999,
+      display: "block",
+    });
+
+    // Store reference so we can remove it later
+    $dropdown.data("cloned-menu", $menuClone);
+
+    // Hide original to prevent double display
+    $menu.hide();
+  });
+
+  $(document).on("hide.bs.dropdown", ".dropdown", function () {
+    var $dropdown = $(this);
+    var $menu = $dropdown.find(".dropdown-menu");
+    var $menuClone = $dropdown.data("cloned-menu");
+
+    // Remove cloned one
+    if ($menuClone) {
+      $menuClone.remove();
+      $dropdown.removeData("cloned-menu");
+    }
+
+    // Show original again
+    $menu.show();
+  });
+
+
   // Toggle Action Modal
   function toggleActionModal() {
     const actionModal = $("#action-modal");
@@ -11,6 +59,8 @@ $(document).ready(function () {
         $(actionModal).css("display", "none");
       });
       actionPanel.animate({ top: "45%" }, 200);
+      $("#action-modal #edit-title-container").empty();
+      $("#action-modal .side-panel").empty();
     } else {
       actionModal
         .css({ display: "block", opacity: 0 })
@@ -20,6 +70,26 @@ $(document).ready(function () {
     return this;
   }
   window.toggleActionModal = toggleActionModal;
+
+  function toggleActionModalSidePanel() {
+    const sidePanel = $("#action-modal .side-panel");
+    sidePanel.toggleClass("reveal");
+    if (sidePanel.hasClass("reveal")) {
+      $("#action-modal .panel-body").removeClass("h-100");
+      $("#action-modal .panel-body").css('height', `${sidePanel.height() + 48}`);
+    } else {
+      $("#action-modal .panel-body").addClass("h-100");
+      $("#action-modal .panel-body").css('height', '');
+    }
+  }
+  window.toggleActionModalSidePanel = toggleActionModalSidePanel;
+
+  // Toggle Action Modal Side Panel when action modal cancel btn is clicked
+  $(document).on('click', '#action-modal .action-modal-form .cancel-btn', function () {
+    toggleActionModalSidePanel();
+    $("#action-modal .panel-body").addClass("h-100");
+    $("#action-modal .panel-body").css("height", "");
+  })
 
   // Toggle Sidebar
 
@@ -31,49 +101,100 @@ $(document).ready(function () {
     $(".sidebar").css({ left: "-100%" });
   });
 
-  // Page navigation
-  const sidebarLinks = $(".sidebar nav li");
-  $(document).on("click", ".sidebar nav li", function () {
-    const clickedLinkId = $(this).attr("id");
-    $(".sidebar").css({ left: "-100%" });
+  // URL-based page navigation
+  function showPageFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    let page = params.get("p") || "dashboard";
+    let filter = params.get("filter") || null;
 
-    switch (clickedLinkId) {
-      case "dashboard-link":
-        $(".screen header .page-title").text("Dashboard");
-        sidebarLinks.removeClass("active");
-        $(this).addClass("active");
-        $(".data-container").removeClass("d-none").addClass("d-none");
-        $("#dashboard-page").removeClass("d-none");
-        break;
+    // Hide all pages
+    $(".data-container").addClass("d-none");
+    // Show the requested page
+    $(`#${page}-page`).removeClass("d-none");
 
-      case "cells-link":
-        $(".screen header .page-title").text("Cells");
-        sidebarLinks.removeClass("active");
-        $(this).addClass("active");
-        $(".data-container").removeClass("d-none").addClass("d-none");
-        $("#cells-page").removeClass("d-none");
-        break;
-
-      case "reports-link":
-        $(".screen header .page-title").text("Reports");
-        sidebarLinks.removeClass("active");
-        $(this).addClass("active");
-        $(".data-container").removeClass("d-none").addClass("d-none");
-        $("#reports-page").removeClass("d-none");
-        break;
-
-      case "settings-link":
-        $(".screen header .page-title").text("Settings");
-        sidebarLinks.removeClass("active");
-        $(this).addClass("active");
-        $(".data-container").removeClass("d-none").addClass("d-none");
-        $("#settings-page").removeClass("d-none");
-        break;
+    // Update page title
+    let $activeSidebarLink = $(`.sidebar nav li[data-page-id='${page}-page']`);
+    if ($activeSidebarLink.length) {
+      $(".sidebar nav li").removeClass("active");
+      $activeSidebarLink.addClass("active");
+      $("#screen header .page-title").text($activeSidebarLink.data("page-title"));
     }
+
+    // Reports filter logic: request server for filtered drafts so direct links work
+    if (page === "reports") {
+      // Always reset filters UI
+      $(".filter").removeClass("active");
+      const activeFilterId = filter || "all";
+      $(`#${activeFilterId}`).addClass("active");
+
+      // Ask the server for drafts matching the filter and render them
+      if (typeof window.fetchReportDrafts === 'function') {
+        window.fetchReportDrafts(activeFilterId);
+      } else {
+        // Fallback to old client-side filtering if fetchReportDrafts not loaded yet
+        if (!filter || filter === "all") {
+          $(".report-draft").show();
+        } else if (filter === "meeting") {
+          $(".report-draft").hide();
+          $(".report-draft[data-report-type='meeting']").show();
+        } else if (filter === "outreach") {
+          $(".report-draft").hide();
+          $(".report-draft[data-report-type='outreach']").show();
+        }
+      }
+    }
+  }
+
+  // Initial page load
+  showPageFromURL();
+
+  // Listen for browser navigation (back/forward)
+  window.addEventListener("popstate", showPageFromURL);
+
+  // Sidebar navigation: update URL and show page
+  $(document).on("click", ".sidebar nav li", function () {
+    let pageId = $(this).data("page-id").replace("-page", "");
+    let pageTitle = $(this).data("page-title");
+    // Close sidebar
+    $(".sidebar").css({ left: "-100%" });
+    // Update URL
+    history.pushState({}, "", `?p=${pageId}`);
+    showPageFromURL();
+  });
+
+  // Reports filter navigation: update URL and show filtered reports
+  $(document).on("click", ".filter", function () {
+    // prefer data-filter (used by church-reports created buttons), fallback to id (used by cell-reports)
+    let filterId = $(this).data("filter") || $(this).attr("id") || "all";
+
+    // determine current cell-id: prefer explicit URL param, fallback to #select-cell value if present
+    const params = new URLSearchParams(window.location.search);
+    let cellId = params.get('cell-id') || null;
+    const $selectCell = $("#select-cell");
+    if (!cellId && $selectCell.length) {
+      const sel = $selectCell.val();
+      if (sel) cellId = sel;
+    }
+
+    // Build URL including cell-id if we have one
+    let url = "";
+    if (cellId) {
+      url = `?p=reports&cell-id=${encodeURIComponent(cellId)}&filter=${encodeURIComponent(filterId)}`;
+    } else {
+      url = `?p=reports&filter=${encodeURIComponent(filterId)}`;
+    }
+
+    history.pushState({}, "", url);
+    showPageFromURL();
   });
 
   // Call action modal when the Add a cell btn is clicked
-  $(document).on("click", "#action-modal header .close-btn", toggleActionModal);
+  $(document).on("click", "#action-modal header .close-btn", function () {
+    $("#action-modal .side-panel").removeClass("reveal");
+    $("#action-modal .panel-body").addClass("h-100");
+    $("#action-modal .panel-body").css("height", "");
+    toggleActionModal();
+  });
 
   // Show/Hide Assign Cell Admin Fields based on Admin Selection
   $(document).on(
@@ -131,6 +252,14 @@ $(document).ready(function () {
     validateAssignAdminForm
   );
   window.validateAssignAdminForm = validateAssignAdminForm;
+
+  // Edit Cell Info
+  $(document).on("click", "#action-modal #editTitleBtn", function () {
+    let inputVal = $.trim($("#action-modal .edit-title-input").val());
+    $("#action-modal .edit-title-bar").toggleClass("d-none");
+    $("#action-modal .edit-title-input").val(inputVal);
+    $("#action-modal .edit-title-input").focus();
+  });
 
   // Close Ready function
 });
