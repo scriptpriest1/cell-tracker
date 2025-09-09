@@ -1162,11 +1162,15 @@ if ($action === 'submit_cell_report') {
   };
 
   if ($reportType === 'outreach') {
-    // outreach requires numeric attendance count, new_converts and outreach-kind
-    foreach (['attendance', 'new_converts', 'outreach-kind'] as $field) {
-      if ($field === 'outreach-kind') {
-        if (empty($_POST['outreach-kind'])) $missing[] = 'outreach-kind';
-      } else {
+    $attendanceCount = 0;
+    if (isset($_POST['attendance'])) {
+      if (is_array($_POST['attendance'])) $attendanceCount = count($_POST['attendance']);
+      else if (trim((string)$_POST['attendance']) !== '') $attendanceCount = 1;
+    }
+    if ($attendanceCount === 0) {
+      $missing[] = 'attendance';
+    } else {
+      foreach (['people_reached', 'outreach_kind'] as $field) {
         // For outreach numeric fields, treat as required scalar values
         if (!isset($_POST[$field]) || trim((string)$_POST[$field]) === '') {
           $missing[] = $field;
@@ -1224,11 +1228,16 @@ if ($action === 'submit_cell_report') {
 
   // Re-check/normalize by report type using normalized arrays
   if ($reportType === 'outreach') {
-    // outreach requires numeric attendance count, new_converts and outreach-kind
-    foreach (['attendance', 'new_converts', 'outreach-kind'] as $field) {
-      if ($field === 'outreach-kind') {
-        if (empty($_POST['outreach-kind'])) $missing[] = $field;
-      } else {
+    $attendanceCount = 0;
+    if (isset($_POST['attendance'])) {
+      if (is_array($_POST['attendance'])) $attendanceCount = count($_POST['attendance']);
+      else if (trim((string)$_POST['attendance']) !== '') $attendanceCount = 1;
+    }
+    if ($attendanceCount === 0) {
+      $missing[] = 'attendance';
+    } else {
+      foreach (['people_reached', 'outreach_kind'] as $field) {
+        // For outreach numeric fields, treat as required scalar values
         if (!isset($_POST[$field]) || trim((string)$_POST[$field]) === '') {
           $missing[] = $field;
         }
@@ -1262,18 +1271,40 @@ if ($action === 'submit_cell_report') {
   if ($report_id && $report_id > 0) {
     // OUTREACH update
     if ($reportType === 'outreach') {
-      $attendance = intval($_POST['attendance']);
+      $people_reached = intval($_POST['people_reached']);
       $new_converts = intval($_POST['new_converts']);
-      $outreach_kind = clean_input($_POST['outreach-kind']);
+      $outreach_kind = clean_input($_POST['outreach_kind']);
       $upd = $conn->prepare("
         UPDATE cell_reports
-        SET attendance = ?, new_converts = ?, outreach_kind = ?, venue = ?, `date` = ?, `time` = ?, offering = ?, date_reported = NOW()
+        SET people_reached = ?, new_converts = ?, outreach_kind = ?, venue = ?, `date` = ?, `time` = ?, offering = ?, date_reported = NOW()
         WHERE id = ? AND cell_id = ?
       ");
       $success = $upd->execute([
-        $attendance, $new_converts, $outreach_kind, $venue, $date, $time, $offering,
+        $people_reached, $new_converts, $outreach_kind, $venue, $date, $time, $offering,
         $report_id, $cell_id
       ]);
+
+      if ($success) {
+        // Remove existing attendees for this report, then insert the new set
+        $del = $conn->prepare("DELETE FROM cell_report_attendees WHERE cell_report_id = ?");
+        $del->execute([$report_id]);
+
+        // Use normalized arrays
+        foreach ($attendanceArr as $memberId) {
+          $memberId = clean_input($memberId);
+          $first_timer = in_array($memberId, $firstTimersArr) ? 1 : 0;
+          $new_convert = in_array($memberId, $newConvertsArr) ? 1 : 0;
+          $memStmt = $conn->prepare("SELECT first_name, last_name FROM cell_members WHERE id = ?");
+          $memStmt->execute([$memberId]);
+          $mem = $memStmt->fetch(PDO::FETCH_ASSOC);
+          $name = $mem ? ($mem['first_name'] . ' ' . $mem['last_name']) : '';
+          $attStmt = $conn->prepare("
+            INSERT INTO cell_report_attendees (name, first_timer, new_convert, cell_member_id, cell_report_id)
+            VALUES (?, ?, ?, ?, ?)
+          ");
+          $attStmt->execute([$name, $first_timer, $new_convert, $memberId, $report_id]);
+        }
+      }
     } else {
       // MEETING update: update main row then replace attendees
       $upd = $conn->prepare("
@@ -1318,27 +1349,44 @@ if ($action === 'submit_cell_report') {
   } else {
     // INSERT (original publish behavior)
     if ($reportType === 'outreach') {
-      $attendance = intval($_POST['attendance']);
+      $people_reached = intval($_POST['people_reached']);
       $new_converts = intval($_POST['new_converts']);
-      $outreach_kind = clean_input($_POST['outreach-kind']);
+      $outreach_kind = clean_input($_POST['outreach_kind']);
       // Insert into cell_reports (first_timers NULL for outreach)
       $ins = $conn->prepare("
         INSERT INTO cell_reports (
-          type, week, description, attendance, first_timers, new_converts, outreach_kind, venue, `date`, `time`, offering, date_generated, expiry_date, date_reported, cell_report_draft_id, cell_id
+          type, week, description, people_reached, first_timers, new_converts, outreach_kind, venue, `date`, `time`, offering, date_generated, expiry_date, date_reported, cell_report_draft_id, cell_id
         ) VALUES (?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)
       ");
       $success = $ins->execute([
-        $type, $week, $description, $attendance, $new_converts, $outreach_kind, $venue, $date, $time, $offering,
+        $type, $week, $description, $people_reached, $new_converts, $outreach_kind, $venue, $date, $time, $offering,
         $date_generated, $expiry_date, $draft_id, $cell_id
       ]);
+
+      // Insert attendees into cell_report_attendees if any attendance members were provided
+      if ($success) {
+        $cell_report_id = $conn->lastInsertId();
+        foreach ($attendanceArr as $memberId) {
+          $memberId = clean_input($memberId);
+          // Get member name for record (safe lookup)
+          $memStmt = $conn->prepare("SELECT first_name, last_name FROM cell_members WHERE id = ?");
+          $memStmt->execute([$memberId]);
+          $mem = $memStmt->fetch(PDO::FETCH_ASSOC);
+          $name = $mem ? ($mem['first_name'] . ' ' . $mem['last_name']) : '';
+          $attStmt = $conn->prepare("
+            INSERT INTO cell_report_attendees (name, cell_member_id, cell_report_id)
+            VALUES (?, ?, ?)
+          ");
+          $attStmt->execute([$name, $memberId, $cell_report_id]);
+        }
+      }
     } else {
-      // meeting: attendance members inserted into attendees table; cell_reports keeps attendance-related fields NULL
       $ins = $conn->prepare("
         INSERT INTO cell_reports (
-          type, week, description, attendance, first_timers, new_converts, outreach_kind,
+          type, week, description, first_timers, new_converts, outreach_kind,
           venue, `date`, `time`, offering,
           date_generated, expiry_date, date_reported, cell_report_draft_id, cell_id
-        ) VALUES (?, ?, ?, NULL, NULL, NULL, NULL, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)
+        ) VALUES (?, ?, ?, NULL, NULL, NULL, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)
       ");
       $success = $ins->execute([
         $type, $week, $description, $venue, $date, $time, $offering,

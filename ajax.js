@@ -1078,10 +1078,14 @@ $(document).ready(() => {
     $(".custom-dropdown").not($(this).closest(".form-group").find(".new-converts-dropdown")).hide();
     $(this).closest(".form-group").find(".new-converts-dropdown").toggle();
   });
-
+  $(document).on("click", ".absent-members-select", function (e) {
+    e.stopPropagation();
+    $(".custom-dropdown").not($(this).closest(".form-group").find(".absent-members-dropdown")).hide();
+    $(this).closest(".form-group").find(".absent-members-dropdown").toggle();
+  });
   // Hide dropdowns when clicking outside
   $(document).on("mousedown", function (e) {
-    if (!$(e.target).closest('.custom-dropdown, .attendance-select, .first-timers-select, .new-converts-select').length) {
+    if (!$(e.target).closest('.custom-dropdown, .attendance-select, .first-timers-select, .new-converts-select, .absent-members-select').length) {
       $(".custom-dropdown").hide();
     }
   });
@@ -1095,11 +1099,14 @@ $(document).ready(() => {
 
     // Specific checks per report type
     if (reportType === "outreach") {
-      // outreach: attendance (number), new_converts (number), outreach-kind required
-      const attendanceVal = $.trim($form.find("input[name='attendance']").val() || "");
-      const newConvertsVal = $.trim($form.find("input[name='new_converts']").val() || "");
-      const outreachKindVal = $.trim($form.find("input[name='outreach-kind']").val() || "");
-      if (attendanceVal === "" || newConvertsVal === "" || outreachKindVal === "") {
+      // outreach: people-reached, new_converts (number), outreach-kind required
+      const peopleReachedVal = $.trim($form.find("input[name='people_reached']").val() || "");
+      const outreachKindVal = $.trim($form.find("input[name='outreach_kind']").val() || "");
+      // Attendance
+      const attendanceCheckedNamed = $form.find("input[name='attendance[]']:checked").length;
+      const attendanceCheckedGeneric = $form.find(".attendance-list input[type='checkbox']:not(.select-all-options):checked").length;
+      const attendanceChecked = attendanceCheckedNamed || attendanceCheckedGeneric;
+      if (!attendanceChecked || peopleReachedVal === "" || outreachKindVal === "") {
         valid = false;
       }
     } else {
@@ -1122,7 +1129,7 @@ $(document).ready(() => {
         return true; // continue
       }
       // For checkbox groups, handled above for attendance; skip checkbox group names containing "attendance" to avoid duplicate check
-      if (name.indexOf("attendance") !== -1 && reportType !== "outreach") {
+      if (name.indexOf("attendance") !== -1) {
         return true;
       }
       if ($(this).is(":checkbox")) {
@@ -1172,23 +1179,23 @@ $(document).ready(() => {
 
     const reportType = $form.find("input[name='report_type']").val();
 
-    if (reportType !== 'outreach') {
-      // collect checked attendance member ids
-      const attendanceIds = [];
-      $form.find(".attendance-list input[type='checkbox']:not(.select-all-options):checked").each(function () {
-        const v = $(this).val();
-        if (v !== undefined && v !== null && String(v).trim() !== "") attendanceIds.push(String(v));
+    // collect checked attendance member ids
+    const attendanceIds = [];
+    $form.find(".attendance-list input[type='checkbox']:not(.select-all-options):checked").each(function () {
+      const v = $(this).val();
+      if (v !== undefined && v !== null && String(v).trim() !== "") attendanceIds.push(String(v));
+    });
+
+    // Only inject hidden inputs if there are NO enabled checkbox inputs named attendance[].
+    // This avoids posting duplicate values (checkboxes + hidden inputs) when checkboxes already have name="attendance[]"
+    const hasEnabledNamedAttendance = $form.find(".attendance-list input[type='checkbox'][name='attendance[]']:not(:disabled)").length > 0;
+    if (!hasEnabledNamedAttendance) {
+      attendanceIds.forEach(id => {
+        $tmp.append($(`<input type="hidden" name="attendance[]" />`).val(id));
       });
+    }
 
-      // Only inject hidden inputs if there are NO enabled checkbox inputs named attendance[].
-      // This avoids posting duplicate values (checkboxes + hidden inputs) when checkboxes already have name="attendance[]"
-      const hasEnabledNamedAttendance = $form.find(".attendance-list input[type='checkbox'][name='attendance[]']:not(:disabled)").length > 0;
-      if (!hasEnabledNamedAttendance) {
-        attendanceIds.forEach(id => {
-          $tmp.append($(`<input type="hidden" name="attendance[]" />`).val(id));
-        });
-      }
-
+    if (reportType !== 'outreach') {
       // collect checked first_timers ids
       const firstTimersIds = [];
       $form.find(".first-timers-list input[type='checkbox']:not(.select-all-options):checked").each(function () {
@@ -1289,7 +1296,7 @@ $(document).ready(() => {
     const editing = !!$editBtn.data("editing");
 
     // Selectors to always keep enabled (dropdown toggles and dropdown search inputs)
-    const keepEnabledSelectors = ".attendance-select, .first-timers-select, .new-converts-select, .attendance-search, .first-timers-search, .new-converts-search";
+    const keepEnabledSelectors = ".attendance-select, .first-timers-select, .new-converts-select, .absent-members-select, .attendance-search, .first-timers-search, .new-converts-search, .absent-members-search";
 
     if (!editing) {
       // Enter edit mode: enable all inputs/selects/textareas and buttons except the keep-enabled selectors (they are already enabled)
@@ -1321,10 +1328,10 @@ $(document).ready(() => {
       $form.find("input, select, textarea, button").not(keepEnabledSelectors).prop("disabled", true);
 
       // Ensure the dropdown toggle buttons remain enabled
-      $form.find(".attendance-select, .first-timers-select, .new-converts-select").prop("disabled", false);
+      $form.find(".attendance-select, .first-timers-select, .new-converts-select, .absent-members-select").prop("disabled", false);
 
       // Keep the dropdown search inputs enabled so users can search even in view mode
-      $form.find(".attendance-search, .first-timers-search, .new-converts-search").prop("disabled", false);
+      $form.find(".attendance-search, .first-timers-search, .new-converts-search, .absent-members-search").prop("disabled", false);
 
       // Remove per-checkbox required attributes if present (cleanup) — not required for validation
       $form.find("input[name='attendance[]']").removeAttr("required");
@@ -2200,11 +2207,11 @@ function applyChurchAdminModalRestrictions() {
   $form.find("input, select, textarea, button").prop("disabled", true);
 
   // Keep the dropdown toggle buttons enabled so church admin can open dropdowns (per requirement)
-  $(".attendance-select, .first-timers-select, .new-converts-select").prop("disabled", false);
+  $(".attendance-select, .first-timers-select, .new-converts-select, .absent-members-select").prop("disabled", false);
 
   // Also keep the dropdown search inputs enabled so church admins can search within dropdowns
   // (these are plain text inputs inside the dropdown; enabling them allows typing/searching)
-  $("#action-modal .attendance-search, #action-modal .first-timers-search, #action-modal .new-converts-search").prop("disabled", false);
+  $("#action-modal .attendance-search, #action-modal .first-timers-search, #action-modal .new-converts-search, .absent-members-search").prop("disabled", false);
 
   // Disable checkboxes inside custom-dropdowns (they should be visible but not interactive)
   $("#action-modal .custom-dropdown input[type='checkbox']").prop("disabled", true);

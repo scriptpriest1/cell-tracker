@@ -106,7 +106,7 @@ if (isset($_POST['content-type'])) {
               class="form-control form-select"
             >
               <option value="">Select</option>
-              <option value="self">Assign youself</option>
+              <option value="self">Assign yourself</option>
               <option value="else">Assign someone else</option>
             </select>
           </div>
@@ -958,7 +958,10 @@ if (isset($_POST['content-type'])) {
     if ($report) {
       $cell_report_id = (int)($report['id'] ?? 0);
       if ($cell_report_id) {
-        $attQ = $conn->prepare("SELECT cell_member_id, first_timer, new_convert FROM cell_report_attendees WHERE cell_report_id = ?");
+        $attQ = $conn->prepare("
+        SELECT cell_member_id, first_timer, new_convert 
+        FROM cell_report_attendees 
+        WHERE cell_report_id = ?");
         $attQ->execute([$cell_report_id]);
         $attRows = $attQ->fetchAll(PDO::FETCH_ASSOC);
         foreach ($attRows as $ar) {
@@ -974,6 +977,19 @@ if (isset($_POST['content-type'])) {
         $attendance_count = count($attendance_ids);
         $first_timers_count = count($first_timers_ids);
         $new_converts_count = count($new_converts_ids);
+
+        // Select cell members that were not in attendance
+        $absMembQ = $conn->prepare("
+        SELECT DISTINCT cm.id, 
+        cm.first_name, 
+        cm.last_name
+        FROM cell_members cm
+        LEFT JOIN cell_report_attendees cra
+        ON cm.id = cra.cell_member_id 
+        WHERE cm.cell_id = ?");
+        $absMembQ->execute([$cellId]);
+        $absMembers = $absMembQ->fetchAll(PDO::FETCH_ASSOC);
+        $absentee_count = count($absMembers);
       }
     }
 
@@ -993,80 +1009,95 @@ if (isset($_POST['content-type'])) {
       <?php endif; ?>
 
       <div class="body px-4 pt-2">
-        <?php if ($reportType === 'outreach'): ?>
-          <div class="form-group">
-            <label for="attendance">Attendance:</label>
-            <input type="number" name="attendance" id="attendance" class="form-control" required
-              value="<?= $report ? htmlspecialchars($report['attendance']) : '' ?>"
-              <?= ($mode === 'view') ? 'disabled' : '' ?>>
-          </div>
-          <div class="form-group">
-            <label for="new-converts">New converts:</label>
-            <input type="number" name="new_converts" id="new-converts" class="form-control" required
-              value="<?= $report ? htmlspecialchars($report['new_converts']) : '' ?>"
-              <?= ($mode === 'view') ? 'disabled' : '' ?>>
-          </div>
-        <?php else: ?>
-          <div class="form-group" style="position:relative;">
-            <label for="attendance">Attendance:</label>
-            <button type="button" class="form-select form-control attendance-select text-start" id="attendance-select" tabindex="0">
-              (<span class="attendance-count"><?= ($mode === 'view') ? $attendance_count : 0 ?></span>)
-            </button>
-            <div class="custom-dropdown attendance-dropdown">
-              <input type="text" class="form-control mb-2 attendance-search" placeholder="Search members...">
-              <div class="attendance-list">
-                <?php if (isset($_SESSION['admin_type']) && $_SESSION['admin_type'] === 'cell'): ?>
+        <div class="form-group" style="position:relative;">
+          <label for="attendance">Cell members in attendance:</label>
+          <button type="button" class="form-select form-control attendance-select text-start" id="attendance-select" tabindex="0">
+            (<span class="attendance-count"><?= ($mode === 'view') ? $attendance_count : 0 ?></span>)
+          </button>
+          <div class="custom-dropdown attendance-dropdown">
+            <input type="text" class="form-control mb-2 attendance-search" placeholder="Search members...">
+            <div class="attendance-list">
+              <?php if (isset($_SESSION['admin_type']) && $_SESSION['admin_type'] === 'cell'): ?>
+              <div class="dropdown-option">
+                <label>
+                  <input type="checkbox" class="form-check-input me-2 select-all-attendance select-all-options" <?= ($mode === 'view') ? 'disabled' : '' ?>>
+                  <span>Select all</span>
+                </label>
+              </div>
+              <?php endif; ?>
+
+              <?php
+              // If viewing as a Church admin, show ONLY members that were marked present (attendance_ids).
+              // Otherwise (cell admin or edit mode) render the full member list, marking checked ones as before.
+              $isChurchAdminView = ($mode === 'view' && isset($_SESSION['admin_type']) && $_SESSION['admin_type'] === 'church');
+
+              if ($isChurchAdminView) {
+                // Render only attendees (present members)
+                $listIds = array_values(array_unique($attendance_ids));
+                foreach ($listIds as $mid):
+                  $name = '';
+                  foreach ($members as $m) {
+                    if ((int)$m['id'] === (int)$mid) { $name = htmlspecialchars($m['first_name'] . ' ' . $m['last_name']); break; }
+                  }
+              ?>
                 <div class="dropdown-option">
                   <label>
-                    <input type="checkbox" class="form-check-input me-2 select-all-attendance select-all-options" <?= ($mode === 'view') ? 'disabled' : '' ?>>
-                    <span>Select all</span>
+                    <input type="checkbox" class="form-check-input me-2" name="attendance[]" value="<?= htmlspecialchars($mid) ?>" checked disabled>
+                    <?= $name ?>
                   </label>
                 </div>
-                <?php endif; ?>
+              <?php
+                endforeach;
+              } else {
+                // Original behavior: list all members (for edit mode or non-church viewers)
+                foreach ($members as $m):
+                  $mid = (int)$m['id'];
+                  $checked = in_array($mid, $attendance_ids) ? 'checked' : '';
+                  $disabled = ($mode === 'view') ? 'disabled' : '';
+              ?>
+                <div class="dropdown-option">
+                  <label>
+                    <input type="checkbox" class="form-check-input me-2" name="attendance[]" value="<?= $mid ?>" <?= $checked ?> <?= $disabled ?>>
+                    <?= htmlspecialchars($m['first_name'] . ' ' . $m['last_name']) ?>
+                  </label>
+                </div>
+              <?php
+                endforeach;
+              }
+              ?>
+            </div>
+          </div>
+        </div>
 
+        <?php if (isset($_SESSION['admin_type']) && $_SESSION['admin_type'] === 'church'): ?>
+          <div class="form-group" style="position:relative;">
+            <label for="absent-members">Cell members that were absent:</label>
+            <button type="button" class="form-select form-control absent-members-select text-start" id="absent-members-select" tabindex="0">
+              (<span class="absentee-count"><?= $absentee_count || 0 ?></span>)
+            </button>
+            <div class="custom-dropdown absent-members-dropdown">
+              <input type="text" class="form-control mb-2 absent-members-search" placeholder="Search members...">
+              <div class="absent-members-list">
                 <?php
-                // If viewing as a Church admin, show ONLY members that were marked present (attendance_ids).
-                // Otherwise (cell admin or edit mode) render the full member list, marking checked ones as before.
-                $isChurchAdminView = ($mode === 'view' && isset($_SESSION['admin_type']) && $_SESSION['admin_type'] === 'church');
-
-                if ($isChurchAdminView) {
-                  // Render only attendees (present members)
-                  $listIds = array_values(array_unique($attendance_ids));
-                  foreach ($listIds as $mid):
-                    $name = '';
-                    foreach ($members as $m) {
-                      if ((int)$m['id'] === (int)$mid) { $name = htmlspecialchars($m['first_name'] . ' ' . $m['last_name']); break; }
-                    }
+                foreach ($members as $m):
+                  $name = htmlspecialchars($m['first_name'] . ' ' . $m['last_name']); 
+                  break;
                 ?>
                   <div class="dropdown-option">
                     <label>
-                      <input type="checkbox" class="form-check-input me-2" name="attendance[]" value="<?= htmlspecialchars($mid) ?>" checked disabled>
+                      <input type="checkbox" class="form-check-input me-2" name="" checked disabled>
                       <?= $name ?>
                     </label>
                   </div>
                 <?php
                   endforeach;
-                } else {
-                  // Original behavior: list all members (for edit mode or non-church viewers)
-                  foreach ($members as $m):
-                    $mid = (int)$m['id'];
-                    $checked = in_array($mid, $attendance_ids) ? 'checked' : '';
-                    $disabled = ($mode === 'view') ? 'disabled' : '';
-                ?>
-                  <div class="dropdown-option">
-                    <label>
-                      <input type="checkbox" class="form-check-input me-2" name="attendance[]" value="<?= $mid ?>" <?= $checked ?> <?= $disabled ?>>
-                      <?= htmlspecialchars($m['first_name'] . ' ' . $m['last_name']) ?>
-                    </label>
-                  </div>
-                <?php
-                  endforeach;
-                }
                 ?>
               </div>
             </div>
           </div>
+        <?php endif; ?>
 
+        <?php if ($reportType === 'meeting'): ?>
           <div class="form-group" style="position:relative;">
             <label for="first-timers">First timers:</label>
             <button type="button" class="form-select form-control first-timers-select text-start" id="first-timers-select" tabindex="0">
@@ -1109,7 +1140,7 @@ if (isset($_POST['content-type'])) {
                   </div>
                 <?php
                   endforeach;
-                endif;
+                  endif;
                 ?>
               </div>
             </div>
@@ -1160,12 +1191,24 @@ if (isset($_POST['content-type'])) {
               </div>
             </div>
           </div>
-        <?php endif; ?>
-
-        <?php if ($reportType === 'outreach'): ?>
+        <?php else: ?>
           <div class="form-group">
-            <label for="outreach-kind">What kind of Outreach is this?</label>
-            <input type="text" name="outreach-kind" id="outreach-kind" class="form-control" required placeholder="e.g: Hospital outreach, etc."
+            <label for="people-reached">Number of people reached:</label>
+            <input type="number" name="people_reached" id="people-reached" class="form-control" required
+              value="<?= $report ? htmlspecialchars($report['people_reached']) : '' ?>"
+              <?= ($mode === 'view') ? 'disabled' : '' ?>>
+          </div> 
+
+          <div class="form-group">
+            <label for="new-converts">New converts in outreach:</label>
+            <input type="number" name="new_converts" id="new-converts" class="form-control"
+              value="<?= $report ? htmlspecialchars($report['new_converts']) : '' ?>"
+              <?= ($mode === 'view') ? 'disabled' : '' ?>>
+          </div>
+
+          <div class="form-group">
+            <label for="outreach-kind">Type of outreach held:</label>
+            <input type="text" name="outreach_kind" id="outreach-kind" class="form-control" required placeholder="e.g: Hospital outreach, etc."
               value="<?= $report ? htmlspecialchars($report['outreach_kind']) : '' ?>"
               <?= ($mode === 'view') ? 'disabled' : '' ?>>
           </div>
@@ -1178,13 +1221,13 @@ if (isset($_POST['content-type'])) {
             <?= ($mode === 'view') ? 'disabled' : '' ?>>
         </div>
         <div class="form-group">
-          <label for="date">Date:</label>
+          <label for="date"><?= ($reportType === 'meeting') ? 'Meeting' : 'Outreach' ?> date:</label>
           <input type="date" name="date" id="date" class="form-control" required
             value="<?= $report ? htmlspecialchars($report['date']) : '' ?>"
             <?= ($mode === 'view') ? 'disabled' : '' ?>>
         </div>
         <div class="form-group">
-          <label for="time">Time:</label>
+          <label for="time"><?= ($reportType === 'meeting') ? 'Meeting' : 'Outreach' ?> time:</label>
           <input type="time" name="time" id="time" class="form-control" required
             value="<?= $report ? htmlspecialchars($report['time']) : '' ?>"
             <?= ($mode === 'view') ? 'disabled' : '' ?>>
