@@ -8500,3 +8500,433 @@ Notes
 - Tests: open Settings (Cell or Church), ensure name/role populated, click Edit → fields enabled and button becomes Cancel, change values and Save → server updates and UI refreshes via fetchUserDetails(); Change password verifies current password and updates hashed password; wrong current password alerts "Incorrect current password".
 
 Made changes.
+
+greatkingpriest: #codebase  
+
+## DASHBOARD STATS COMPLETION  
+
+### Requirements  
+
+#### For Church Admins  
+- **Total cell meetings reported:**  
+  - Should equal the **sum of all published cell `meeting` reports** across every cell under that church.  
+- **Total cell outreaches reported:**  
+  - Should equal the **sum of all published cell `outreach` reports** across every cell under that church.  
+
+#### For Cell Admins  
+- **Cell meetings reported:**  
+  - Should equal the **sum of published `meeting` reports** for that specific cell only.  
+- **Cell outreaches reported:**  
+  - Should equal the **sum of published `outreach` reports** for that specific cell only.  
+
+---
+
+### Constraints  
+- Work **strictly within the scope of this prompt**.  
+- Do not modify any other unrelated dashboard stats or logic.  
+
+
+GitHub Copilot: Solution — steps
+1. Add two backend endpoints in php/ajax.php to return counts:
+   - fetch_church_report_counts — sums published meeting/outreach reports for all cells in the church.
+   - fetch_cell_report_counts — sums published meeting/outreach reports for the current cell.
+2. Add frontend functions in ajax.js to call those endpoints and populate the dashboard stat spans.
+3. Add CSS/HTML hooks (small class attributes) to the dashboard PHP files so the new JS can target the correct spans.
+4. Call the new JS functions on page load (only for the page type present).
+
+Changes grouped by file
+
+### [ajax.php](file:///c%3A/xampp/htdocs/cell-tracker/php/ajax.php)
+
+Add two new actions to return JSON counts for church-wide and per-cell published reports.
+
+````php
+// ...existing code...
+
+/*=======================================
+  Fetch church-wide published report counts
+  (meetings & outreaches) across all cells for the church
+=======================================*/
+if ($action === 'fetch_church_report_counts') {
+  $churchId = clean_input($_SESSION['entity_id'] ?? null);
+  if (!$churchId) {
+    echo json_encode(['status'=>'error','message'=>'Not authenticated']);
+    exit;
+  }
+
+  try {
+    // Count published meeting reports for cells under this church
+    $stmt = $conn->prepare("
+      SELECT COUNT(cr.id) AS cnt
+      FROM cell_reports cr
+      INNER JOIN cells c ON cr.cell_id = c.id
+      WHERE c.church_id = :church_id AND cr.type = 'meeting'
+    ");
+    $stmt->bindValue(':church_id', $churchId, PDO::PARAM_INT);
+    $stmt->execute();
+    $meetings = (int)$stmt->fetchColumn();
+
+    // Count published outreach reports
+    $stmt = $conn->prepare("
+      SELECT COUNT(cr.id) AS cnt
+      FROM cell_reports cr
+      INNER JOIN cells c ON cr.cell_id = c.id
+      WHERE c.church_id = :church_id AND cr.type = 'outreach'
+    ");
+    $stmt->bindValue(':church_id', $churchId, PDO::PARAM_INT);
+    $stmt->execute();
+    $outreaches = (int)$stmt->fetchColumn();
+
+    echo json_encode(['status'=>'success','meetings'=>$meetings,'outreaches'=>$outreaches]);
+    exit;
+  } catch (PDOException $ex) {
+    error_log("fetch_church_report_counts error: ".$ex->getMessage());
+    echo json_encode(['status'=>'error','message'=>'Database error']);
+    exit;
+  }
+}
+
+/*=======================================
+  Fetch single cell published report counts
+  (meetings & outreaches) for the current cell
+=======================================*/
+if ($action === 'fetch_cell_report_counts') {
+  $cellId = clean_input($_SESSION['entity_id'] ?? null);
+  if (!$cellId) {
+    echo json_encode(['status'=>'error','message'=>'Not authenticated']);
+    exit;
+  }
+
+  try {
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM cell_reports WHERE cell_id = ? AND type = 'meeting'");
+    $stmt->execute([ $cellId ]);
+    $meetings = (int)$stmt->fetchColumn();
+
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM cell_reports WHERE cell_id = ? AND type = 'outreach'");
+    $stmt->execute([ $cellId ]);
+    $outreaches = (int)$stmt->fetchColumn();
+
+    echo json_encode(['status'=>'success','meetings'=>$meetings,'outreaches'=>$outreaches]);
+    exit;
+  } catch (PDOException $ex) {
+    error_log("fetch_cell_report_counts error: ".$ex->getMessage());
+    echo json_encode(['status'=>'error','message'=>'Database error']);
+    exit;
+  }
+}
+
+// ...existing code...
+````
+
+### [ajax.js](file:///c%3A/xampp/htdocs/cell-tracker/ajax.js)
+
+Add two new fetch functions and call them conditionally on load to populate the dashboard stats. Minimal insertion near the top where dashboard stats logic runs.
+
+````javascript
+
+
+Made changes.
+
+// ...existing code...
+
+  // If church admin, fetch total cell members for dashboard stats
+  if ($("body").hasClass("church-admin") || $("#dashboard-page .cell-count").length) {
+    fetchChurchCellMemberCount();
+    // fetch church-level report counts (meetings & outreaches)
+    if (typeof fetchChurchReportCounts === 'function') fetchChurchReportCounts();
+  }
+
+  // If cell admin, fetch cell-level report counts
+  if ($("body").hasClass("cell-admin") || $("#dashboard-page .cell-member-count").length) {
+    if (typeof fetchCellReportCounts === 'function') fetchCellReportCounts();
+  }
+
+// ...existing code...
+
+// New: fetch and populate church totals (published reports across all cells in church)
+function fetchChurchReportCounts() {
+  $.ajax({
+    url: "../php/ajax.php",
+    method: "POST",
+    dataType: "json",
+    data: { action: "fetch_church_report_counts" },
+    success: function (res) {
+      if (res && res.status === "success") {
+        // populate spans added to church dashboard
+        $(".total-meetings").text(res.meetings);
+        $(".total-outreaches").text(res.outreaches);
+      }
+    },
+    error: function () {
+      // silent fail
+    }
+  });
+}
+window.fetchChurchReportCounts = fetchChurchReportCounts;
+
+// New: fetch and populate current cell totals (published reports for this cell)
+function fetchCellReportCounts() {
+  $.ajax({
+    url: "../php/ajax.php",
+    method: "POST",
+    dataType: "json",
+    data: { action: "fetch_cell_report_counts" },
+    success: function (res) {
+      if (res && res.status === "success") {
+        // populate spans added to cell dashboard
+        $(".cell-meetings-reported").text(res.meetings);
+        $(".cell-outreaches-reported").text(res.outreaches);
+      }
+    },
+    error: function () {
+      // silent fail
+    }
+  });
+}
+window.fetchCellReportCounts = fetchCellReportCounts;
+
+// ...existing code...
+````
+
+### [church-dashboard.php](file:///c%3A/xampp/htdocs/cell-tracker/dashboard/pages/dashboard/church-dashboard.php)
+
+Add small class hooks for the meetings/outreaches stat spans so JS can update them. Keep rest unchanged.
+
+````php
+
+
+Made changes.
+
+````php
+````php
+````php
+````php
+````php
+````php
+````php
+````php
+````php
+````php
+````php
+````php
+````php
+````php
+<!-- Church Stats -->
+        <div class="stats">
+        <div class="data-block stats-block d-grid">
+          <div class="stat px-3 py-2">
+            <span class="value fs-4 fw-bold d-block cell-count">--</span>
+            <span class="title d-block">Cells</span>
+          </div>
+
+          <div class="stat px-3 py-2">
+            <span class="value fs-4 fw-bold d-block">--</span>
+            <span class="title d-block">Total cell members</span>
+          </div>
+
+          <div class="stat px-3 py-2">
+            <span class="value fs-4 fw-bold d-block total-meetings">--</span>
+            <span class="title d-block">Total cell meetings reported</span>
+          </div>
+
+          <div class="stat px-3 py-2">
+            <span class="value fs-4 fw-bold d-block total-outreaches">--</span>
+            <span class="title d-block">Total cell outreaches reported</span>
+          </div>
+        </div>
+    </div>
+````
+
+### [cell-dashboard.php](file:///c%3A/xampp/htdocs/cell-tracker/dashboard/pages/dashboard/cell-dashboard.php)
+
+Add class hooks for the cell-level meetings/outreaches stat spans. Keep rest unchanged.
+
+````php
+
+
+Made changes.
+
+<!-- Cell Stats -->
+<div class="stats">
+<div class="data-block stats-block d-grid">
+          <div class="stat px-3 py-2">
+            <span class="value fs-4 fw-bold d-block cell-member-count">--</span>
+            <span class="title d-block">Cell members</span>
+          </div>
+
+          <div class="stat px-3 py-2">
+            <span class="value fs-4 fw-bold d-block cell-meetings-reported">--</span>
+            <span class="title d-block">Cell meetings reported</span>
+          </div>
+
+          <div class="stat px-3 py-2">
+            <span class="value fs-4 fw-bold d-block cell-outreaches-reported">--</span>
+            <span class="title d-block">Cell outreaches reported</span>
+          </div>
+        </div>
+        </div>
+````
+
+Notes
+- Backend queries count rows in cell_reports which represent published reports; no change to publication logic.
+- Changes are minimal, scoped only to dashboard stats wiring as requested.
+- After merging, clear browser cache and reload dashboard; the stats should populate automatically for church and cell admins.
+
+Made changes.
+
+greatkingpriest: #codebase  
+
+## Issue  
+- When attempting to update a cell member's details, the error **"Server error!"** is returned.  
+- This comes specifically from the following block in `ajax.js`:  
+
+```js
+$.ajax({
+  url: "../php/ajax.php?action=edit_cell_member",
+  method: "POST",
+  data,
+  dataType: "json",
+  success: (res) => {
+    if (res.status === "success") {
+      alert("Member details updated!");
+      fetchAllCellMembers();
+      $("#edit-cell-member-form .submit-btn")
+        .prop("disabled", true)
+        .text("Save");
+      toggleActionModal();
+    } else {
+      alert(res.message || "Error updating member's details.");
+      $btn.prop("disabled", false).text("Save");
+    }
+  },
+  error: () => {
+    alert("Server error!");
+    $btn.prop("disabled", false).text("Save");
+  },
+});
+
+## Task:
+- Inspect the corresponding logic in ajax.php for the action edit_cell_member.
+- Identify the root cause of the "Server error!" issue.
+- Fix the issue so that member details can be successfully updated.
+- Ensure the success and error handling in the frontend (ajax.js) continues to work correctly.
+
+## Constraints:
+- Work only within the scope of the edit_cell_member logic.
+- Do not modify unrelated functionality in ajax.php or ajax.js.
+- Maintain existing code structure and conventions.
+
+GitHub Copilot: Solution — steps
+1. Inspect ajax.js caller: it sets dataType: "json" for the edit_cell_member AJAX call, so the server must always return valid JSON (not plain text) or jQuery will call the error handler ("Server error!").
+2. Find ajax.php edit_cell_member branch: it returns plain strings on early validation failures (e.g., "First name and last name are required.") — that causes JSON parse errors.
+3. Replace the edit_cell_member handler so every exit path returns JSON with a consistent shape (status/message), wrap DB operations in try/catch to handle exceptions and return JSON on errors.
+4. Keep existing logic and SQL, only change the output and error handling for this action.
+5. Test manually: submit edit form with missing fields (should get JSON error and frontend shows alert via success callback?), with valid input should return {"status":"success"} and frontend will behave as before.
+
+Files changed
+
+### [ajax.php](file:///c%3A/xampp/htdocs/cell-tracker/php/ajax.php)
+
+Replace the edit_cell_member action block so it always returns JSON, handles exceptions, and preserves existing validation and DB update logic.
+
+````php
+// ...existing code...
+
+/*=======================================
+      Edit Cell Members' details 
+          - Functionality
+=======================================*/
+if ($action === 'edit_cell_member') {
+  header('Content-Type: application/json; charset=utf-8');
+  try {
+    $member_id = clean_input($_POST['member_id'] ?? '');
+
+    if (!$member_id) {
+      echo json_encode(["status" => "error", "message" => "Cell member ID not found!"]);
+      exit;
+    }
+
+    $title = clean_input($_POST['title'] ?? '');
+    $first_name = clean_input($_POST['first_name'] ?? '');
+    $last_name = clean_input($_POST['last_name'] ?? '');
+    $phone_number = clean_input($_POST['phone_number'] ?? '');
+    $email = clean_input($_POST['email'] ?? '');
+    $dob_month = clean_input($_POST['dob_month'] ?? '');
+    $dob_day = clean_input($_POST['dob_day'] ?? '');
+    $occupation = clean_input($_POST['occupation'] ?? '');
+    $residential_address = clean_input($_POST['res_address'] ?? '');
+    $foundation_sch_status = clean_input($_POST['fs_status'] ?? '');
+    $delg_in_cell = clean_input($_POST['delg_in_cell'] ?? '');
+    $dept_in_church = clean_input($_POST['dept_in_church'] ?? '');
+    $date_joined_ministry = clean_input($_POST['date_joined_ministry'] ?? '');
+
+    // Server-side validation (first & last name required)
+    if ($first_name === '' || $last_name === '') {
+      echo json_encode(["status" => "error", "message" => "First name and last name are required."]);
+      exit;
+    }
+
+    // Check if the email already exists (case-insensitive), but allow same member
+    if ($email !== '') {
+      $q = $conn->prepare("SELECT id FROM cell_members WHERE LOWER(email) = LOWER(?) LIMIT 1");
+      $q->execute([ $email ]);
+      $foundId = $q->fetchColumn();
+
+      if ($foundId && $foundId != $member_id) {
+        echo json_encode([
+          'status' => 'error',
+          'message' => 'Email address taken! Please use another email.'
+        ]);
+        exit;
+      }
+    }
+
+    $stmt = $conn->prepare(
+      "UPDATE cell_members 
+       SET title = ?, first_name = ?, last_name = ?, phone_number = ?, email = ?, dob_month = ?, dob_day = ?, occupation = ?, residential_address = ?, foundation_sch_status = ?, delg_in_cell = ?, dept_in_church = ?, date_joined_ministry = ?
+       WHERE id = ?"
+    );
+
+    $success = $stmt->execute([
+      $title,
+      $first_name,
+      $last_name,
+      $phone_number,
+      $email,
+      $dob_month,
+      $dob_day,
+      $occupation,
+      $residential_address,
+      $foundation_sch_status,
+      $delg_in_cell,
+      $dept_in_church,
+      $date_joined_ministry,
+      $member_id
+    ]);
+
+    if ($success) {
+      echo json_encode(["status" => "success"]);
+    } else {
+      // Provide a consistent JSON error message (avoid emitting raw SQL/HTML)
+      echo json_encode(["status" => "error", "message" => "Failed to update member's details."]);
+    }
+    exit;
+  } catch (PDOException $ex) {
+    error_log("edit_cell_member PDO error: " . $ex->getMessage());
+    echo json_encode(["status" => "error", "message" => "Database error while updating member."]);
+    exit;
+  } catch (Exception $ex) {
+    error_log("edit_cell_member error: " . $ex->getMessage());
+    echo json_encode(["status" => "error", "message" => "Unexpected error while updating member."]);
+    exit;
+  }
+}
+
+// ...existing code...
+````
+
+Notes
+- This change is limited to the edit_cell_member handler. It ensures the endpoint always returns valid JSON and will no longer trigger the AJAX error handler due to parse failures caused by plain-text responses.
+- No frontend changes required; ajax.js success/error handling remains compatible.
+
+Made changes.
