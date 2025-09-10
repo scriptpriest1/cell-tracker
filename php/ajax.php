@@ -1187,7 +1187,7 @@ if ($action === 'submit_cell_report') {
     if ($attendanceCount === 0) {
       $missing[] = 'attendance';
     }
-    // NOTE: first_timers and new_converts are optional for meetings (do not mark missing)
+    // NOTE: new_converts are optional for meetings (do not mark missing)
   }
 
   if (!empty($missing)) {
@@ -1352,11 +1352,10 @@ if ($action === 'submit_cell_report') {
       $people_reached = intval($_POST['people_reached']);
       $new_converts = intval($_POST['new_converts']);
       $outreach_kind = clean_input($_POST['outreach_kind']);
-      // Insert into cell_reports (first_timers NULL for outreach)
       $ins = $conn->prepare("
         INSERT INTO cell_reports (
-          type, week, description, people_reached, first_timers, new_converts, outreach_kind, venue, `date`, `time`, offering, date_generated, expiry_date, date_reported, cell_report_draft_id, cell_id
-        ) VALUES (?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)
+          type, week, description, people_reached, new_converts, outreach_kind, venue, `date`, `time`, offering, date_generated, expiry_date, date_reported, cell_report_draft_id, cell_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)
       ");
       $success = $ins->execute([
         $type, $week, $description, $people_reached, $new_converts, $outreach_kind, $venue, $date, $time, $offering,
@@ -1383,10 +1382,10 @@ if ($action === 'submit_cell_report') {
     } else {
       $ins = $conn->prepare("
         INSERT INTO cell_reports (
-          type, week, description, first_timers, new_converts, outreach_kind,
+          type, week, description, new_converts, outreach_kind,
           venue, `date`, `time`, offering,
           date_generated, expiry_date, date_reported, cell_report_draft_id, cell_id
-        ) VALUES (?, ?, ?, NULL, NULL, NULL, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)
+        ) VALUES (?, ?, ?, NULL, NULL, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)
       ");
       $success = $ins->execute([
         $type, $week, $description, $venue, $date, $time, $offering,
