@@ -186,7 +186,7 @@ $(document).ready(() => {
           $("#add-cell-form .submit-btn")
             .prop("disabled", true)
             .text("Add Cell");
-          handleAdminSelection(""); // reset visibility
+          handleAdminSelection("");
         } else {
           alert("Error: " + res);
           $btn.prop("disabled", false).text("Add Cell");
@@ -226,8 +226,10 @@ $(document).ready(() => {
           result = { status: res };
         }
         if (result.status === "success" && result.profile) {
+
           window.location.reload();
         } else if (res === "success") {
+
           window.location.reload();
         } else {
           alert("Error: " + (result.message || res));
@@ -527,6 +529,7 @@ $(document).ready(() => {
           loadDynamicContentfunction.call(this, e);
           fetchAllCells();
           alert("Admin details updated.");
+          $('#action-modal .side-panel').scrollTop(0);
         } else {
           alert(res.message || "Update failed.");
         }
@@ -601,6 +604,8 @@ $(document).ready(() => {
           fetchAllCellMembers(); // Reload members table
           $("#add-cell-member-form").trigger("reset");
           $btn.prop("disabled", false).text("Add Member");
+
+          console.log($("#action-modal .action-modal-inner"));
         } else {
           alert("Error: " + res);
           $btn.prop("disabled", false).text("Add Member");
@@ -695,6 +700,7 @@ $(document).ready(() => {
           $("#edit-cell-member-form .submit-btn")
             .prop("disabled", true)
             .text("Save");
+
           toggleActionModal();
         } else {
           alert(res.message || "Error updating member's details.");

@@ -232,6 +232,11 @@ button.check-btn svg {
   max-height: 100% !important;
   background-color: var(--bg);
 }
+#site-header {
+  position: sticky;
+  top: 0;
+  background-color: var(--bg);
+}
 
 /* =========================================
 
@@ -323,7 +328,7 @@ button.check-btn svg {
   }
 }
 
-.action-modal .action-modal-inner.scrollable {
+.action-modal .action-modal-inner {
   overflow-y: auto;
   max-height: 350px;
   padding-bottom: 20px !important;
