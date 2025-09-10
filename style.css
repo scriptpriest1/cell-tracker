@@ -537,10 +537,15 @@ button.check-btn svg {
   border-bottom: 1px solid var(--border);
 }
 
-#screen header .account-name-bar .account {
+#screen header .account-name-bar {
+  max-width: 90%;
+  overflow: hidden;
+}
+
+#screen header .account-name-bar .account-name {
   margin: 0;
   overflow-x: hidden;
-  flex: 40%;
+  max-width: 90%;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -557,6 +562,12 @@ button.check-btn svg {
 
 #screen header .menu-btn svg {
   fill: var(--text-primary);
+}
+
+@media screen and (max-width: 767px) {
+  #screen header .account-name-bar {
+    max-width: 30% !important;
+  }
 }
 
 #screen .body {
