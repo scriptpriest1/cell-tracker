@@ -566,7 +566,7 @@ button.check-btn svg {
 
 @media screen and (max-width: 767px) {
   #screen header .account-name-bar {
-    max-width: 30% !important;
+    max-width: 80% !important;
   }
 }
 
