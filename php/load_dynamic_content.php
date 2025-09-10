@@ -22,7 +22,8 @@ if (isset($_POST['content-type'])) {
   $content_type = clean_input($_POST['content-type']);
 
   if ($content_type === 'add-a-cell-form') {
-    echo <<<HTML
+    ob_start();
+    ?>
       <form id="add-cell-form" class="action-modal-form position-relative">
         <div class="body px-4 pt-2">
           <div class="form-group">
@@ -90,7 +91,10 @@ if (isset($_POST['content-type'])) {
           <button type="submit" class="submit-btn w-100" disabled>Add Cell</button>
         </footer>
       </form>
-    HTML;
+    <?php
+    $html = ob_get_clean();
+    echo $html;
+    exit;
   }
 
   if ($content_type === 'assign-cell-admin') {
