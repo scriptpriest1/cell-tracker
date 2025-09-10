@@ -1,5 +1,6 @@
 <!-- Cell Reports Section -->
 <section class="reports-section">
+  <button type="button" id="create-draft-btn" class="bg-dark text-white d-block m-0 my-2">Create draft</button>
   <div class="reports-status-bar d-flex align-items-center gap-4 mt-2">
     <div class="report-status published">
       <h6 class="text m-0 p-0">Published: <span class="count span-box"></span></h6>
@@ -20,7 +21,6 @@
     <button id="outreach" class="filter">Outreaches</button>
   </div>
   <div class="reports-body">
-    <button type="button" id="create-draft-btn" class="bg-dark text-white position-absolute top-0 end-0">Create draft</button>
     <!-- Report block dynamically inserted here -->
   </div>
 </section>
