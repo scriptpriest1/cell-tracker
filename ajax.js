@@ -38,6 +38,9 @@ $(document).ready(() => {
   $("#login-form").on("submit", (e) => {
     e.preventDefault();
 
+    $submitBtn = $('#login-form .submit-btn');
+    $submitBtn.prop('disabled', true).text('Logging in...');
+
     const data = $("#login-form").serialize();
 
     $.ajax({
@@ -47,14 +50,17 @@ $(document).ready(() => {
       success: (res) => {
         if (res === "success") {
           //successMsg.text("Logging in...");
-          window.location.href = "./dashboard";
+          $submitBtn.prop('disabled', false).text('Log in');
+          window.location.href = "dashboard";
         } else if (res === "wrongDetails") {
+          $submitBtn.prop('disabled', false).text('Log in');
           alert('Incorrect email or password');
           //errMsg.text("Wrong username or password");
         }
       },
       error: () => {
-        errMsg.text("Error logging in");
+        $submitBtn.prop('disabled', false).text('Log in');
+        alert("Error logging in");
       },
     });
   });
@@ -344,6 +350,7 @@ $(document).ready(() => {
         "admin-id": adminId != undefined ? adminId : null,
         "cell-member-id": cellMemberId != undefined ? cellMemberId : null,
       },
+      cache: false,
       success: (res) => {
         if (contentType === "add-a-cell-form") {
           $("#action-modal header .title").text("Add a Cell");
@@ -547,7 +554,7 @@ $(document).ready(() => {
       { profile_type: profileType, entity_id: entityId },
       function (response) {
         if (response === "success") {
-          window.location.href = "/dashboard";
+          window.location.href = "../dashboard";
         } else {
           alert("Could not switch profile.");
         }
