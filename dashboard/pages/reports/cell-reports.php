@@ -1,6 +1,6 @@
 <!-- Cell Reports Section -->
 <section class="reports-section">
-  <button type="button" id="create-draft-btn" class="bg-dark text-white d-block m-0 mb-3 w-100">Create draft</button>
+  <button type="button" id="create-draft-btn" class="bg-dark text-white d-block m-0 mb-3">Create draft</button>
   <div class="reports-status-bar d-flex align-items-center gap-4 mt-2">
     <div class="report-status published">
       <h6 class="text m-0 p-0">Published: <span class="count span-box"></span></h6>
