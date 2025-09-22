@@ -788,8 +788,7 @@ button.check-btn svg {
   width: 70%;
 }
 
-.report-draft .week {
-}
+.report-draft .week {}
 
 .report-draft .description {
   font-size: 14px;
@@ -895,4 +894,101 @@ button.check-btn svg {
   .church-reports-section .cells-reports .top-bar select {
     width: 100%;
   }
+}
+
+/* Settings page */
+
+.profile-section .heading {
+  color: var(--text-primary);
+}
+
+.profile-section .sub-section {
+}
+
+.profile-section .profile-bar {
+  background-color: var(--tertiary-alt);
+  border-radius: 15px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.profile-section .profile-bar .icon-div {
+  background-color: var(--border);
+  border-radius: 10px;
+}
+
+.profile-section .profile-bar .icon-div svg {
+  fill: var(--text-primary);
+}
+
+.profile-section .profile-bar .text-div {
+  overflow: hidden;
+}
+
+.profile-section .profile-bar .text-div .name {
+  color: var(--text-primary);
+  width: auto;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.profile-section .profile-bar .text-div .role {
+  width: auto;
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-section .profile-form-section .profile-form {
+}
+
+.profile-section .profile-form-section .profile-form .body {
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background-color: var(--tertiary-alt);
+}
+
+.profile-section .profile-form-section .profile-form .form-group {
+  margin-bottom: 7px;
+}
+
+
+.profile-section .profile-form-section .profile-form footer .edit-btn,
+.profile-section .profile-form-section .profile-form footer .save-btn {
+  background-color: var(--primary);
+  color: var(--text-tertiary);
+  padding-left: 20px !important;
+  padding-right: 20px !important;
+}
+
+.profile-section .change-password-section .change-password-bar {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.profile-section .change-password-section .change-password-clicker {
+  border-radius: 0;
+  border: none !important;
+  border-bottom: 1px solid var(--border) !important;
+  color: var(--primary);
+  cursor: pointer;
+}
+
+.profile-section .change-password-section .input-container {
+  background-color: var(--bg);
+}
+
+.profile-section .change-password-section .input-container .form-control {
+  border: 1px solid var(--border);
+}
+.profile-section .change-password-section .input-container .form-control:first-child {
+  margin: 0 !important;
+}
+
+.profile-section .change-password-section .input-container .change-password-submit-btn {
+  background-color: var(--primary);
+  color: var(--text-tertiary);
 }
