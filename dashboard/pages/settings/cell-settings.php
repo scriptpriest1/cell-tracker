@@ -9,14 +9,14 @@
             </div>
             <div class="text-div w-100">
                 <h6 class="name m-0">Chinwendu Chimereze</h6>
-                <span class="role">PCF Leader</span>
+                <span class="role d-block m-0">PCF Leader</span>
             </div>
         </div>
 
         <div class="change-password-section sub-section">
             <div class="change-password-bar">
                 <span class="change-password-clicker w-100 d-block text-start form-select" id="change-password-clicker">Change account password</span>
-                <div class="input-container p-2">
+                <div class="input-container d-none p-2">
                     <input type="password" class="form-control w-100 mt-1" id="current-password-input" placeholder="Enter current password">
                     <input type="password" class="form-control w-100 mt-1" id="new-password-input" placeholder="Enter new password">
                     <button type="button" class="change-password-submit-btn mt-2 text-center w-100">Change password</button>
@@ -27,9 +27,9 @@
     
     <section class="profile-form-container mt-4 mt-md-0 w-100">
         <div class="profile-form-section sub-section mb-2">
-            <h5 class="heading">Profile details</h5>
-            <form class="profile-form">
-                <div class="body py-2 px-3">
+            <h5 class="heading">Update profile info</h5>
+            <form class="profile-form py-2 px-3 pb-3">
+                <div class="body">
                     <div class="form-group">
                         <label for="first-name">First name:</label>
                         <input type="text" id="first-name" name="first-name" class="form-control" value="" disabled />
@@ -49,7 +49,7 @@
                 </div>
                 <footer class="form-footer mt-3 d-flex align-items-center gap-3">
                     <button type="button" class="edit-btn" id="profile-form-edit-btn">Edit</button>
-                    <button type="submit" class="save-btn" id="profile-form-save-btn">Save</button>
+                    <button type="submit" class="save-btn d-none" id="profile-form-save-btn">Save</button>
                 </footer>
             </form>
         </div>

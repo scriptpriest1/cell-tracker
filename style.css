@@ -909,6 +909,7 @@ button.check-btn svg {
   background-color: var(--tertiary-alt);
   border-radius: 15px;
   border: 1px solid var(--border);
+  border-bottom-width: 2px;
   overflow: hidden;
 }
 
@@ -942,10 +943,8 @@ button.check-btn svg {
 }
 
 .profile-section .profile-form-section .profile-form {
-}
-
-.profile-section .profile-form-section .profile-form .body {
   border: 1px solid var(--border);
+  border-bottom-width: 2px;
   border-radius: 15px;
   background-color: var(--tertiary-alt);
 }
@@ -959,8 +958,8 @@ button.check-btn svg {
 .profile-section .profile-form-section .profile-form footer .save-btn {
   background-color: var(--primary);
   color: var(--text-tertiary);
-  padding-left: 20px !important;
-  padding-right: 20px !important;
+  padding-left: 25px !important;
+  padding-right: 25px !important;
 }
 
 .profile-section .change-password-section .change-password-bar {
