@@ -7260,3 +7260,617 @@ Status
 
 Next steps (optional)
 - I can run a quick static scan or run the app to verify labels render correctly and modal behavior; tell me if you want me to proceed.
+
+celestialscriptpriest: #codebase  
+
+REQUIREMENTS FOR **CHURCH REPORTS** PAGE
+
+1. **Church admin permissions**  
+   - The church admin can **only view** reports of the selected cell.  
+   - **Publishing and editing** cell reports are **not allowed** for church admins.  
+
+2. **Published reports**  
+   - Church admin can open/view the cell report (the "View" button should be visible and functional).  
+   - The "Edit report" button inside the opened modal/form should **not** be displayed.  
+   - All fields inside the report form should always be **disabled**, regardless of the report’s status.  
+   - For outreach reports: dropdown buttons should remain enabled, but the checkboxes inside them should be disabled.  
+
+3. **General restriction**  
+   - All functions for publishing and editing reports should not be applicable for church admins.  
+
+**Task:**  
+- Implement the above requirements 
+- Work only within the scope of this prompt 
+
+
+GitHub Copilot: GitHub Copilot
+
+Solution (steps)
+1. Add a small helper in ajax.js that enforces "church admin" view-only restrictions inside the action modal: remove edit/publish controls, disable inputs, keep dropdown toggles enabled but disable checkboxes inside dropdowns.
+2. Call that helper after any AJAX load that injects a cell report form into the modal (both the global publish/view handler and the church-section-scoped view handler).
+3. Keep all other logic unchanged so cell-admin flows remain intact.
+
+File changed
+
+### [ajax.js](file:///c%3A/xampp/htdocs/cell-tracker/ajax.js)
+
+Add applyChurchAdminModalRestrictions() and call it after injecting report form HTML in the AJAX success handlers that open the modal.
+
+````javascript
+// ...existing code...
+
+// Add helper to enforce church-admin view-only behavior for reports loaded into the modal
+function applyChurchAdminModalRestrictions() {
+  // detect church-admin context: the church-reports container sets data-is-church-admin="1" on church pages
+  const isChurchAdmin = String($(".cells-reports").data("is-church-admin") || "0") === "1";
+  if (!isChurchAdmin) return;
+
+  // target the report form inside the action modal (if present)
+  const $form = $("#action-modal #cell-report-form");
+  if ($form.length === 0) return;
+
+  // Disable all form inputs, selects, textareas to make it view-only
+  $form.find("input, select, textarea, button").prop("disabled", true);
+
+  // Keep the dropdown toggle buttons enabled so church admin can open dropdowns (per requirement)
+  $(".attendance-select, .first-timers-select, .new-converts-select").prop("disabled", false);
+
+  // Disable checkboxes inside custom-dropdowns (they should be visible but not interactive)
+  $("#action-modal .custom-dropdown input[type='checkbox']").prop("disabled", true);
+
+  // Remove any edit/publish/submit controls from the modal to prevent editing/publishing
+  $form.find(".edit-btn, .cancel-btn, .submit-btn, .publish-btn").remove();
+
+  // Also remove any inline "Edit report" controls that might be outside #cell-report-form
+  $("#action-modal .edit-btn, #action-modal .publish-btn, #action-modal .submit-btn").remove();
+}
+window.applyChurchAdminModalRestrictions = applyChurchAdminModalRestrictions;
+
+// ...existing code...
+
+// Modify global delegated publish/view handler to apply restrictions when modal content is injected
+// ...existing code before this handler...
+$(document).on("click", ".publish-btn, .view-btn", function (e) {
+  e.preventDefault();
+  const $btn = $(this);
+  const $draftDiv = $btn.closest(".report-draft");
+  const draftId = $draftDiv.data("id");
+  const week = $draftDiv.data("week");
+  const description = $draftDiv.find(".description").text();
+  const status = ($draftDiv.data("report-status") || "").toString().toLowerCase();
+  const type = $draftDiv.data("report-type");
+
+  // If draft is expired (server may have updated status) block action with alert
+  if (status === "expired") {
+    alert("Report is expired and cannot be published!");
+    return;
+  }
+
+  // Load the report form via AJAX and show in modal
+  $.ajax({
+    url: "../php/load_dynamic_content.php",
+    method: "POST",
+    data: {
+      "content-type": "cell-report-form",
+      "draft-id": draftId,
+      "week": week,
+      "description": description,
+      "status": status,
+      "report-type": type,
+      "mode": $btn.hasClass("publish-btn") ? "publish" : "view"
+    },
+    success: function (res) {
+      $("#action-modal header .title").text(`Week ${week}: ${description}`);
+      $("#action-modal .content-container").html(res);
+
+      // If we're on the church-reports page (church admin), enforce view-only restrictions
+      try { applyChurchAdminModalRestrictions(); } catch (err) { /* noop */ }
+
+      toggleActionModal();
+    }
+  });
+});
+// ...existing code...
+
+// ...existing code inside renderDraftsIntoSection where section-scoped view handler exists...
+// Wire view/publish buttons inside this injected section
+$section.off("click", ".view-btn").on("click", ".view-btn", function (e) {
+  // Prevent document-level handlers from also running (they toggle the modal too)
+  e.preventDefault();
+  e.stopPropagation();
+  e.stopImmediatePropagation();
+
+  const $btn = $(this);
+  const draftId = $btn.data("draft-id");
+  const status = $btn.closest(".report-item").data("report-status");
+  // Prevent opening pending/expired drafts for church admins: they shouldn't be rendered, but double-guard
+  if (String(status) !== "published") {
+    alert("You cannot open this draft.");
+    return;
+  }
+  // Open read-only view via existing load_dynamic_content flow
+  $.ajax({
+    url: "../php/load_dynamic_content.php",
+    method: "POST",
+    data: {
+      "content-type": "cell-report-form",
+      "draft-id": draftId,
+      "mode": "view"
+    },
+    success: function (res) {
+      $("#action-modal header .title").text("View Report");
+      $("#action-modal .content-container").html(res);
+
+      // ensure fields and checkboxes are disabled (defensive) and remove edit controls for church admins
+      $("#action-modal #cell-report-form input, #action-modal #cell-report-form select, #action-modal #cell-report-form textarea").prop("disabled", true);
+      $("#action-modal .custom-dropdown input[type='checkbox']").prop("disabled", true);
+
+      try { applyChurchAdminModalRestrictions(); } catch (err) { /* noop */ }
+
+      toggleActionModal();
+    }
+  });
+});
+
+// ...existing code...
+````
+
+Notes
+- The helper uses the existing data-is-church-admin flag placed on .cells-reports to detect church-admin context, so it only affects the church-reports flow.
+- It removes edit/publish/submit controls from the modal and disables inputs; dropdown toggles remain enabled per your requirement while checkboxes inside them are disabled.
+- Called in both global and section-scoped AJAX success callbacks so the modal is sanitized regardless of how the report form was requested.
+- No other editor/publish logic was changed so cell-admin flows remain intact.
+
+Made changes.
+
+celestialscriptpriest: #codebase  
+
+**Issue:**  
+- The title of the action modal for church admins is currently set to `"View Report"`.  
+
+**Requirement:**  
+- The modal title should instead display the **Week** and **Description** of the report, exactly as it is done in the cell admin’s report page.  
+
+**Task:**  
+- Update the modal logic to use the correct title format (`Week + Description`).  
+- Ensure consistency with how it is implemented for cell admins.  
+- Do not break existing functionality for cell admins.  
+- Work only within the scope of this prompt
+
+GitHub Copilot: GitHub Copilot
+
+Solution (steps)
+1. For church-admin (section-scoped) view button handler, compute the draft's week and description from the clicked draft element.
+2. Use those values to set the action modal title to "Week {week}: {description}" (same format as the cell-admin/global handler).
+3. Make the change only in the section-scoped view handler so cell-admin/global behavior remains unchanged.
+
+Changes grouped by file:
+
+### [ajax.js](file:///c%3A/xampp/htdocs/cell-tracker/ajax.js)
+
+Update the section-scoped ".view-btn" click handler to set the modal title to "Week {week}: {description}" instead of the generic "View Report". This uses the draft's data-week and .description text already present in the DOM.
+
+````javascript
+// ...existing code...
+    // Wire view/publish buttons inside this injected section
+-    $section.off("click", ".view-btn").on("click", ".view-btn", function (e) {
+-      // Prevent document-level handlers from also running (they toggle the modal too)
+-      e.preventDefault();
+-      e.stopPropagation();
+-      e.stopImmediatePropagation();
+-
+-      const $btn = $(this);
+-      const draftId = $btn.data("draft-id");
+-      const status = $btn.closest(".report-item").data("report-status");
+-      // Prevent opening pending/expired drafts for church admins: they shouldn't be rendered, but double-guard
+-      if (String(status) !== "published") {
+-        alert("You cannot open this draft.");
+-        return;
+-      }
+-      // Open read-only view via existing load_dynamic_content flow
+-      $.ajax({
+-        url: "../php/load_dynamic_content.php",
+-        method: "POST",
+-        data: {
+-          "content-type": "cell-report-form",
+-          "draft-id": draftId,
+-          "mode": "view"
+-        },
+-        success: function (res) {
+-          $("#action-modal header .title").text("View Report");
+-          $("#action-modal .content-container").html(res);
+-
+-          // ensure fields and checkboxes are disabled (defensive) and remove edit controls for church admins
+-          $("#action-modal #cell-report-form input, #action-modal #cell-report-form select, #action-modal #cell-report-form textarea").prop("disabled", true);
+-          $("#action-modal .custom-dropdown input[type='checkbox']").prop("disabled", true);
+-
+-          try { applyChurchAdminModalRestrictions(); } catch (err) { /* noop */ }
+-
+-          toggleActionModal();
+-        }
+-      });
+-    });
++    $section.off("click", ".view-btn").on("click", ".view-btn", function (e) {
++      // Prevent document-level handlers from also running (they toggle the modal too)
++      e.preventDefault();
++      e.stopPropagation();
++      e.stopImmediatePropagation();
++
++      const $btn = $(this);
++      const draftId = $btn.data("draft-id");
++      const $draftItem = $btn.closest(".report-item");
++      const status = String($draftItem.data("report-status") || "").toLowerCase();
++
++      // Prevent opening pending/expired drafts for church admins: they shouldn't be rendered, but double-guard
++      if (status !== "published") {
++        alert("You cannot open this draft.");
++        return;
++      }
++
++      // Read week and description from the DOM so we can set the exact modal title
++      const week = $draftItem.data("week");
++      const description = $draftItem.find(".description").text().trim();
++
++      // Open read-only view via existing load_dynamic_content flow
++      $.ajax({
++        url: "../php/load_dynamic_content.php",
++        method: "POST",
++        data: {
++          "content-type": "cell-report-form",
++          "draft-id": draftId,
++          "mode": "view"
++        },
++        success: function (res) {
++          // Use same title format as cell-admin/global handler
++          $("#action-modal header .title").text(`Week ${week}: ${description}`);
++          $("#action-modal .content-container").html(res);
++
++          // ensure fields and checkboxes are disabled (defensive) and remove edit controls for church admins
++          $("#action-modal #cell-report-form input, #action-modal #cell-report-form select, #action-modal #cell-report-form textarea").prop("disabled", true);
++          $("#action-modal .custom-dropdown input[type='checkbox']").prop("disabled", true);
++
++          try { applyChurchAdminModalRestrictions(); } catch (err) { /* noop */ }
++
++          toggleActionModal();
++        }
++      });
++    });
+// ...existing code...
+````
+
+Notes
+- This change only affects the section-scoped handler used on the church-reports page; the global handler for cell-admins is unchanged and still sets the modal title the same way.
+- The title now exactly matches "Week {week}: {description}" for church-admin views (consistent with cell-admin behavior).
+
+Made changes.
+
+celestialscriptpriest: #codebase 
+The cell report's dropdown search input should not be disabled even for the church admin. Re-enable the search inputs
+
+GitHub Copilot: GitHub Copilot
+
+Solution (steps)
+1. The modal helper applyChurchAdminModalRestrictions currently disables all inputs inside the modal and then selectively re-enables dropdown toggle buttons. That also disabled the dropdown search inputs.  
+2. Update the helper to also re-enable the dropdown search inputs (.attendance-search, .first-timers-search, .new-converts-search) so church admins can open dropdowns and use the search fields while checkboxes remain disabled.  
+3. Keep changes minimal and scoped to ajax.js so behavior for other roles is unchanged.
+
+Files changed
+
+### [ajax.js](file:///c%3A/xampp/htdocs/cell-tracker/ajax.js)
+
+Re-enable the dropdown search inputs for church-admin view-only modal. Keep checkboxes disabled but allow users to open dropdowns and type in the search fields.
+
+````javascript
+// ...existing code...
+
+// Add helper to enforce church-admin view-only behavior for reports loaded into the modal
+function applyChurchAdminModalRestrictions() {
+  // detect church-admin context: the church-reports container sets data-is-church-admin="1" on church pages
+  const isChurchAdmin = String($(".cells-reports").data("is-church-admin") || "0") === "1";
+  if (!isChurchAdmin) return;
+
+  // target the report form inside the action modal (if present)
+  const $form = $("#action-modal #cell-report-form");
+  if ($form.length === 0) return;
+
+  // Disable all form inputs, selects, textareas to make it view-only
+  $form.find("input, select, textarea, button").prop("disabled", true);
+
+  // Keep the dropdown toggle buttons enabled so church admin can open dropdowns (per requirement)
+  $(".attendance-select, .first-timers-select, .new-converts-select").prop("disabled", false);
+
++  // Also keep the dropdown search inputs enabled so church admins can search within dropdowns
++  // (these are plain text inputs inside the dropdown; enabling them allows typing/searching)
++  $("#action-modal .attendance-search, #action-modal .first-timers-search, #action-modal .new-converts-search").prop("disabled", false);
+
+  // Disable checkboxes inside custom-dropdowns (they should be visible but not interactive)
+  $("#action-modal .custom-dropdown input[type='checkbox']").prop("disabled", true);
+
+  // Remove any edit/publish/submit controls from the modal to prevent editing/publishing
+  $form.find(".edit-btn, .cancel-btn, .submit-btn, .publish-btn").remove();
+
+  // Also remove any inline "Edit report" controls that might be outside #cell-report-form
+  $("#action-modal .edit-btn, #action-modal .publish-btn, #action-modal .submit-btn").remove();
+}
+window.applyChurchAdminModalRestrictions = applyChurchAdminModalRestrictions;
+
+// ...existing code...
+````
+
+Notes
+- Only the search input enabling line was added; all other view-only restrictions remain (checkboxes disabled, edit/publish removed).
+- This restores the ability for church admins to type into dropdown searches while keeping the form read-only.
+
+Made changes.
+
+celestialscriptpriest: **Pending reports**  
+   - Church admin should **not be able to open pending reports**.  
+   - The "Publish" button should not be rendered at all.  
+   - Publishing functions should not be applicable.  
+
+GitHub Copilot: GitHub Copilot
+
+Solution (steps)
+1. Prevent rendering of "Publish" for church admins by checking the isChurchAdmin flag when building action buttons inside renderDraftsIntoSection.
+2. Keep published reports showing the "View" button for church admins.
+3. Leave all other code unchanged so cell-admin flows still render publish buttons.
+
+File changed
+
+### [ajax.js](file:///c%3A/xampp/htdocs/cell-tracker/ajax.js)
+
+Only change: in renderDraftsIntoSection, do not create/append a Publish button for pending reports when isChurchAdmin is true.
+
+````javascript
+// ...existing code...
+        group[month].forEach(draft => {
+          const status = (draft.status || "pending").toLowerCase();
+          const desc = $('<div>').text(draft.description || getMeetingDescription(draft.week)).html();
+
+          // Build status label HTML for visibility in the action-bar
+          let labelHtml = "";
+          if (status === "published") {
+            labelHtml = `<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill=""><path d="m382-354 339-339q12-12 28-12t28 12q12 12 12 28.5T777-636L410-268q-12 12-28 12t-28-12L182-440q-12-12-11.5-28.5T183-497q12-12 28.5-12t28.5 12l142 143Z"/></svg>`;
+          } else if (status === "pending") {
+            labelHtml = `<span class="label"></span>`;
+          } else if (status === "expired") {
+            labelHtml = `<span class="label">expired</span>`;
+          }
+
+-        // Choose allowed actions for church admin:
+-        // - If church admin: do not show Publish or Edit buttons.
+-        // - If published: show View button.
+-        // - If pending or expired and user is church admin: do not render View/Publish.
+-        let $actionBtn = $();
+-        if (status === "published") {
+-          // published -> show View (allowed to church admin)
+-          $actionBtn = $(`<button class="view-btn m-0 p-0" data-draft-id="${draft.id}" data-cell-id="${draft.cell_id}">View</button>`);
+-        } else if (status === "pending") {
+-          // pending -> only show Publish to non-church-admins
+-          $actionBtn = $(`<button class="publish-btn m-0 p-0" data-draft-id="${draft.id}" data-cell-id="${draft.cell_id}">Publish</button>`);
+-        } else if (status === "expired") {
+-          $actionBtn = $(); // no action for expired
+-        }
++        // Choose allowed actions taking church-admin into account:
++        // - Published: always show View button.
++        // - Pending: show Publish ONLY to non-church-admins (church admins see no action).
++        // - Expired: no action.
++        let $actionBtn = $();
++        if (status === "published") {
++          $actionBtn = $(`<button class="view-btn m-0 p-0" data-draft-id="${draft.id}" data-cell-id="${draft.cell_id}">View</button>`);
++        } else if (status === "pending") {
++          if (!isChurchAdmin) {
++            $actionBtn = $(`<button class="publish-btn m-0 p-0" data-draft-id="${draft.id}" data-cell-id="${draft.cell_id}">Publish</button>`);
++          } else {
++            $actionBtn = $(); // church admin: do not render publish or view for pending
++          }
++        } else {
++          $actionBtn = $(); // expired -> no action
++        }
+// ...existing code...
+````
+
+Notes
+- This ensures church admins cannot open pending reports and the Publish button will not be rendered for them. Cell-admin behavior is unchanged.
+
+Made changes.
+
+celestialscriptpriest: #codebase  
+
+**Critical Issue:**  
+- In the **church admin's report page**, the report form for type `'outreach'` is incorrectly using the same structure as for `'meeting'`.  
+
+**Requirement:**  
+- For `'outreach'` reports:  
+  1. **Attendance** and **New Converts** should be simple **input elements** just like it is for the **cell admin's page**, not dropdowns.  
+  2. The **Outreach Kind** field must also be rendered.  
+  3. This structure of the form should **match exactly** how it is implemented in the **cell admin's page**.  
+
+**Guide:**
+- Read the load_dynamic_content.php file to understand how the forms are currently being generated in the **cell admin's page**. The logic for rendering the forms begins around line 914.
+- Use this as a reference to replicate the correct structure for the **church admin's outreach report form**.
+
+**Task:**  
+- Correctly implement the outreach form structure for church admins.  
+- Ensure this change does not affect the `'meeting'` form type or any other unrelated logic.  
+- Keep the implementation consistent with the cell admin's outreach form.  
+- WORK ONLY WITHIN THE SCOPE OF THIS PROMPT
+- DON'T ALTER THE ORIGINAL STRUCTURE OF THE CELL ADMIN'S REPORT FORMS
+
+GitHub Copilot: GitHub Copilot
+
+Solution (steps)
+1. The church-admin section-level view handler calls load_dynamic_content.php with only draft-id and mode, so the server cannot determine the report type (week empty → defaults to meeting).
+2. Pass the draft's week, description and report-type in that AJAX request so the server renders outreach forms correctly for church admins.
+3. Make the change only in the section-scoped view handler inside ajax.js; keep all other logic unchanged.
+
+### [ajax.js](file:///c%3A/xampp/htdocs/cell-tracker/ajax.js)
+
+Fix the section-scoped view button handler to send week, description and report-type to load_dynamic_content.php (so outreach uses numeric inputs like the cell-admin page).
+
+````javascript
+// ...existing code...
+    // Wire view/publish buttons inside this injected section
+-    $section.off("click", ".view-btn").on("click", ".view-btn", function (e) {
++    $section.off("click", ".view-btn").on("click", ".view-btn", function (e) {
+       // Prevent document-level handlers from also running (they toggle the modal too)
+       e.preventDefault();
+       e.stopPropagation();
+       e.stopImmediatePropagation();
+ 
+       const $btn = $(this);
+       const draftId = $btn.data("draft-id");
+       const $draftItem = $btn.closest(".report-item");
+       const status = String($draftItem.data("report-status") || "").toLowerCase();
+ 
+       // Prevent opening pending/expired drafts for church admins: they shouldn't be rendered, but double-guard
+       if (status !== "published") {
+         alert("You cannot open this draft.");
+         return;
+       }
+ 
+       // Read week and description from the DOM so we can set the exact modal title
+       const week = $draftItem.data("week");
+-      const description = $draftItem.find(".description").text().trim();
++      const description = $draftItem.find(".description").text().trim();
++      const reportType = $draftItem.data("report-type") || (week ? undefined : 'meeting');
+ 
+       // Open read-only view via existing load_dynamic_content flow
+       $.ajax({
+         url: "../php/load_dynamic_content.php",
+         method: "POST",
+-        data: {
+-          "content-type": "cell-report-form",
+-          "draft-id": draftId,
+-          "mode": "view"
+-        },
++        data: {
++          "content-type": "cell-report-form",
++          "draft-id": draftId,
++          "week": week,
++          "description": description,
++          "report-type": reportType,
++          "mode": "view"
++        },
+         success: function (res) {
+           // Use same title format as cell-admin/global handler
+           $("#action-modal header .title").text(`Week ${week}: ${description}`);
+           $("#action-modal .content-container").html(res);
+ 
+           // ensure fields and checkboxes are disabled (defensive) and remove edit controls for church admins
+           $("#action-modal #cell-report-form input, #action-modal #cell-report-form select, #action-modal #cell-report-form textarea").prop("disabled", true);
+           $("#action-modal .custom-dropdown input[type='checkbox']").prop("disabled", true);
+ 
+           try { applyChurchAdminModalRestrictions(); } catch (err) { /* noop */ }
+ 
+           toggleActionModal();
+         }
+       });
+     });
+// ...existing code...
+````
+
+Notes
+- This mirrors the global handler that already provided week/description/report-type; server-side load_dynamic_content.php will now correctly detect outreach and render numeric inputs + outreach-kind for church-admin views.
+- No other behavior changed.
+
+Made changes.
+
+celestialscriptpriest: #codebase  
+
+**Issue:**  
+- On the **Church admin's** report page, the `attendance` dropdown currently renders **all members of the cell** instead of only those who were marked as present.  
+
+**Requirement:**  
+- The `attendance` dropdown should render **only the members that were marked as present**.  
+- This change should apply **only to the Church admin's report page**.  
+- The Cell admin’s implementation must remain unchanged.  
+
+**Task:**  
+- Update the logic so that the attendance dropdown on the Church admin’s report page shows only the correct subset of members (those marked present).  
+- Ensure this update does not break the dropdown functionality for cell admins or other member types.  
+
+
+GitHub Copilot: GitHub Copilot
+
+Solution (steps)
+1. The church-admin view should only show members that were actually marked as present. Currently the attendance dropdown always renders all cell members and merely marks the checked ones — this reveals non-attendees to church admins.
+2. Change the attendance-dropdown rendering in php/load_dynamic_content.php so that when mode === 'view' AND the current session admin_type === 'church', we iterate only over attendance_ids (the list of present member ids) and render those entries (checked + disabled).  
+3. Leave all other behavior unchanged: cell-admins and non-view modes still list all members as before.
+
+Files changed
+
+### [load_dynamic_content.php](file:///c%3A/xampp/htdocs/cell-tracker/php/load_dynamic_content.php)
+
+Update: attendance dropdown rendering — when viewing as a church admin render only attendees (those in $attendance_ids). Cell-admins and edit/publish modes keep the original full-members dropdown.
+
+````php
+// ...existing code...
+
+          <div class="form-group" style="position:relative;">
+            <label for="attendance">Attendance:</label>
+            <button type="button" class="form-select form-control attendance-select text-start" id="attendance-select" tabindex="0">
+              (<span class="attendance-count"><?= ($mode === 'view') ? $attendance_count : 0 ?></span>)
+            </button>
+            <div class="custom-dropdown attendance-dropdown">
+              <input type="text" class="form-control mb-2 attendance-search" placeholder="Search members...">
+              <div class="attendance-list">
+                <div class="dropdown-option">
+                  <label>
+                    <input type="checkbox" class="form-check-input me-2 select-all-attendance select-all-options" <?= ($mode === 'view') ? 'disabled' : '' ?>>
+                    <span>Select all</span>
+                  </label>
+                </div>
+
+                <?php
+                // If viewing as a Church admin, show ONLY members that were marked present (attendance_ids).
+                // Otherwise (cell admin or edit mode) render the full member list, marking checked ones as before.
+                $isChurchAdminView = ($mode === 'view' && isset($_SESSION['admin_type']) && $_SESSION['admin_type'] === 'church');
+
+                if ($isChurchAdminView) {
+                  // Render only attendees (present members)
+                  $listIds = array_values(array_unique($attendance_ids));
+                  foreach ($listIds as $mid):
+                    $name = '';
+                    foreach ($members as $m) {
+                      if ((int)$m['id'] === (int)$mid) { $name = htmlspecialchars($m['first_name'] . ' ' . $m['last_name']); break; }
+                    }
+                ?>
+                  <div class="dropdown-option">
+                    <label>
+                      <input type="checkbox" class="form-check-input me-2" name="attendance[]" value="<?= htmlspecialchars($mid) ?>" checked disabled>
+                      <?= $name ?>
+                    </label>
+                  </div>
+                <?php
+                  endforeach;
+                } else {
+                  // Original behavior: list all members (for edit mode or non-church viewers)
+                  foreach ($members as $m):
+                    $mid = (int)$m['id'];
+                    $checked = in_array($mid, $attendance_ids) ? 'checked' : '';
+                    $disabled = ($mode === 'view') ? 'disabled' : '';
+                ?>
+                  <div class="dropdown-option">
+                    <label>
+                      <input type="checkbox" class="form-check-input me-2" name="attendance[]" value="<?= $mid ?>" <?= $checked ?> <?= $disabled ?>>
+                      <?= htmlspecialchars($m['first_name'] . ' ' . $m['last_name']) ?>
+                    </label>
+                  </div>
+                <?php
+                  endforeach;
+                }
+                ?>
+              </div>
+            </div>
+          </div>
+
+// ...existing code...
+````
+
+Notes
+- This change only affects the attendance dropdown rendering for church-admins viewing a published report (mode === 'view' and $_SESSION['admin_type'] === 'church').  
+- Cell admins and edit/publish modes are left unchanged.  
+- No other logic or server-side processing was modified.
+
+Made changes.

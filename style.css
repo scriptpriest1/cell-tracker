@@ -902,8 +902,7 @@ button.check-btn svg {
   color: var(--text-primary);
 }
 
-.profile-section .sub-section {
-}
+.profile-section .sub-section {}
 
 .profile-section .profile-bar {
   background-color: var(--tertiary-alt);
@@ -962,6 +961,17 @@ button.check-btn svg {
   padding-right: 25px !important;
 }
 
+.profile-section .profile-form-section .profile-form footer .cancel-btn {
+  color: var(--text-primary);
+  padding-left: 25px !important;
+  padding-right: 25px !important;
+  border: 1px solid var(--border);
+}
+
+.profile-section .profile-form-section .profile-form footer .cancel-btn:hover {
+  background-color: var(--hover-on-bg);
+}
+
 .profile-section .change-password-section .change-password-bar {
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -983,6 +993,7 @@ button.check-btn svg {
 .profile-section .change-password-section .input-container .form-control {
   border: 1px solid var(--border);
 }
+
 .profile-section .change-password-section .input-container .form-control:first-child {
   margin: 0 !important;
 }
