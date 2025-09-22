@@ -55,3 +55,26 @@
         </div>
     </section>
 </section>
+
+
+Format this prompt
+
+#codebase
+
+SETTINGS PAGE
+- Scan the draft.html file to see the structure of the settings page for both cell and church admins.
+- Scan the cell_tracker_schema.sql file to see the structure of the `users` table.
+
+- There should be a fetchUserDetails() function to fetch the users details from the `users` table in the database. 
+- The form fields should contain the information of the user fetched from the database `users`table.
+- When the edit button is clicked:
+	- the innertext changes to 'Cancel' and the classname changes from 'edit-btn' to 'cancel-btn'.
+	- the form fields become enabled and the user can edit his details. On click 'Save' button, the users details update on the database.
+	- When this same button which now has the classname 'cancel-btn' is clicked, the reverse of the above happens.
+- In the '.profile-bar' element in the draft.html file, there's the '.role' element that holds the role of the user. This should be fetched from the `cell_role` or `group-role` column for cell admins or group admins respectively.
+- For cell admins, when fetching the roles, add 'Cell ' before the role name. For example, if the role is 'leader', then what will be displayed is 'Cell leader'. For the church admins, just display the role; don't add anything.
+
+**Change password**
+- When the '.change-password-clicker' element is clicked, it should toggle the 'input-container' element's display (d-block/d-none).
+- The user is required to enter his current password and a new password. If the [hashed] entered current password is same with what's in the database in the `users` table, then the password should be updated with the new one. If not, an error that says 'Incorrect current password' should be displayed via an alert().
+- The fetchUserDetails() function should run immediately after successful password reset.
