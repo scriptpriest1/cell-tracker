@@ -120,24 +120,27 @@ $(document).ready(function () {
       $("#screen header .page-title").text($activeSidebarLink.data("page-title"));
     }
 
-    // Reports filter logic
+    // Reports filter logic: request server for filtered drafts so direct links work
     if (page === "reports") {
-      // Always reset filters
+      // Always reset filters UI
       $(".filter").removeClass("active");
-      if (filter) {
-        $(`#${filter}`).addClass("active");
+      const activeFilterId = filter || "all";
+      $(`#${activeFilterId}`).addClass("active");
+
+      // Ask the server for drafts matching the filter and render them
+      if (typeof window.fetchReportDrafts === 'function') {
+        window.fetchReportDrafts(activeFilterId);
       } else {
-        $("#all").addClass("active");
-      }
-      // Filter report drafts by type
-      if (!filter || filter === "all") {
-        $(".report-draft").show();
-      } else if (filter === "meetings") {
-        $(".report-draft").hide();
-        $(".report-draft[data-report-type='meeting']").show();
-      } else if (filter === "outreached" || filter === "outreaches") {
-        $(".report-draft").hide();
-        $(".report-draft[data-report-type='outreach']").show();
+        // Fallback to old client-side filtering if fetchReportDrafts not loaded yet
+        if (!filter || filter === "all") {
+          $(".report-draft").show();
+        } else if (filter === "meeting") {
+          $(".report-draft").hide();
+          $(".report-draft[data-report-type='meeting']").show();
+        } else if (filter === "outreach") {
+          $(".report-draft").hide();
+          $(".report-draft[data-report-type='outreach']").show();
+        }
       }
     }
   }

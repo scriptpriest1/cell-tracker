@@ -754,7 +754,7 @@ button.check-btn svg {
 }
 
 .report-status.pending .span-box {
-  background-color: var(--warning-light);
+  background-color: var(--border);
 }
 
 .report-status.unpublished .span-box {
@@ -783,13 +783,26 @@ button.check-btn svg {
   background-color: var(--error-hover);
 }
 
+.report-draft .text-bar {
+  overflow: hidden;
+  width: 70%;
+}
+
+.report-draft .week {
+}
+
 .report-draft .description {
   font-size: 14px;
   font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
 }
 
 .report-draft .label {
   font-style: italic;
+  font-size: 14px;
 }
 
 .report-draft[data-report-status="expired"] .label {
@@ -809,7 +822,7 @@ button.check-btn svg {
 
 .report-draft .publish-btn:hover,
 .report-draft .view-btn:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .custom-dropdown {

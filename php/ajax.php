@@ -745,25 +745,34 @@ if ($action === 'generate_report_draft') {
     exit;
   }
 
-  // Set expiry_date: Sunday 23:59:59 of the reporting week
+  // Compute draft Monday 00:00:00 (use same logic as auto-generation to keep idempotency consistent)
   $draftMonday = clone $firstMonday;
   $draftMonday->modify('+' . ($week - 1) * 7 . ' days');
+  $draftMonday->setTime(0, 0, 0);
+
+  // Expiry: Sunday 23:59:59 of the reporting week
   $expiryDate = clone $draftMonday;
   $expiryDate->modify('next Sunday');
   $expiryDate->setTime(23, 59, 59);
 
-  // Set description using helper
+  // Set description & type using helpers
   $description = getMeetingDescription($week);
-
-  // Set type based on week
   $type = getReportTypeByWeek($week);
 
   try {
+    // IMPORTANT: use the computed draft Monday as date_generated (not NOW())
     $stmt = $conn->prepare("
       INSERT INTO cell_report_drafts (type, week, description, status, date_generated, expiry_date, cell_id)
-      VALUES (?, ?, ?, 'pending', NOW(), ?, ?)
+      VALUES (?, ?, ?, 'pending', ?, ?, ?)
     ");
-    $stmt->execute([$type, $week, $description, $expiryDate->format('Y-m-d H:i:s'), clean_input($cell_id)]);
+    $stmt->execute([
+      $type,
+      $week,
+      $description,
+      $draftMonday->format('Y-m-d H:i:s'),
+      $expiryDate->format('Y-m-d H:i:s'),
+      clean_input($cell_id)
+    ]);
 
     $lastId = $conn->lastInsertId();
 
@@ -782,7 +791,8 @@ if ($action === 'generate_report_draft') {
 
   } catch (PDOException $ex) {
     error_log("generate_report_draft error: " . $ex->getMessage());
-    echo json_encode(['status' => 'error', 'message' => 'Database error']);
+    // Return concise error to client but log the full message
+    echo json_encode(['status' => 'error', 'message' => 'Database error while generating draft']);
     exit;
   }
 }
@@ -798,24 +808,36 @@ if ($action === 'fetch_report_drafts') {
     exit;
   }
 
+  // Accept optional filter type from client: expected values 'meeting' or 'outreach'
+  $typeFilter = isset($_POST['type']) ? trim(strtolower(clean_input($_POST['type']))) : '';
+
   try {
-    // include expiry_date in select
-    $q = $conn->prepare("
+    // Build base query and params
+    $sql = "
       SELECT id, type, week, description, status, DATE_FORMAT(date_generated, '%Y-%m-%d %H:%i:%s') AS date_generated, expiry_date, cell_id
       FROM cell_report_drafts
       WHERE cell_id = ?
-      ORDER BY date_generated ASC
-    ");
-    $q->execute([clean_input($cell_id)]);
+    ";
+    $params = [clean_input($cell_id)];
+
+    // If a valid type filter was passed, apply it
+    if (in_array($typeFilter, ['meeting', 'outreach'], true)) {
+      $sql .= " AND type = ?";
+      $params[] = $typeFilter;
+    }
+
+    $sql .= " ORDER BY date_generated DESC";
+
+    $q = $conn->prepare($sql);
+    $q->execute($params);
     $rows = $q->fetchAll(PDO::FETCH_ASSOC);
 
     // Expire any pending drafts whose expiry_date is in the past (server-side enforcement for pending drafts only)
     foreach ($rows as &$row) {
-      // Normalize expiry value
       $expiry = $row['expiry_date'] ?? null;
       if (strtolower($row['status']) === 'pending' && !empty($expiry) && strtotime($expiry) < time()) {
-        // Update DB to mark expired
-        $upd = $conn->prepare("UPDATE cell_report_drafts SET status = 'expired' WHERE id = ?");
+        // Update DB to mark expired (only affect pending drafts)
+        $upd = $conn->prepare("UPDATE cell_report_drafts SET status = 'expired' WHERE id = ? AND status = 'pending'");
         $upd->execute([clean_input($row['id'])]);
         // Reflect change in returned data
         $row['status'] = 'expired';
@@ -823,9 +845,9 @@ if ($action === 'fetch_report_drafts') {
       // Ensure description/type correct
       $row['description'] = getMeetingDescription($row['week']);
       $row['type'] = getReportTypeByWeek($row['week']);
-      // Optionally format expiry_date for frontend (keep raw DB format)
-      // $row['expiry_date'] = $row['expiry_date'];
+      // expiry_date left as-is for frontend use if needed
     }
+
     echo json_encode(['status' => 'success', 'data' => $rows]);
     exit;
   } catch (PDOException $ex) {
@@ -1225,6 +1247,130 @@ if ($action === 'submit_cell_report') {
     echo json_encode(['status' => 'error', 'message' => 'Failed to submit report']);
     exit;
   }
+}
+
+/*=======================================
+      Auto-generate All Cell Report Drafts
+        - Functionality (cron / manual)
+        NOTE: This routine creates drafts with date_generated set to
+        the Monday 00:00:00 of the reporting week. Run it via cron on
+        Mondays at 00:00:00 to auto-generate drafts.
+=======================================*/
+if ($action === 'auto_generate_all_drafts') {
+  // Optional date parameter (yyyy-mm-dd) for testing; default to today.
+  $dateParam = isset($_POST['date']) ? clean_input($_POST['date']) : date('Y-m-d');
+  try {
+    $reportDate = new DateTime($dateParam);
+  } catch (Exception $e) {
+    echo json_encode(['status'=>'error','message'=>'Invalid date']);
+    exit;
+  }
+
+  // Helper: compute week index using the "first Monday" approach used elsewhere.
+  $computeWeek = function (DateTime $d) {
+    $year = (int)$d->format('Y');
+    $month = (int)$d->format('m');
+    $day = (int)$d->format('j');
+
+    $firstOfMonth = new DateTime("$year-$month-01 00:00:00");
+    $dow = (int)$firstOfMonth->format('N'); // 1=Mon
+    $firstMonday = clone $firstOfMonth;
+    if ($dow !== 1) {
+      $firstMonday->modify('next Monday');
+    }
+    $firstMondayDay = (int)$firstMonday->format('j');
+
+    if ($day < $firstMondayDay) return 0;
+    return 1 + floor(($day - $firstMondayDay) / 7);
+  };
+
+  $week = $computeWeek($reportDate);
+  if ($week < 1 || $week > 5) {
+    echo json_encode(['status'=>'ok','message'=>'Not a reporting week; nothing to generate.','generated'=>0,'skipped'=>0]);
+    exit;
+  }
+
+  // Compute the draftMonday and expiry once (same for all cells)
+  $year = (int)$reportDate->format('Y');
+  $month = (int)$reportDate->format('m');
+  $firstOfMonth = new DateTime("$year-$month-01 00:00:00");
+  $dow = (int)$firstOfMonth->format('N');
+  $firstMonday = clone $firstOfMonth;
+  if ($dow !== 1) $firstMonday->modify('next Monday');
+  $draftMonday = clone $firstMonday;
+  $draftMonday->modify('+' . ($week - 1) * 7 . ' days');
+  $draftMonday->setTime(0, 0, 0);
+
+  // Expiry is the Sunday 23:59:59 of that reporting week
+  $expiry = clone $draftMonday;
+  $expiry->modify('next Sunday');
+  $expiry->setTime(23,59,59);
+
+  // Use draft's month/year for idempotency checks (fixes month-boundary bugs)
+  $draftMonth = (int)$draftMonday->format('m');
+  $draftYear  = (int)$draftMonday->format('Y');
+
+  // Fetch all cells
+  $cellsStmt = $conn->prepare("SELECT id FROM cells");
+  $cellsStmt->execute();
+  $cells = $cellsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+  $generated = 0;
+  $skipped = 0;
+  $errors = [];
+
+  foreach ($cells as $c) {
+    $cellId = $c['id'];
+
+    // Skip if a draft already exists for same cell + week + same month/year (idempotency)
+    $check = $conn->prepare("
+      SELECT COUNT(*) FROM cell_report_drafts 
+      WHERE cell_id = ? AND week = ? 
+        AND MONTH(date_generated) = ? AND YEAR(date_generated) = ?
+    ");
+    $check->execute([
+      clean_input($cellId),
+      clean_input($week),
+      $draftMonth,
+      $draftYear
+    ]);
+    $exists = (int)$check->fetchColumn();
+    if ($exists > 0) {
+      $skipped++;
+      continue;
+    }
+
+    $description = getMeetingDescription($week);
+    $type = getReportTypeByWeek($week);
+
+    try {
+      // Insert using the computed date_generated (the Monday 00:00:00)
+      $ins = $conn->prepare("
+        INSERT INTO cell_report_drafts (type, week, description, status, date_generated, expiry_date, cell_id)
+        VALUES (?, ?, ?, 'pending', ?, ?, ?)
+      ");
+      $ins->execute([
+        $type,
+        $week,
+        $description,
+        $draftMonday->format('Y-m-d H:i:s'),
+        $expiry->format('Y-m-d H:i:s'),
+        clean_input($cellId)
+      ]);
+      $generated++;
+    } catch (PDOException $ex) {
+      error_log("auto_generate_all_drafts insert error for cell {$cellId}: " . $ex->getMessage());
+      $errors[] = "Cell {$cellId}: DB error";
+    }
+  }
+
+  echo json_encode([
+    'status' => 'success',
+    'generated' => $generated,
+    'skipped' => $skipped,
+    'errors' => $errors
+  ]);
+  exit;
 }
 
 // Helper function for meeting description

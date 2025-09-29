@@ -786,7 +786,7 @@ $(document).ready(() => {
            data-id="${draft.id}"
            data-date-generated="${draft.date_generated}">
         <div class="text-bar d-flex align-items-center gap-2">
-          <h6 class="m-0 p-0 week">Week ${draft.week}:</h6>
+          <h6 class="m-0 p-0 week">W${draft.week}:</h6>
           <p class="m-0 p-0 description">${$("<div>").text(desc).html()}</p>
         </div>
 
@@ -815,7 +815,7 @@ $(document).ready(() => {
       }
     });
 
-    // if not found, create the html structure and insert it in chronological order
+    // if not found, create the html structure and insert it in reverse chronological order (newest months first)
     if (!$monthBlock || $monthBlock.length === 0) {
       const $newBlock = $(`
       <div class="reports-block mt-4">
@@ -827,7 +827,7 @@ $(document).ready(() => {
       </div>
     `);
 
-      // Insert into the DOM in chronological order by data-date attribute (01-MM-YYYY)
+      // Insert into the DOM in reverse chronological order by data-date attribute (01-MM-YYYY)
       // Convert data-date to YYYY-MM-01 for easy comparison
       const toCompare = (dStr) => {
         // dStr is 01-MM-YYYY
@@ -851,22 +851,22 @@ $(document).ready(() => {
           const existingComp = toCompare(existingDate);
           const newComp = toCompare(monthData);
           if (!existingComp || !newComp) return;
-          // we want chronological ascending order: earlier months appear first.
-          if (newComp < existingComp) {
+          // We want newest months first: if newComp > existingComp, put newBlock before existing block
+          if (newComp > existingComp) {
             $(this).before($newBlock);
             inserted = true;
             return false; // break
           }
         });
         if (!inserted) {
-          // append at the end
+          // append at the end (oldest)
           $(".reports-section .reports-body").append($newBlock);
         }
       }
       $monthBlock = $newBlock.find(".reports-container").first();
     }
 
-    // Now insert the draft inside $monthBlock in ascending order by date_generated
+    // Now insert the draft inside $monthBlock so newer drafts appear above older ones
     const $newDraft = buildDraftElement(draft);
 
     // convert date_generated to comparable ISO string
@@ -878,7 +878,8 @@ $(document).ready(() => {
       // normalize
       const existingISO = existingDate.replace(" ", "T");
       if (!existingISO) return;
-      if (new Date(newDateISO) < new Date(existingISO)) {
+      // Place newer drafts before older ones
+      if (new Date(newDateISO) > new Date(existingISO)) {
         $(this).before($newDraft);
         placed = true;
         return false; // break
@@ -886,6 +887,7 @@ $(document).ready(() => {
     });
 
     if (!placed) {
+      // if not placed, append at end (oldest in that month)
       $monthBlock.append($newDraft);
     }
 
@@ -897,39 +899,51 @@ $(document).ready(() => {
   const updateStatusCounts = () => {
     const $section = $(".reports-section");
     if ($section.length === 0) return;
-    const $published = $section.find(
-      ".report-draft[data-report-status='published']"
-    ).length;
-    const $pending = $section.find(
-      ".report-draft[data-report-status='pending']"
-    ).length;
-    const $expired = $section.find(
-      ".report-draft[data-report-status='expired']"
-    ).length;
-    $section.find(".report-status.published .count").text($published);
-    $section.find(".report-status.pending .count").text($pending);
-    $section.find(".report-status.expired .count").text($expired);
+
+    const published = $section.find(".report-draft[data-report-status='published']").length;
+    const pending = $section.find(".report-draft[data-report-status='pending']").length;
+    const unpublished = $section.find(".report-draft[data-report-status!='published']").length;
+
+    // Ensure each status widget has a .span-box element so the CSS selectors can apply
+    $section.find(".report-status").each(function () {
+      const $rs = $(this);
+      if ($rs.find(".span-box").length === 0) {
+        // prepend a small element used purely for background/indicator coloring
+        $rs.prepend('<span class="span-box" aria-hidden="true"></span>');
+      }
+    });
+
+    // Update counts for the three valid statuses
+    $section.find(".report-status.published .count").text(published);
+    $section.find(".report-status.pending .count").text(pending);
+    if ($section.find(".report-status.unpublished .count").length) {
+      $section.find(".report-status.unpublished .count").text(unpublished);
+    }
   };
 
-  // Fetch all drafts for the logged-in cell and render everything (fresh)
-  window.fetchReportDrafts = () => {
+  // Fetch all cell report drafts (accepts optional filter: 'all' | 'meeting' | 'outreach')
+  window.fetchReportDrafts = (filter = 'all') => {
+    // Map UI filter ids to backend type values
+    let typeParam = null; // null => fetch all
+    if (filter === 'meeting') typeParam = 'meeting';
+    else if (filter === 'outreach') typeParam = 'outreach';
+    // else 'all' -> null
+
     $.ajax({
       url: "../php/ajax.php",
       type: "POST",
-      data: { action: "fetch_report_drafts" },
+      data: { action: "fetch_report_drafts", ...(typeParam ? { type: typeParam } : {}) },
       dataType: "json",
       success: (res) => {
         if (res.status === "success" && Array.isArray(res.data)) {
           // clear existing month blocks under .reports-body (but keep UI header/filter etc)
-          // We'll remove only generated .reports-blocks to avoid destroying other UI elements
           $(".reports-section .reports-block").remove();
 
-          // Build month blocks + drafts
-          // Sort server results by date_generated ascending just to be safe
+          // Sort server results by date_generated DESC so newest first
           res.data.sort(
             (a, b) =>
-              new Date(a.date_generated.replace(" ", "T")) -
-              new Date(b.date_generated.replace(" ", "T"))
+              new Date(b.date_generated.replace(" ", "T")) -
+              new Date(a.date_generated.replace(" ", "T"))
           );
 
           res.data.forEach((draft) => {
@@ -972,16 +986,28 @@ $(document).ready(() => {
   };
 
   // Load all cell report drafts
-  fetchReportDrafts();
+  // Read current URL filter (if any) so direct links / manual URL edits work
+  const initialUrlFilter = new URLSearchParams(window.location.search).get('filter') || 'all';
+  fetchReportDrafts(initialUrlFilter);
 
-  // create draft button: you can change behavior later to choose meeting/outreach
-  $(".reports-body button:contains('Create draft')")
-    .off("click")
-    .on("click", (e) => {
-      e.preventDefault();
-      // default to 'meeting' for manual test
-      generateReportDraft("meeting");
-    });
+  // Also respond to history navigation (back/forward) by re-fetching using the URL filter
+  window.addEventListener('popstate', () => {
+    const f = new URLSearchParams(window.location.search).get('filter') || 'all';
+    if (typeof window.fetchReportDrafts === 'function') {
+      fetchReportDrafts(f);
+    }
+  });
+
+  // Create draft button (stable selector). Default type = "meeting"
+  $(document).on('click', '#create-draft-btn', function (e) {
+    e.preventDefault();
+    // call the existing generator; change argument later to support outreach if needed
+    if (typeof window.generateReportDraft === 'function') {
+      window.generateReportDraft('meeting');
+    } else {
+      console.error('generateReportDraft not defined');
+    }
+  });
 
   // Delegated click handlers for publish/view buttons
   $(document).on("click", ".publish-btn, .view-btn", function (e) {

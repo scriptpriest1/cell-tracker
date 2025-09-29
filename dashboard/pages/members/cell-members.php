@@ -1,7 +1,7 @@
 <!-- Cell Members Table -->
       <div class="cell-table-section">
         <div class="control-panel d-flex align-items-center gap-3 justify-content-between mb-2">
-          <h6 class="m-0">Total No.: &nbsp;<span class="cell-member-count span-box fw-normal"></span></h6>
+          <h6 class="m-0">Members: <span class="cell-member-count span-box fw-normal"></span></h6>
 
           <button id="add-members-btn" class="load-action-modal-dyn-content add-member-btn px-3" data-content-type="add-cell-member-form">Add members
           </button>

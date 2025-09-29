@@ -1,7 +1,7 @@
 <!-- Cells Table -->
 <div class="cell-table-section">
   <div class="control-panel d-flex align-items-center gap-3 justify-content-between mb-2">
-    <h6 class="m-0">Total No.: &nbsp;<span class="cell-count span-box fw-normal"></span></h6>
+    <h6 class="m-0">Cells: <span class="cell-count span-box fw-normal"></span></h6>
     <button id="add-cell-btn" class="load-action-modal-dyn-content add-cell-btn px-3" data-content-type="add-a-cell-form">Add a Cell
     </button>
   </div>
