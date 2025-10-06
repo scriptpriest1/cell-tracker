@@ -1603,6 +1603,7 @@ $(document).ready(() => {
       // Read week and description from the DOM so we can set the exact modal title
       const week = $draftItem.data("week");
       const description = $draftItem.find(".description").text().trim();
+      const reportType = $draftItem.data("report-type") || (week ? undefined : 'meeting');
 
       // Open read-only view via existing load_dynamic_content flow
       $.ajax({
@@ -1611,6 +1612,9 @@ $(document).ready(() => {
         data: {
           "content-type": "cell-report-form",
           "draft-id": draftId,
+          "week": week,
+          "description": description,
+          "report-type": reportType,
           "mode": "view"
         },
         success: function (res) {
@@ -1770,9 +1774,11 @@ function renderCellsTable(cells, query) {
           <td>${cell.cell_leader_name || ""}</td>
           <td>${cell.cell_members_count}</td>
           <td class="d-flex align-items-center gap-2">
+           
             <button type="button" class="load-action-modal-dyn-content view-cell-details-btn action-btn px-3 py-1" data-content-type="view-cell-details" data-cell-name="${cell.cell_name}" data-cell-id="${cell.id}">View</button>
             <button type="button" class="load-action-modal-dyn-content assign-cell-admin-btn action-btn px-3 py-1" data-content-type="assign-cell-admin" data-cell-name="${cell.cell_name}" data-cell-id="${cell.id}">Assign admin</button>
-          </td        </tr>`;
+          </td>
+        </tr>`;
       tbody.append(row);
     });
   }
