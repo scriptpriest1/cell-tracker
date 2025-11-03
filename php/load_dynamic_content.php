@@ -1015,12 +1015,14 @@ if (isset($_POST['content-type'])) {
             <div class="custom-dropdown attendance-dropdown">
               <input type="text" class="form-control mb-2 attendance-search" placeholder="Search members...">
               <div class="attendance-list">
+                <?php if (isset($_SESSION['admin_type']) && $_SESSION['admin_type'] === 'cell'): ?>
                 <div class="dropdown-option">
                   <label>
                     <input type="checkbox" class="form-check-input me-2 select-all-attendance select-all-options" <?= ($mode === 'view') ? 'disabled' : '' ?>>
                     <span>Select all</span>
                   </label>
                 </div>
+                <?php endif; ?>
 
                 <?php
                 // If viewing as a Church admin, show ONLY members that were marked present (attendance_ids).
@@ -1073,12 +1075,14 @@ if (isset($_POST['content-type'])) {
             <div class="custom-dropdown first-timers-dropdown">
               <input type="text" class="form-control mb-2 first-timers-search" placeholder="Search members...">
               <div class="first-timers-list">
+                <?php if (isset($_SESSION['admin_type']) && $_SESSION['admin_type'] === 'cell'): ?>
                 <div class="dropdown-option">
                   <label>
                     <input type="checkbox" class="form-check-input me-2 select-all-first-timers select-all-options" <?= ($mode === 'view') ? 'disabled' : '' ?>>
                     <span>Select all</span>
                   </label>
                 </div>
+                <?php endif; ?>
                 <?php
                 // For view mode we populate from attendees (only those who attended)
                 if ($mode === 'view' && !empty($attendance_ids)):
@@ -1119,12 +1123,14 @@ if (isset($_POST['content-type'])) {
             <div class="custom-dropdown new-converts-dropdown">
               <input type="text" class="form-control mb-2 new-converts-search" placeholder="Search members...">
               <div class="new-converts-list">
+                <?php if (isset($_SESSION['admin_type']) && $_SESSION['admin_type'] === 'cell'): ?>
                 <div class="dropdown-option">
                   <label>
                     <input type="checkbox" class="form-check-input me-2 select-all-new-converts select-all-options" <?= ($mode === 'view') ? 'disabled' : '' ?>>
                     <span>Select all</span>
                   </label>
                 </div>
+                <?php endif; ?>
 
                 <?php
                 // For view mode populate from attendees
