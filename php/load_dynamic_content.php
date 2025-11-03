@@ -1021,20 +1021,46 @@ if (isset($_POST['content-type'])) {
                     <span>Select all</span>
                   </label>
                 </div>
-                <?php foreach ($members as $m): 
-                  $mid = (int)$m['id'];
-                  $checked = in_array($mid, $attendance_ids) ? 'checked' : '';
-                  $disabled = ($mode === 'view') ? 'disabled' : '';
+
+                <?php
+                // If viewing as a Church admin, show ONLY members that were marked present (attendance_ids).
+                // Otherwise (cell admin or edit mode) render the full member list, marking checked ones as before.
+                $isChurchAdminView = ($mode === 'view' && isset($_SESSION['admin_type']) && $_SESSION['admin_type'] === 'church');
+
+                if ($isChurchAdminView) {
+                  // Render only attendees (present members)
+                  $listIds = array_values(array_unique($attendance_ids));
+                  foreach ($listIds as $mid):
+                    $name = '';
+                    foreach ($members as $m) {
+                      if ((int)$m['id'] === (int)$mid) { $name = htmlspecialchars($m['first_name'] . ' ' . $m['last_name']); break; }
+                    }
                 ?>
                   <div class="dropdown-option">
                     <label>
-                      <input type="checkbox" class="form-check-input me-2" name="attendance[]" value="<?= $mid ?>"
-                        <?= $checked ?> <?= $disabled ?>
-                        >
+                      <input type="checkbox" class="form-check-input me-2" name="attendance[]" value="<?= htmlspecialchars($mid) ?>" checked disabled>
+                      <?= $name ?>
+                    </label>
+                  </div>
+                <?php
+                  endforeach;
+                } else {
+                  // Original behavior: list all members (for edit mode or non-church viewers)
+                  foreach ($members as $m):
+                    $mid = (int)$m['id'];
+                    $checked = in_array($mid, $attendance_ids) ? 'checked' : '';
+                    $disabled = ($mode === 'view') ? 'disabled' : '';
+                ?>
+                  <div class="dropdown-option">
+                    <label>
+                      <input type="checkbox" class="form-check-input me-2" name="attendance[]" value="<?= $mid ?>" <?= $checked ?> <?= $disabled ?>>
                       <?= htmlspecialchars($m['first_name'] . ' ' . $m['last_name']) ?>
                     </label>
                   </div>
-                <?php endforeach; ?>
+                <?php
+                  endforeach;
+                }
+                ?>
               </div>
             </div>
           </div>
