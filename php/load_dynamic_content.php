@@ -1053,11 +1053,16 @@ if (isset($_POST['content-type'])) {
                     <span>Select all</span>
                   </label>
                 </div>
-
                 <?php
                 // For view mode we populate from attendees (only those who attended)
                 if ($mode === 'view' && !empty($attendance_ids)):
-                  foreach ($attendance_ids as $mid):
+                  // If the current viewer is a church admin, show ONLY the members that were marked as first timers.
+                  // Otherwise preserve existing behavior (show attendance list but mark checked those in first_timers_ids).
+                  $isChurchAdminView = (isset($_SESSION['admin_type']) && $_SESSION['admin_type'] === 'church');
+                  $listIds = $isChurchAdminView ? $first_timers_ids : $attendance_ids;
+                  // Ensure listIds is an array and unique
+                  $listIds = array_values(array_unique($listIds));
+                  foreach ($listIds as $mid):
                     // find name from $members array
                     $name = '';
                     foreach ($members as $m) {
@@ -1098,7 +1103,11 @@ if (isset($_POST['content-type'])) {
                 <?php
                 // For view mode populate from attendees
                 if ($mode === 'view' && !empty($attendance_ids)):
-                  foreach ($attendance_ids as $mid):
+                  // Church admin should see only members explicitly marked as new converts.
+                  $isChurchAdminView = (isset($_SESSION['admin_type']) && $_SESSION['admin_type'] === 'church');
+                  $listIds = $isChurchAdminView ? $new_converts_ids : $attendance_ids;
+                  $listIds = array_values(array_unique($listIds));
+                  foreach ($listIds as $mid):
                     $name = '';
                     foreach ($members as $m) {
                       if ((int)$m['id'] === (int)$mid) { $name = htmlspecialchars($m['first_name'] . ' ' . $m['last_name']); break; }
